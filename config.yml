@@ -1,0 +1,18 @@
+#This is the config file of AdvancedKits.
+
+#Note: Only player-data will be saved in the MySQL database, not kit data. Kit data is saved in the kit.yml file.
+
+#If MySQL is disabled, AdvancedKits will store all data in the AdvancedKits folder in your plugin folder.
+use-MySQL: false
+
+#MySQL login info.
+MySQL-Host:
+MySQL-Port:
+MySQL-DB_Name:
+MySQL-User:
+MySQL-Password:
+MySQL-Player-Table:
+
+#If you're using MySQL, you can still store your files in the AdvancedKits folder, as backup.
+#If you're not using MySQL, no action is required.
+Use-On-Server-Backup: true

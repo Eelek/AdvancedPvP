@@ -1,0 +1,10 @@
+name: AdvancedKits
+main: me.eelek.advancedkits.AKitsMain
+version: 1.6-DEV
+author: Eelek
+description: The Advanced Kits plugin by Eelek.
+
+commands:
+  kit:
+    usage: /<command>
+    description: The main command.

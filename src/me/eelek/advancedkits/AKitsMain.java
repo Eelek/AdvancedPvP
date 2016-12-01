@@ -19,7 +19,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	
 	static Scoreboard s;
 	
-	//This is Advanced Kits version: 1.0
+	//This is Advanced Kits version: 2.0
 	
 	@Override
 	public void onEnable() {

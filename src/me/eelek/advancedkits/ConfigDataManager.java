@@ -43,15 +43,6 @@ public class ConfigDataManager {
 					} else if(split.length < 3) {
 						ItemStack i = new ItemStack(m, amount);
 						content.add(i);
-					} else if(split.length == 4) {
-						Enchantment ench = Enchantment.getByName(split[2]);
-						int level = Integer.parseInt(split[3]);
-						
-						ItemStack i = new ItemStack(m, amount);
-						
-						i.addEnchantment(ench, level);
-						
-						content.add(i);
 					} else if(split.length == 5) {
 						int damage = Integer.parseInt(split[2]);
 						

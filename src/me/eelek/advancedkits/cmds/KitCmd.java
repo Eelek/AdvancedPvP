@@ -5,6 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 
 import me.eelek.advancedkits.AKitsMain;
 import me.eelek.advancedkits.kits.Kit;
@@ -44,9 +45,11 @@ public class KitCmd implements CommandExecutor {
 						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit give <player> <kit>" + ChatColor.GRAY + " gives the selected player the selected kit.");
 					} else if(args[0].equalsIgnoreCase("clear")) {
 						p.getInventory().clear();
-						p.getActivePotionEffects().clear();
+						for(PotionEffect pE : p.getActivePotionEffects()) {
+							p.removePotionEffect(pE.getType());
+						}
 						p.setHealth(20.0);
-						p.sendMessage(ChatColor.GOLD + "[" + ChatColor.DARK_GREEN + "Advanced Kits" + ChatColor.GOLD + "] " + ChatColor.BLUE + "You have been " + ChatColor.AQUA + "healed " + ChatColor.BLUE + ".");
+						p.sendMessage(ChatColor.GOLD + "[" + ChatColor.DARK_GREEN + "Advanced Kits" + ChatColor.GOLD + "] " + ChatColor.BLUE + "You have been " + ChatColor.AQUA + "healed" + ChatColor.BLUE + ".");
 					}
 				} else if(args.length == 3) {
 					if(args[0].equalsIgnoreCase("give")) {

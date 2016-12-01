@@ -42,6 +42,11 @@ public class KitCmd implements CommandExecutor {
 						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit list" + ChatColor.GRAY + " get a list of all the existing kits.");
 						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit help" + ChatColor.GRAY + " opens this.");
 						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit give <player> <kit>" + ChatColor.GRAY + " gives the selected player the selected kit.");
+					} else if(args[0].equalsIgnoreCase("clear")) {
+						p.getInventory().clear();
+						p.getActivePotionEffects().clear();
+						p.setHealth(20.0);
+						p.sendMessage(ChatColor.GOLD + "[" + ChatColor.DARK_GREEN + "Advanced Kits" + ChatColor.GOLD + "] " + ChatColor.BLUE + "You have been " + ChatColor.AQUA + "healed " + ChatColor.BLUE + ".");
 					}
 				} else if(args.length == 3) {
 					if(args[0].equalsIgnoreCase("give")) {

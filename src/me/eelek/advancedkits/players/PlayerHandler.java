@@ -20,8 +20,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
 import me.eelek.advancedkits.AKitsMain;
 import me.eelek.advancedkits.ConfigDataManager;
 import me.eelek.advancedkits.kits.KitManager;
@@ -46,8 +44,7 @@ public class PlayerHandler implements Listener {
 	}
 	
 	public static void inputData(Player p, int kills, int deaths, int points) {
-		GamePlayer player = new GamePlayer(p, kills, deaths, points);
-		data.add(player);
+		data.add(new GamePlayer(p, kills, deaths, points));
 	}
 	
 	public static void removePlayer(Player p) {
@@ -82,9 +79,7 @@ public class PlayerHandler implements Listener {
 			if(plugin.useDatabase()) {
 				MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
 				try {
-					GamePlayer player = LoadData.getPlayerData(e.getPlayer(), plugin);
-					data.add(player);
-					
+					data.add(LoadData.getPlayerData(e.getPlayer(), plugin));
 				} catch(Exception ex) {
 					ex.printStackTrace();
 				}
@@ -100,8 +95,7 @@ public class PlayerHandler implements Listener {
 				MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
 				try {
 					LoadData.addNewPlayer(e.getPlayer(), plugin);
-					GamePlayer player = LoadData.getPlayerData(e.getPlayer(), plugin);
-					data.add(player);
+					data.add(LoadData.getPlayerData(e.getPlayer(), plugin));
 				} catch(Exception ex) {
 					ex.printStackTrace();
 				}
@@ -160,8 +154,7 @@ public class PlayerHandler implements Listener {
 	public void onRespawn(PlayerRespawnEvent e) {
 		e.getPlayer().getInventory().clear();
 		for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
-			PotionEffectType t = pE.getType();
-			e.getPlayer().removePotionEffect(t);
+			e.getPlayer().removePotionEffect(pE.getType());
 		}
 		
 		e.getPlayer().getInventory().setItem(4, getKitSelectCompass());

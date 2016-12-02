@@ -3,7 +3,6 @@ package me.eelek.advancedkits;
 import java.util.logging.Logger;
 
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -51,9 +50,8 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		getConfig().options().copyDefaults(true);
 		
 		//Register Events
-		PluginManager pl = getServer().getPluginManager();
-		pl.registerEvents(new PlayerHandler(this), this);
-		pl.registerEvents(new KitManager(), this);
+		getServer().getPluginManager().registerEvents(new PlayerHandler(this), this);
+		getServer().getPluginManager().registerEvents(new KitManager(), this);
 	}
 	
 	@Override

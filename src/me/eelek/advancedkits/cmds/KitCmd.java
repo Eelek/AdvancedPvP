@@ -33,8 +33,7 @@ public class KitCmd implements CommandExecutor {
 					} else if(args[0].equalsIgnoreCase("list")) {
 						p.sendMessage(ChatColor.GOLD + "[" + ChatColor.DARK_GREEN + "Advanced Kits" + ChatColor.GOLD + "] " + ChatColor.BLUE + "Possible kits:");
 						for(Kit kit : KitManager.getAllKits()) {
-							String name = kit.getName();
-							p.sendMessage(ChatColor.GOLD + "- " + ChatColor.GREEN + name);
+							p.sendMessage(ChatColor.GOLD + "- " + ChatColor.GREEN + kit.getName());
 						}
 					} else if(args[0].equalsIgnoreCase("help")) {
 						p.sendMessage(ChatColor.GOLD + "------------" + ChatColor.DARK_GREEN + "< Kit Help Menu >" + ChatColor.GOLD + "------------");

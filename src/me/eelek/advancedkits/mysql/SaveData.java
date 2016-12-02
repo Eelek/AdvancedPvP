@@ -12,7 +12,7 @@ public class SaveData {
 	
 	public static void savePlayerDataToDatabase(GamePlayer p, AKitsMain plugin) {
 		try {
-			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("UPDATE `" + plugin.getMySQLData()[4] + "`  SET kills = ?, deaths = ?, points = ? WHERE player_name = ? AND player_uuid = ?;");
+			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("UPDATE `" + plugin.getMySQLData("table") + "`  SET kills = ?, deaths = ?, points = ? WHERE player_name = ? AND player_uuid = ?;");
 			statement.setString(4, p.getPlayer().getPlayerListName());
 			statement.setString(5, PlayerHandler.getUUID(p.getPlayer()).toString());
 			statement.setInt(1, p.getKills());
@@ -29,7 +29,7 @@ public class SaveData {
 		for(Player p : plugin.getServer().getOnlinePlayers()) {
 			GamePlayer player = PlayerHandler.getPlayer(p.getPlayerListName());
 			try {
-				PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("UPDATE `" + plugin.getMySQLData()[4] + "`  SET kills = ?, deaths = ?, points = ? WHERE player_name = ? AND player_uuid = ?;");
+				PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("UPDATE `" + plugin.getMySQLData("table") + "`  SET kills = ?, deaths = ?, points = ? WHERE player_name = ? AND player_uuid = ?;");
 				statement.setString(4, p.getPlayer().getPlayerListName());
 				statement.setString(5, PlayerHandler.getUUID(p.getPlayer()).toString());
 				statement.setInt(1, player.getKills());

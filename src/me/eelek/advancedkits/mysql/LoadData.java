@@ -13,7 +13,7 @@ public class LoadData {
 	
 	public static boolean doesPlayerHaveData(Player p, AKitsMain plugin) {
 		try {
-			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("SELECT * FROM `" + plugin.getMySQLData()[4]  + "` WHERE player_name=?;");
+			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("SELECT * FROM `" + plugin.getMySQLData("table")  + "` WHERE player_name=?;");
 			statement.setString(1, p.getPlayerListName());
 			ResultSet resultSet = statement.executeQuery();
 			boolean containsPlayer = resultSet.next();
@@ -31,7 +31,7 @@ public class LoadData {
 	public static GamePlayer getPlayerData(Player p, AKitsMain plugin) {
 		GamePlayer player = null;
 		try {
-			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("SELECT * FROM `" + plugin.getMySQLData()[4] + "` WHERE player_name=?;");
+			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("SELECT * FROM `" + plugin.getMySQLData("table") + "` WHERE player_name=?;");
 			statement.setString(1, p.getPlayerListName());
 			ResultSet resultSet = statement.executeQuery();
 			
@@ -50,7 +50,7 @@ public class LoadData {
 	
 	public static void addNewPlayer(Player p, AKitsMain plugin) {
 		try {
-			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("INSERT INTO `" + plugin.getMySQLData()[4] + "` values(?,?,0,0,0);");
+			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("INSERT INTO `" + plugin.getMySQLData("table") + "` values(?,?,0,0,0);");
 			statement.setString(1, p.getPlayerListName());
 			statement.setString(2, PlayerHandler.getUUID(p).toString());
 			statement.execute();

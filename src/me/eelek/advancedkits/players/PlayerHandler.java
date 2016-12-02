@@ -80,7 +80,7 @@ public class PlayerHandler implements Listener {
 	public void playerJoin(PlayerJoinEvent e) {
 		if(e.getPlayer().hasPlayedBefore()) {
 			if(plugin.useDatabase()) {
-				MySQLConnect.establishMySQLConnection(plugin.getMySQLData()[0], plugin.getMySQLData()[2], plugin.getMySQLData()[3], plugin.getMySQLData()[1]);
+				MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
 				try {
 					GamePlayer player = LoadData.getPlayerData(e.getPlayer(), plugin);
 					data.add(player);
@@ -97,7 +97,7 @@ public class PlayerHandler implements Listener {
 			}
 		} else {
 			if(plugin.useDatabase()) {
-				MySQLConnect.establishMySQLConnection(plugin.getMySQLData()[0], plugin.getMySQLData()[2], plugin.getMySQLData()[3], plugin.getMySQLData()[1]);
+				MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
 				try {
 					LoadData.addNewPlayer(e.getPlayer(), plugin);
 					GamePlayer player = LoadData.getPlayerData(e.getPlayer(), plugin);
@@ -119,7 +119,7 @@ public class PlayerHandler implements Listener {
 	
 	@EventHandler
 	public void playerLeave(PlayerQuitEvent e) {
-		MySQLConnect.establishMySQLConnection(plugin.getMySQLData()[0], plugin.getMySQLData()[2], plugin.getMySQLData()[3], plugin.getMySQLData()[1]);
+		MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
 		SaveData.savePlayerDataToDatabase(getPlayer(e.getPlayer().getPlayerListName()), plugin);
 		MySQLConnect.closeConnection();
 		removePlayer(e.getPlayer());

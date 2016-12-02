@@ -37,7 +37,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		//But can be saved in the event of a shutdown when there are still players online.
 		
 		//Create table if not exist
-		MySQLConnect.createTable(getMySQLData()[0], getMySQLData()[2], getMySQLData()[3], getMySQLData()[1], getMySQLData()[4], this);
+		MySQLConnect.createTable(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"), getMySQLData("table"), this);
 		log.info("[AdvancedKits] Succesfully connected to database.");
 		
 		//Setup configs and such.
@@ -60,7 +60,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	public void onDisable() {
 		//Check for MySQL usage, then saved either to the database, server, or both.
 		if(useConfig()) {
-			MySQLConnect.establishMySQLConnection(getMySQLData()[0], getMySQLData()[2], getMySQLData()[3], getMySQLData()[1]);
+			MySQLConnect.establishMySQLConnection(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"));
 			SaveData.updateOnDisable(this);
 			MySQLConnect.closeConnection();
 		} else {
@@ -81,16 +81,19 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	}
 	
 	//Get MySQL data from config.
-	public String[] getMySQLData() {
-		String host = getConfig().getString("MySQL-Host");
-		String port = getConfig().getString("MySQL-Port");
-		String db_name = getConfig().getString("MySQL-DB_Name");
-		String user = getConfig().getString("MySQL-User");
-		String password = getConfig().getString("MySQL-Password");
-		String table = getConfig().getString("MySQL-Player-Table");
-		
-		String cmd = host + ":" + port + "-" + db_name + "-" + user + "-" + password + "-" + table;
-		String[] split = cmd.split("-");
-		return split;
+	public String getMySQLData(String param) {
+		if(param.equals("host")) {
+			return getConfig().getString("MySQL-Host") + ":" + getConfig().getString("MySQL-Port");
+		} else if(param.equals("database")) {
+			return getConfig().getString("MySQL-DB_Name");
+		} else if(param.equals("user")) {
+			return getConfig().getString("MySQL-User");
+		} else if(param.equals("pass")) {
+			return getConfig().getString("MySQL-Password");
+		} else if(param.equals("table")) {
+			return getConfig().getString("MySQL-Player-Table");
+		} else {
+			return null;
+		}
 	}
 }

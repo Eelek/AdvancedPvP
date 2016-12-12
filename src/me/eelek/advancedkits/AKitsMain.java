@@ -48,6 +48,9 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		CustomConfigHandler.saveDefaultPlayers(this);
 		CustomConfigHandler.getPlayers(this).options().copyDefaults(true);
 		
+		CustomConfigHandler.saveDefaultLevels(this);
+		CustomConfigHandler.getLevels(this).options().copyDefaults(true);
+		
 		saveDefaultConfig();
 		getConfig().options().copyDefaults(true);
 		

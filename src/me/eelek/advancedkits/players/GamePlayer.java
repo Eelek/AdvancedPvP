@@ -59,5 +59,9 @@ public class GamePlayer {
 	public int getLevel() {
 		return level;
 	}
+	
+	public void levelUp() {
+		level = level + 1;
+	}
 
 }

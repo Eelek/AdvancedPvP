@@ -149,6 +149,8 @@ public class PlayerHandler implements Listener {
 			e.setDeathMessage(ChatColor.BLUE + killed.getPlayerListName() + ChatColor.AQUA + " was slain by " + ChatColor.BLUE + killer.getPlayerListName());
 			getPlayer(killer.getPlayerListName()).addKill();
 			Scoresboard.setScoreboard(plugin, killer);
+			
+			Levels.levelUp(getPlayer(killer.getPlayerListName()));
 		}
 		
 		getPlayer(killed.getPlayerListName()).addDeath();

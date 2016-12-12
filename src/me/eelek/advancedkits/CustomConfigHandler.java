@@ -119,5 +119,111 @@ public class CustomConfigHandler {
 			plugin.saveResource("kits.yml", false);
 		}
 	}
+	
+	// This is for the arenas.yml file.
+	private static FileConfiguration arenas = null;
+	private static File arenasFile = null;
+
+	public static void reloadArenas(AKitsMain plugin) {
+		if (arenasFile == null) {
+			arenasFile = new File(plugin.getDataFolder(), "arenas.yml");
+		}
+
+		arenas = YamlConfiguration.loadConfiguration(arenasFile);
+
+		Reader defConfigStream;
+		try {
+			defConfigStream = new InputStreamReader(plugin.getResource("arenas.yml"), "UTF8");
+			if (defConfigStream != null) {
+				YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+				arenas.setDefaults(defConfig);
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static FileConfiguration getArenas(AKitsMain plugin) {
+		if (arenas == null) {
+			reloadArenas(plugin);
+		}
+
+		return arenas;
+	}
+
+	public static void saveArenas(AKitsMain plugin) {
+		if (arenas == null || arenasFile == null) {
+			return;
+		}
+
+		try {
+			getArenas(plugin).save(arenasFile);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public static void saveDefaultArenas(AKitsMain plugin) {
+		if (arenasFile == null) {
+			arenasFile = new File(plugin.getDataFolder(), "arenas.yml");
+		}
+
+		if (!arenasFile.exists()) {
+			plugin.saveResource("arenas.yml", false);
+		}
+	}
+	
+	// This is for the levelss.yml file.
+	private static FileConfiguration levels = null;
+	private static File levelsFile = null;
+
+	public static void reloadLevels(AKitsMain plugin) {
+		if (levelsFile == null) {
+			levelsFile = new File(plugin.getDataFolder(), "levels.yml");
+		}
+
+		levels = YamlConfiguration.loadConfiguration(levelsFile);
+
+		Reader defConfigStream;
+		try {
+			defConfigStream = new InputStreamReader(plugin.getResource("levels.yml"), "UTF8");
+			if (defConfigStream != null) {
+				YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+				levels.setDefaults(defConfig);
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static FileConfiguration getLevels(AKitsMain plugin) {
+		if (levels == null) {
+			reloadLevels(plugin);
+		}
+
+		return levels;
+	}
+
+	public static void saveLevels(AKitsMain plugin) {
+		if (levels == null || levelsFile == null) {
+			return;
+		}
+
+		try {
+			getLevels(plugin).save(levelsFile);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public static void saveDefaultLevels(AKitsMain plugin) {
+		if (levelsFile == null) {
+			levelsFile = new File(plugin.getDataFolder(), "levels.yml");
+		}
+
+		if (!levelsFile.exists()) {
+			plugin.saveResource("levels.yml", false);
+		}
+	}
 
 }

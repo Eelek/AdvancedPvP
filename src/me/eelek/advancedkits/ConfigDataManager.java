@@ -15,6 +15,7 @@ import org.bukkit.potion.PotionEffectType;
 import me.eelek.advancedkits.kits.Kit;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.players.GamePlayer;
+import me.eelek.advancedkits.players.Levels;
 import me.eelek.advancedkits.players.PlayerHandler;
 
 public class ConfigDataManager {
@@ -158,7 +159,7 @@ public class ConfigDataManager {
 		}
 	}
 	
-	static void saveDataToServer(AKitsMain plugin) {
+	public static void saveDataToServer(AKitsMain plugin) {
 		//Save playerdata
 		if(!PlayerHandler.getAllPlayerData().isEmpty()) {
 			for(GamePlayer p : PlayerHandler.getAllPlayerData()) {
@@ -173,6 +174,16 @@ public class ConfigDataManager {
 			}
 		} else {
 			AKitsMain.log.warning("[AdvancedKits] No player data could be saved to the server.");
+		}
+	}
+	
+	public static void getLevels(AKitsMain plugin) {
+		for(String iLevel : CustomConfigHandler.getLevels(plugin).getStringList("levels")) {
+			Integer level = Integer.parseInt(iLevel);
+			Integer minimun = CustomConfigHandler.getLevels(plugin).getInt("levels." + iLevel + ".minimun_kills");
+			String prefix = CustomConfigHandler.getLevels(plugin).getString("levels." + iLevel + ".prefix");
+			
+			Levels.addLevel(level, minimun, prefix);
 		}
 	}
 }

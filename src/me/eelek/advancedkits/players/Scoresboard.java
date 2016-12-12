@@ -137,7 +137,7 @@ public class Scoresboard {
 		Score level = show.getScore("" + ChatColor.AQUA + PlayerHandler.getPlayer(p.getPlayerListName()).getLevel());
 		level.setScore(1);
 		
-		Score empty4 = show.getScore("      ");
+		Score empty4 = show.getScore("        ");
 		empty4.setScore(0);
 
 		p.setScoreboard(board);

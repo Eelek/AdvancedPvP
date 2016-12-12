@@ -4,9 +4,9 @@
 #levels:
 #  0:
 #    miminum_kills: 0
-#    prefix: "§c[§fLevel 0§c]"
+#    prefix: "&c[&fLevel 0&c]"
 #  1:
 #    minimun_kills: 10
-#    prefix: "§c[§aLevel 1§c§]"
+#    prefix: "&c[&aLevel 1&c&]"
 
 levels: []

@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -113,6 +114,8 @@ public class PlayerHandler implements Listener {
 		}
 		
 		Scoresboard.setScoreboard(plugin, e.getPlayer());
+		
+		e.getPlayer().setDisplayName(Levels.getLevel(getPlayer(e.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getPlayerListName());
 	}
 	
 	@EventHandler
@@ -148,9 +151,10 @@ public class PlayerHandler implements Listener {
 		if(killed.getLastDamageCause().getCause().equals(DamageCause.ENTITY_ATTACK)) {
 			e.setDeathMessage(ChatColor.BLUE + killed.getPlayerListName() + ChatColor.AQUA + " was slain by " + ChatColor.BLUE + killer.getPlayerListName());
 			getPlayer(killer.getPlayerListName()).addKill();
-			Scoresboard.setScoreboard(plugin, killer);
 			
 			Levels.levelUp(getPlayer(killer.getPlayerListName()));
+			
+			Scoresboard.setScoreboard(plugin, killer);
 		}
 		
 		getPlayer(killed.getPlayerListName()).addDeath();
@@ -207,5 +211,10 @@ public class PlayerHandler implements Listener {
 				}
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onChat(AsyncPlayerChatEvent e) {
+		e.setFormat(e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
 	}
 }

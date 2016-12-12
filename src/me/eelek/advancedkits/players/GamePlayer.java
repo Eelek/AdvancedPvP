@@ -61,7 +61,7 @@ public class GamePlayer {
 	}
 	
 	public void levelUp() {
-		level = level + 1;
+		this.level = level + 1;
 	}
 
 }

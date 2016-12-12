@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
-import me.eelek.advancedkits.cmds.ArenaCmd;
+//import me.eelek.advancedkits.cmds.ArenaCmd;
 import me.eelek.advancedkits.cmds.KitCmd;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.mysql.MySQLConnect;
@@ -27,11 +27,12 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		
 		//CommandExecutors here
 		getCommand("kit").setExecutor(new KitCmd(this));
-		getCommand("arena").setExecutor(new ArenaCmd());
+		//getCommand("arena").setExecutor(new ArenaCmd());
 		
 		//Load on server data
 		if(useConfig()) {
 			ConfigDataManager.loadOnServerData(this);
+			ConfigDataManager.getLevels(this);
 		}
 		
 		//Playerdata will be loaded when player logs on to the server.

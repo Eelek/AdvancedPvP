@@ -3,6 +3,7 @@ package me.eelek.advancedkits;
 import java.sql.Connection;
 import java.util.ArrayList;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -178,12 +179,14 @@ public class ConfigDataManager {
 	}
 	
 	public static void getLevels(AKitsMain plugin) {
-		for(String iLevel : CustomConfigHandler.getLevels(plugin).getStringList("levels")) {
+		for(String iLevel : CustomConfigHandler.getLevels(plugin).getConfigurationSection("levels").getKeys(false)) {
 			Integer level = Integer.parseInt(iLevel);
 			Integer minimun = CustomConfigHandler.getLevels(plugin).getInt("levels." + iLevel + ".minimun_kills");
-			String prefix = CustomConfigHandler.getLevels(plugin).getString("levels." + iLevel + ".prefix");
+			String prefix = ChatColor.translateAlternateColorCodes('&', CustomConfigHandler.getLevels(plugin).getString("levels." + iLevel + ".prefix"));
 			
 			Levels.addLevel(level, minimun, prefix);
+			
+			System.out.println("Level " + level + " min kills " + minimun + " prefix " + prefix);
 		}
 	}
 }

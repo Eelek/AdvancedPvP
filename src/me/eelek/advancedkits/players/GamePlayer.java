@@ -9,16 +9,18 @@ public class GamePlayer {
 	private int kills;
 	private int deaths;
 	private int points;
+	private int level;
 	
 	public GamePlayer(Player player) {
 		this.p = player;
 	}
 	
-	public GamePlayer(Player player, int kills, int deaths, int points) {
+	public GamePlayer(Player player, int kills, int deaths, int points, int level) {
 		this.p = player;
 		this.kills = kills;
 		this.deaths = deaths;
 		this.points = points;
+		this.level = level;
 	}
 	
 	public Player getPlayer() {
@@ -52,6 +54,10 @@ public class GamePlayer {
 	
 	public double calculateKDR() {
 		return kills / deaths;
+	}
+	
+	public int getLevel() {
+		return level;
 	}
 
 }

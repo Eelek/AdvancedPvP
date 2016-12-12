@@ -93,43 +93,52 @@ public class Scoresboard {
 		show.setDisplaySlot(DisplaySlot.SIDEBAR);
 
 		Score top = show.getScore(" ");
-		top.setScore(12);
+		top.setScore(15);
 
 		Score welcome = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Hello there,");
-		welcome.setScore(11);
+		welcome.setScore(14);
 
 		Score player = show.getScore("" + ChatColor.GOLD + ChatColor.BOLD + p.getPlayerListName() + ChatColor.BLUE + ChatColor.BOLD + "!");
-		player.setScore(10);
+		player.setScore(13);
 
 		Score empty = show.getScore("  ");
-		empty.setScore(9);
+		empty.setScore(12);
 
 		Score yourKills = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your kills: ");
-		yourKills.setScore(8);
+		yourKills.setScore(11);
 
 		Score kills = show.getScore("" + ChatColor.GREEN + PlayerHandler.getPlayer(p.getPlayerListName()).getKills());
-		kills.setScore(7);
+		kills.setScore(10);
 
 		Score empty1 = show.getScore("   ");
-		empty1.setScore(6);
+		empty1.setScore(9);
 
 		Score yourDeaths = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your deaths: ");
-		yourDeaths.setScore(5);
+		yourDeaths.setScore(8);
 
 		Score deaths = show.getScore("" + ChatColor.RED + PlayerHandler.getPlayer(p.getPlayerListName()).getDeaths());
-		deaths.setScore(4);
+		deaths.setScore(7);
 
 		Score empty2 = show.getScore("    ");
-		empty2.setScore(3);
+		empty2.setScore(6);
 
 		Score yourPoints = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your points: ");
-		yourPoints.setScore(2);
+		yourPoints.setScore(5);
 
 		Score points = show.getScore("" + ChatColor.GOLD + PlayerHandler.getPlayer(p.getPlayerListName()).getPoints());
-		points.setScore(1);
+		points.setScore(4);
 
 		Score empty3 = show.getScore("     ");
-		empty3.setScore(0);
+		empty3.setScore(3);
+		
+		Score yourLevel = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your level: ");
+		yourLevel.setScore(2);
+		
+		Score level = show.getScore("" + ChatColor.AQUA + PlayerHandler.getPlayer(p.getPlayerListName()).getLevel());
+		level.setScore(1);
+		
+		Score empty4 = show.getScore("      ");
+		empty4.setScore(0);
 
 		p.setScoreboard(board);
 

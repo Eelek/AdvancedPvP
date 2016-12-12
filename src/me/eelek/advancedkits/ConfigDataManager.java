@@ -138,18 +138,23 @@ public class ConfigDataManager {
 				KitManager.addKit(new Kit(kitName.replaceAll("_", " "), content, armor, kitItem, effects));
 			}
 		}
+		
+		//Load arenas
+		
+		
 	}
 	
 	public static void getPlayerDataFromServer(Player p, AKitsMain plugin) {
 		if(CustomConfigHandler.getPlayers(plugin).getConfigurationSection("players").getKeys(false).contains(p.getPlayerListName())) {
 			String player = p.getPlayerListName();
-			int kills = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + "kills");
-			int deaths = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + "deaths");
-			int points = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + "points");
+			int kills = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".kills");
+			int deaths = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".deaths");
+			int points = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".points");
+			int level = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".level");
 			
-			PlayerHandler.inputData(p, kills, deaths, points);
+			PlayerHandler.inputData(p, kills, deaths, points, level);
 		} else {
-			PlayerHandler.inputData(p, 0, 0, 0);
+			PlayerHandler.inputData(p, 0, 0, 0, 0);
 		}
 	}
 	
@@ -158,13 +163,13 @@ public class ConfigDataManager {
 		if(!PlayerHandler.getAllPlayerData().isEmpty()) {
 			for(GamePlayer p : PlayerHandler.getAllPlayerData()) {
 				Player player = p.getPlayer();
-				CustomConfigHandler.getPlayers(plugin).set("players" + player.getPlayerListName() + "kills", p.getKills());
-				CustomConfigHandler.getPlayers(plugin).set("players" + player.getPlayerListName() + "deaths", p.getDeaths());
-				CustomConfigHandler.getPlayers(plugin).set("players" + player.getPlayerListName() + "points", p.getPoints());
+				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".kills", p.getKills());
+				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".deaths", p.getDeaths());
+				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".points", p.getPoints());
 				
-				CustomConfigHandler.getPlayers(plugin).addDefault("players" + player.getPlayerListName() + "kills", p.getKills());
-				CustomConfigHandler.getPlayers(plugin).addDefault("players" + player.getPlayerListName() + "deaths", p.getDeaths());
-				CustomConfigHandler.getPlayers(plugin).addDefault("players" + player.getPlayerListName() + "points", p.getPoints());
+				CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".kills", p.getKills());
+				CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".deaths", p.getDeaths());
+				CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".points", p.getPoints());
 			}
 		} else {
 			AKitsMain.log.warning("[AdvancedKits] No player data could be saved to the server.");

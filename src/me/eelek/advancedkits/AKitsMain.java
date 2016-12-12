@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
+import me.eelek.advancedkits.cmds.ArenaCmd;
 import me.eelek.advancedkits.cmds.KitCmd;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.mysql.MySQLConnect;
@@ -18,7 +19,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	
 	static Scoreboard s;
 	
-	//This is Advanced Kits version: 2.0
+	//This is Advanced Kits version: 3.0
 	
 	@Override
 	public void onEnable() {
@@ -26,6 +27,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		
 		//CommandExecutors here
 		getCommand("kit").setExecutor(new KitCmd(this));
+		getCommand("arena").setExecutor(new ArenaCmd());
 		
 		//Load on server data
 		if(useConfig()) {

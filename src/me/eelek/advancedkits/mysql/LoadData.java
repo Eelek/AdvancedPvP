@@ -36,7 +36,7 @@ public class LoadData {
 			ResultSet resultSet = statement.executeQuery();
 			
 			if(resultSet.next()) {
-					player = new GamePlayer(p, resultSet.getInt(3), resultSet.getInt(4), resultSet.getInt(5));
+				player = new GamePlayer(p, resultSet.getInt(3), resultSet.getInt(4), resultSet.getInt(5), resultSet.getInt(6));
 			}
 			
 		statement.close();

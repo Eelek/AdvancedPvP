@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,8 +21,11 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+
 import me.eelek.advancedkits.AKitsMain;
 import me.eelek.advancedkits.ConfigDataManager;
+import me.eelek.advancedkits.arena.Arena;
+import me.eelek.advancedkits.arena.GameHandler;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.mysql.LoadData;
 import me.eelek.advancedkits.mysql.MySQLConnect;
@@ -43,8 +47,8 @@ public class PlayerHandler implements Listener {
 		data.add(gP);
 	}
 	
-	public static void inputData(Player p, int kills, int deaths, int points) {
-		data.add(new GamePlayer(p, kills, deaths, points));
+	public static void inputData(Player p, int kills, int deaths, int points, int level) {
+		data.add(new GamePlayer(p, kills, deaths, points, level));
 	}
 	
 	public static void removePlayer(Player p) {
@@ -104,7 +108,7 @@ public class PlayerHandler implements Listener {
 			} 
 			
 			if(plugin.useConfig()) {
-				inputData(e.getPlayer(), 0, 0, 0);
+				inputData(e.getPlayer(), 0, 0, 0, 0);
 			}
 		}
 		
@@ -170,6 +174,34 @@ public class PlayerHandler implements Listener {
 			if(p.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
 				if(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|")) {
 					p.openInventory(KitManager.getSelectInventory());
+				}
+			}
+		} else if(e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+			if(p.getInventory().getItemInMainHand().getType() == Material.GOLD_AXE) {
+				if(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().contains(ChatColor.BLUE + "Select arena ")) {
+					e.setCancelled(true);
+					
+					Location l1 = null;
+					Location l2 = null;
+					
+					if(e.getAction() == Action.LEFT_CLICK_BLOCK) {
+						l1 = e.getClickedBlock().getLocation();
+						p.sendMessage(ChatColor.BLUE + "Selected first location: " + ChatColor.AQUA + l1.getBlockX() + " " + l1.getBlockY() + " " + l1.getBlockZ() + ChatColor.BLUE + ".");
+					} else if(e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+						l2 = e.getClickedBlock().getLocation();
+						p.sendMessage(ChatColor.BLUE + "Selected second location: " + ChatColor.AQUA + l2.getBlockX() + " " + l2.getBlockY() + " " + l2.getBlockZ() + ChatColor.BLUE + ".");
+					}
+					
+					if(l1 != null && l2 != null) {
+						GameHandler.addArena(new Arena(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().split("" + ChatColor.AQUA)[1], p.getWorld(), l1, l2));
+						
+						p.sendMessage(ChatColor.BLUE + "Arena " + ChatColor.AQUA + p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().split("" + ChatColor.AQUA)[1] + ChatColor.BLUE + " has been succesfully created.");
+						p.sendMessage(ChatColor.BLUE + "Please specify the level and the max players using the command: \n" + ChatColor.DARK_GRAY + "/arena <name> set maxplayers <max players>" + ChatColor.BLUE + " and " + ChatColor.DARK_GRAY + "/arena <name> set level <level>" + ChatColor.BLUE + ".");
+					}
+				} else if(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().contains(ChatColor.BLUE + "Select spawns ")) {
+					e.setCancelled(true);
+					
+					
 				}
 			}
 		}

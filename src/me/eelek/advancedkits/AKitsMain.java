@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
-import me.eelek.advancedkits.arena.GameHandler;
+import me.eelek.advancedkits.arena.ArenaManager;
 import me.eelek.advancedkits.cmds.ArenaCmd;
 import me.eelek.advancedkits.cmds.KitCmd;
 import me.eelek.advancedkits.kits.KitManager;
@@ -67,7 +67,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		//Register Events
 		getServer().getPluginManager().registerEvents(new PlayerHandler(this), this);
 		getServer().getPluginManager().registerEvents(new KitManager(), this);
-		getServer().getPluginManager().registerEvents(new GameHandler(this), this);
+		getServer().getPluginManager().registerEvents(new ArenaManager(this), this);
 	}
 	
 	@Override

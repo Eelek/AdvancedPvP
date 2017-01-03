@@ -17,14 +17,14 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import me.eelek.advancedkits.AKitsMain;
 
-public class GameHandler implements Listener {
+public class ArenaManager implements Listener {
 	
 	static ArrayList<Arena> arenas = new ArrayList<Arena>();
 	
 	private static AKitsMain plugin;
 	
-	public GameHandler(AKitsMain plugin) {
-		GameHandler.plugin = plugin;
+	public ArenaManager(AKitsMain plugin) {
+		ArenaManager.plugin = plugin;
 	}
 
 	public static Inventory getInventory(Arena a) {

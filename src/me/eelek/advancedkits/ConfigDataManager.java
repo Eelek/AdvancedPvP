@@ -17,7 +17,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import me.eelek.advancedkits.arena.Arena;
-import me.eelek.advancedkits.arena.GameHandler;
+import me.eelek.advancedkits.arena.ArenaManager;
 import me.eelek.advancedkits.kits.Kit;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.players.GamePlayer;
@@ -215,9 +215,9 @@ public class ConfigDataManager {
 			}
 			
 			if(spawns.isEmpty()) {
-				GameHandler.addArena(new Arena(name, world, maxPlayers, level));
+				ArenaManager.addArena(new Arena(name, world, maxPlayers, level));
 			} else {
-				GameHandler.addArena(new Arena(name, world, maxPlayers, level, spawns, spawnCount, spawnIndex));
+				ArenaManager.addArena(new Arena(name, world, maxPlayers, level, spawns, spawnCount, spawnIndex));
 			}
 			
 			System.out.println("Loaded " + name);
@@ -225,7 +225,7 @@ public class ConfigDataManager {
 	}
 	
 	public static void saveArenas(AKitsMain plugin) {
-		for(Arena a : GameHandler.getArenas()) {
+		for(Arena a : ArenaManager.getArenas()) {
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".max_players", a.getMaxPlayers());
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".minimun_level", a.getLevel());
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".world", a.getWorld().getName());

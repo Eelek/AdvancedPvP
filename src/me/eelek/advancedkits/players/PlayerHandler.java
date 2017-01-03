@@ -27,7 +27,7 @@ import org.bukkit.potion.PotionEffect;
 import me.eelek.advancedkits.AKitsMain;
 import me.eelek.advancedkits.ConfigDataManager;
 import me.eelek.advancedkits.arena.Arena;
-import me.eelek.advancedkits.arena.GameHandler;
+import me.eelek.advancedkits.arena.ArenaManager;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.mysql.LoadData;
 import me.eelek.advancedkits.mysql.MySQLConnect;
@@ -125,7 +125,7 @@ public class PlayerHandler implements Listener {
 		SaveData.savePlayerDataToDatabase(getPlayer(e.getPlayer().getPlayerListName()), plugin);
 		MySQLConnect.closeConnection();
 		if(getPlayer(e.getPlayer().getPlayerListName()).isPlaying()) {
-			GameHandler.getArena(getPlayer(e.getPlayer().getPlayerListName()).getCurrentArena()).removePlayer(e.getPlayer());
+			ArenaManager.getArena(getPlayer(e.getPlayer().getPlayerListName()).getCurrentArena()).removePlayer(e.getPlayer());
 			getPlayer(e.getPlayer().getPlayerListName()).setPlaying(false);
 		}
 		removePlayer(e.getPlayer());
@@ -167,7 +167,7 @@ public class PlayerHandler implements Listener {
 		getPlayer(killed.getPlayerListName()).addDeath();
 		getPlayer(killed.getPlayerListName()).setPlaying(false);
 		
-		GameHandler.getArena(getPlayer(killed.getPlayerListName()).getCurrentArena()).removePlayer(killed);
+		ArenaManager.getArena(getPlayer(killed.getPlayerListName()).getCurrentArena()).removePlayer(killed);
 	}
 	
 	@EventHandler
@@ -196,7 +196,7 @@ public class PlayerHandler implements Listener {
 				} else if (p.getInventory().getItemInMainHand().getType() == Material.DIAMOND_HOE) {
 					if (p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().contains(ChatColor.BLUE + "Select spawns ")) {
 						e.setCancelled(true);
-						Arena a = GameHandler.getArena(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().split("" + ChatColor.AQUA)[1]);
+						Arena a = ArenaManager.getArena(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().split("" + ChatColor.AQUA)[1]);
 						a.addSpawn(e.getClickedBlock().getLocation());
 						p.sendMessage(ChatColor.BLUE + "Added spawn " + ChatColor.AQUA + a.getAmountOfSpawns() + ChatColor.BLUE + " for arena " + ChatColor.AQUA + a.getName() + ChatColor.BLUE + ".");
 					}
@@ -206,7 +206,7 @@ public class PlayerHandler implements Listener {
 			if(p.getInventory().getItemInMainHand().getType() == Material.DIAMOND_HOE) {
 				if(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().contains(ChatColor.BLUE + "Select spawns ")) {
 					e.setCancelled(true);
-					Arena a = GameHandler.getArena(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().split("" + ChatColor.AQUA)[1]);
+					Arena a = ArenaManager.getArena(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().split("" + ChatColor.AQUA)[1]);
 					a.addSpawn(e.getClickedBlock().getLocation());
 					p.sendMessage(ChatColor.BLUE + "Added spawn " + ChatColor.AQUA + a.getAmountOfSpawns() + ChatColor.BLUE + " for arena " + ChatColor.AQUA + a.getName() + ChatColor.BLUE + ".");
 				}
@@ -216,7 +216,7 @@ public class PlayerHandler implements Listener {
 				if(e.getClickedBlock().getType() == Material.SIGN || e.getClickedBlock().getType() == Material.WALL_SIGN) {
 					Sign s = (Sign) e.getClickedBlock().getState();
 					if(s.getLine(0).equals("§6§l[§4§lArena§6§l]")) {
-						Arena a = GameHandler.getArena(s.getLine(1));
+						Arena a = ArenaManager.getArena(s.getLine(1));
 						if(getPlayer(p.getPlayerListName()).getLevel() >= a.getLevel()) {
 							if(a.isActive() && (a.getCurrentPlayers().size() < a.getMaxPlayers())) {
 								Location spawn = a.getSpawnLocation();

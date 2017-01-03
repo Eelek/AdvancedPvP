@@ -11,6 +11,10 @@ public class GamePlayer {
 	private int points;
 	private int level;
 	
+	private boolean playing;
+	
+	private String arena;
+	
 	public GamePlayer(Player player) {
 		this.p = player;
 	}
@@ -21,6 +25,10 @@ public class GamePlayer {
 		this.deaths = deaths;
 		this.points = points;
 		this.level = level;
+		
+		this.playing = false;
+		
+		this.arena = "";
 	}
 	
 	public Player getPlayer() {
@@ -62,6 +70,22 @@ public class GamePlayer {
 	
 	public void levelUp() {
 		this.level = level + 1;
+	}
+	
+	public boolean isPlaying() {
+		return playing;
+	}
+	
+	public void setPlaying(boolean set) {
+		playing = set;
+	}
+	
+	public String getCurrentArena() {
+		return arena;
+	}
+	
+	public void setCurrentArena(String a) {
+		this.arena = a;
 	}
 
 }

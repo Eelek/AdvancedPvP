@@ -2,10 +2,13 @@ package me.eelek.advancedkits;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -13,6 +16,8 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import me.eelek.advancedkits.arena.Arena;
+import me.eelek.advancedkits.arena.GameHandler;
 import me.eelek.advancedkits.kits.Kit;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.players.GamePlayer;
@@ -168,10 +173,12 @@ public class ConfigDataManager {
 				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".kills", p.getKills());
 				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".deaths", p.getDeaths());
 				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".points", p.getPoints());
+				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".level", p.getLevel());
 				
 				CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".kills", p.getKills());
 				CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".deaths", p.getDeaths());
 				CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".points", p.getPoints());
+				CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".level", p.getLevel());
 			}
 		} else {
 			AKitsMain.log.warning("[AdvancedKits] No player data could be saved to the server.");
@@ -187,6 +194,56 @@ public class ConfigDataManager {
 			Levels.addLevel(level, minimun, prefix);
 			
 			System.out.println("Level " + level + " min kills " + minimun + " prefix " + prefix);
+		}
+	}
+	
+	public static void loadArenas(AKitsMain plugin) {
+		for(String name : CustomConfigHandler.getArenas(plugin).getConfigurationSection("arenas").getKeys(false)) {
+			int maxPlayers = CustomConfigHandler.getArenas(plugin).getInt("arenas." + name + ".max_players");
+			int level = CustomConfigHandler.getArenas(plugin).getInt("arenas." + name + ".minimun_level");
+			World world = plugin.getServer().getWorld(CustomConfigHandler.getArenas(plugin).getString("arenas." + name + ".world"));
+			
+			ArrayList<Location> spawns = new ArrayList<Location>();
+			HashMap<Location, Integer> spawnCount = new HashMap<Location, Integer>();
+			HashMap<Location, Integer> spawnIndex = new HashMap<Location, Integer>();
+			for(String spawn : CustomConfigHandler.getArenas(plugin).getStringList("arenas." + name + ".spawns")) {
+				String[] s = spawn.split(",");
+				Location spawnloc = new Location(plugin.getServer().getWorld(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]), Integer.parseInt(s[3]), Float.parseFloat(s[4]), Float.parseFloat(s[5]));
+				spawns.add(spawnloc);
+				spawnCount.put(spawnloc, Integer.parseInt(s[6]));
+				spawnIndex.put(spawnloc, 0);
+			}
+			
+			if(spawns.isEmpty()) {
+				GameHandler.addArena(new Arena(name, world, maxPlayers, level));
+			} else {
+				GameHandler.addArena(new Arena(name, world, maxPlayers, level, spawns, spawnCount, spawnIndex));
+			}
+			
+			System.out.println("Loaded " + name);
+		}
+	}
+	
+	public static void saveArenas(AKitsMain plugin) {
+		for(Arena a : GameHandler.getArenas()) {
+			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".max_players", a.getMaxPlayers());
+			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".minimun_level", a.getLevel());
+			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".world", a.getWorld().getName());
+
+			ArrayList<String> list = new ArrayList<String>();
+			for(Location l : a.getSpawnLocations()) {
+				String loc = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getPitch() + "," + l.getYaw() + "," + a.getSpawnCount(l);
+				list.add(loc);
+			}
+			
+			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".spawns", list);
+			
+			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".max_players", a.getMaxPlayers());
+			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".minimun_level", a.getLevel());
+			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".world", a.getWorld().getName());
+			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".spawns", list);
+			
+			System.out.println("Saved arena " + a.getName());
 		}
 	}
 }

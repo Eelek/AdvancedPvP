@@ -173,7 +173,7 @@ public class CustomConfigHandler {
 		}
 	}
 	
-	// This is for the levelss.yml file.
+	// This is for the levels.yml file.
 	private static FileConfiguration levels = null;
 	private static File levelsFile = null;
 

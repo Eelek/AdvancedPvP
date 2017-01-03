@@ -1,6 +1,6 @@
 name: AdvancedKits
 main: me.eelek.advancedkits.AKitsMain
-version: 3.0
+version: 4.0
 author: Eelek
 description: The Advanced Kits plugin by Eelek.
 
@@ -8,3 +8,6 @@ commands:
   kit:
     usage: /<command>
     description: The main command.
+  arena:
+    usage: /<command>
+    description: Arena command.

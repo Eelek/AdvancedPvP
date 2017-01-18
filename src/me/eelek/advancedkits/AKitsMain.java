@@ -4,7 +4,6 @@ import java.util.logging.Logger;
 
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Scoreboard;
 
 import me.eelek.advancedkits.arena.ArenaManager;
 import me.eelek.advancedkits.cmds.ArenaCmd;
@@ -18,9 +17,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	
 	public static Logger log;
 	
-	static Scoreboard s;
-	
-	//This is Advanced Kits version: 3.0
+	//This is Advanced Kits version: 5.0
 	
 	@Override
 	public void onEnable() {
@@ -66,18 +63,14 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		
 		//Register Events
 		getServer().getPluginManager().registerEvents(new PlayerHandler(this), this);
-		getServer().getPluginManager().registerEvents(new KitManager(), this);
+		getServer().getPluginManager().registerEvents(new KitManager(this), this);
 		getServer().getPluginManager().registerEvents(new ArenaManager(this), this);
 	}
 	
 	@Override
 	public void onDisable() {
 		//Check for MySQL usage, then saved either to the database, server, or both.
-		if(!useConfig()) {
-			MySQLConnect.establishMySQLConnection(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"));
-			SaveData.updateOnDisable(this);
-			MySQLConnect.closeConnection();
-		} else {
+		if(useConfig()) {
 			ConfigDataManager.saveDataToServer(this);
 			ConfigDataManager.saveArenas(this);
 			
@@ -85,6 +78,12 @@ public class AKitsMain extends JavaPlugin implements Listener {
 			CustomConfigHandler.saveKits(this);
 			CustomConfigHandler.saveLevels(this);
 			CustomConfigHandler.savePlayers(this);
+		}
+		
+		if(useDatabase()) {
+			MySQLConnect.establishMySQLConnection(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"));
+			SaveData.updateOnDisable(this);
+			MySQLConnect.closeConnection();
 		}
 	}
 	

@@ -3,6 +3,7 @@ package me.eelek.advancedkits;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -18,8 +19,11 @@ import org.bukkit.potion.PotionEffectType;
 
 import me.eelek.advancedkits.arena.Arena;
 import me.eelek.advancedkits.arena.ArenaManager;
+import me.eelek.advancedkits.arena.GameManager;
+import me.eelek.advancedkits.arena.GameManager.GameType;
 import me.eelek.advancedkits.kits.Kit;
 import me.eelek.advancedkits.kits.KitManager;
+import me.eelek.advancedkits.kits.KitSet;
 import me.eelek.advancedkits.players.GamePlayer;
 import me.eelek.advancedkits.players.Levels;
 import me.eelek.advancedkits.players.PlayerHandler;
@@ -30,7 +34,7 @@ public class ConfigDataManager {
 	
 	static void loadOnServerData(AKitsMain plugin) {
 		//Load Kits
-		if(CustomConfigHandler.getKits(plugin).contains("kits") == false) {
+		if(CustomConfigHandler.getKits(plugin).getConfigurationSection("kits") == null) {
 			AKitsMain.log.warning("[AdvancedKits] No kits were found in the on-server storage.");
 		} else {
 			for(String kitName : CustomConfigHandler.getKits(plugin).getConfigurationSection("kits").getKeys(false)) {
@@ -152,16 +156,20 @@ public class ConfigDataManager {
 	}
 	
 	public static void getPlayerDataFromServer(Player p, AKitsMain plugin) {
-		if(CustomConfigHandler.getPlayers(plugin).getConfigurationSection("players").getKeys(false).contains(p.getPlayerListName())) {
-			String player = p.getPlayerListName();
-			int kills = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".kills");
-			int deaths = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".deaths");
-			int points = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".points");
-			int level = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".level");
-			
-			PlayerHandler.inputData(p, kills, deaths, points, level);
+		if(CustomConfigHandler.getPlayers(plugin).getConfigurationSection("players") != null) {
+			if(CustomConfigHandler.getPlayers(plugin).getConfigurationSection("players").getKeys(false).contains(p.getPlayerListName())) {
+				String player = p.getPlayerListName();
+				int kills = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".kills");
+				int deaths = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".deaths");
+				int points = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".points");
+				int level = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".level");
+				
+				PlayerHandler.inputData(p, kills, deaths, points, level);
+			} else {
+				PlayerHandler.inputData(p, 0, 0, 0, 0);
+			}
 		} else {
-			PlayerHandler.inputData(p, 0, 0, 0, 0);
+			AKitsMain.log.warning("[AdvancedKits] No player data was found in the on-server storage.");
 		}
 	}
 	
@@ -186,64 +194,134 @@ public class ConfigDataManager {
 	}
 	
 	public static void getLevels(AKitsMain plugin) {
-		for(String iLevel : CustomConfigHandler.getLevels(plugin).getConfigurationSection("levels").getKeys(false)) {
-			Integer level = Integer.parseInt(iLevel);
-			Integer minimun = CustomConfigHandler.getLevels(plugin).getInt("levels." + iLevel + ".minimun_kills");
-			String prefix = ChatColor.translateAlternateColorCodes('&', CustomConfigHandler.getLevels(plugin).getString("levels." + iLevel + ".prefix"));
-			
-			Levels.addLevel(level, minimun, prefix);
-			
-			System.out.println("Level " + level + " min kills " + minimun + " prefix " + prefix);
+		if(CustomConfigHandler.getLevels(plugin).getConfigurationSection("levels") != null) {
+			for(String iLevel : CustomConfigHandler.getLevels(plugin).getConfigurationSection("levels").getKeys(false)) {
+				Integer level = Integer.parseInt(iLevel.replace("level", ""));
+				Integer minimun = CustomConfigHandler.getLevels(plugin).getInt("levels." + iLevel + ".minimum_kills");
+				String prefix = ChatColor.translateAlternateColorCodes('&', CustomConfigHandler.getLevels(plugin).getString("levels." + iLevel + ".prefix"));
+				
+				Levels.addLevel(level, minimun, prefix);
+				
+				System.out.println("Level " + level + " min kills " + minimun + " prefix " + prefix);
+			}
+		} else {
+			AKitsMain.log.warning("[AdvancedKits] No level data could be saved to the server.");
 		}
 	}
 	
 	public static void loadArenas(AKitsMain plugin) {
-		for(String name : CustomConfigHandler.getArenas(plugin).getConfigurationSection("arenas").getKeys(false)) {
-			int maxPlayers = CustomConfigHandler.getArenas(plugin).getInt("arenas." + name + ".max_players");
-			int level = CustomConfigHandler.getArenas(plugin).getInt("arenas." + name + ".minimun_level");
-			World world = plugin.getServer().getWorld(CustomConfigHandler.getArenas(plugin).getString("arenas." + name + ".world"));
-			
-			ArrayList<Location> spawns = new ArrayList<Location>();
-			HashMap<Location, Integer> spawnCount = new HashMap<Location, Integer>();
-			HashMap<Location, Integer> spawnIndex = new HashMap<Location, Integer>();
-			for(String spawn : CustomConfigHandler.getArenas(plugin).getStringList("arenas." + name + ".spawns")) {
-				String[] s = spawn.split(",");
-				Location spawnloc = new Location(plugin.getServer().getWorld(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]), Integer.parseInt(s[3]), Float.parseFloat(s[4]), Float.parseFloat(s[5]));
-				spawns.add(spawnloc);
-				spawnCount.put(spawnloc, Integer.parseInt(s[6]));
-				spawnIndex.put(spawnloc, 0);
+		if(CustomConfigHandler.getArenas(plugin).getConfigurationSection("arenas") != null) {
+			for(String name : CustomConfigHandler.getArenas(plugin).getConfigurationSection("arenas").getKeys(false)) {
+				int maxPlayers = CustomConfigHandler.getArenas(plugin).getInt("arenas." + name + ".max_players");
+				int minLevel = CustomConfigHandler.getArenas(plugin).getInt("arenas." + name + ".minimum_level");
+				World world = plugin.getServer().getWorld(CustomConfigHandler.getArenas(plugin).getString("arenas." + name + ".world"));
+				GameType type = GameManager.getType(CustomConfigHandler.getArenas(plugin).getString("arenas." + name + ".type"));
+				String kitSet = CustomConfigHandler.getArenas(plugin).getString("arenas." + name + ".kit_set");
+				String[] loc = CustomConfigHandler.getArenas(plugin).getString("arenas." + name + ".lobby").split(",");
+				Location lobby = new Location(world, Integer.parseInt(loc[0]), Integer.parseInt(loc[1]), Integer.parseInt(loc[2]));
+				
+				ArrayList<Location> spawns = new ArrayList<Location>();
+				HashMap<Location, Integer> spawnCount = new HashMap<Location, Integer>();
+				HashMap<Location, Integer> spawnIndex = new HashMap<Location, Integer>();
+				HashMap<Location, String> spawnTeam = new HashMap<Location, String>();
+				for(String spawn : CustomConfigHandler.getArenas(plugin).getStringList("arenas." + name + ".spawns")) {
+					String[] s = spawn.split(",");
+					Location spawnloc = new Location(plugin.getServer().getWorld(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]), Integer.parseInt(s[3]), Float.parseFloat(s[4]), Float.parseFloat(s[5]));
+					spawns.add(spawnloc);
+					spawnCount.put(spawnloc, Integer.parseInt(s[6]));
+					spawnIndex.put(spawnloc, null);
+					
+					if(!s[7].equals("null")) {
+						spawnTeam.put(spawnloc, s[7]);
+					} else {
+						spawnTeam.put(spawnloc, null);
+					}
+				}
+				
+				for(String kitSetName : CustomConfigHandler.getArenas(plugin).getConfigurationSection("sets").getKeys(false)) {
+					ArrayList<Kit> kits = new ArrayList<Kit>();
+					for(String kit : CustomConfigHandler.getArenas(plugin).getStringList("sets." + kitSetName)) {
+						if(KitManager.isKit(kit)) {
+							kits.add(KitManager.getKit(kit));
+						} else if(kit.equalsIgnoreCase("all")) {
+							kits.addAll(KitManager.getAllKits());
+						} else {
+							AKitsMain.log.warning("[AKitsMain] Couldn't load kit " + kit + " in kit set " + kitSetName + ".");
+						}
+					}
+					
+					KitSet.addSet(kitSetName, kits);
+				}
+				
+				if(spawns.isEmpty() && type == null) {
+					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel));
+				} else if(spawns.isEmpty() && type != null) {
+					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, spawnTeam, type, kitSet));
+				} else {
+					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, spawnTeam, type, kitSet, lobby));
+				}
+				
+				System.out.println("Loaded " + name);
 			}
-			
-			if(spawns.isEmpty()) {
-				ArenaManager.addArena(new Arena(name, world, maxPlayers, level));
-			} else {
-				ArenaManager.addArena(new Arena(name, world, maxPlayers, level, spawns, spawnCount, spawnIndex));
-			}
-			
-			System.out.println("Loaded " + name);
+		} else {
+			AKitsMain.log.warning("[AdvancedKits] No arena data could be saved to the server.");
 		}
 	}
 	
 	public static void saveArenas(AKitsMain plugin) {
 		for(Arena a : ArenaManager.getArenas()) {
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".max_players", a.getMaxPlayers());
-			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".minimun_level", a.getLevel());
+			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".minimun_level", a.getMinimumLevel());
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".world", a.getWorld().getName());
+			if(a.getType() == null) {
+				CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".type", "null");
+			} else {
+				CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".type", a.getType().toString().toLowerCase());
+			}
+			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".kit_set", a.getKitSetName());
+			if(a.getLobbyLocation() == null) {
+				CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".lobby", "0,0,0");
+			} else {
+				String lobbyLoc = a.getLobbyLocation().getBlockX() + "," + a.getLobbyLocation().getBlockY() + "," + a.getLobbyLocation().getBlockZ();
+				CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".lobby", lobbyLoc);
+			}
 
 			ArrayList<String> list = new ArrayList<String>();
 			for(Location l : a.getSpawnLocations()) {
-				String loc = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getPitch() + "," + l.getYaw() + "," + a.getSpawnCount(l);
+				String loc = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getPitch() + "," + l.getYaw() + "," + a.getSpawnCount(l) + "," + a.getSpawnTeam(l);
 				list.add(loc);
 			}
 			
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".spawns", list);
 			
 			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".max_players", a.getMaxPlayers());
-			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".minimun_level", a.getLevel());
+			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".minimun_level", a.getMinimumLevel());
 			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".world", a.getWorld().getName());
-			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".spawns", list);
+			if(a.getType() == null) {
+				CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".type", "null");
+			} else {
+				CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".type", a.getType().toString().toLowerCase());
+			}
+			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".spawns", list);
+			if(a.getLobbyLocation() == null) {
+				CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".lobby", "0,0,0");
+			} else {
+				String lobbyLoc = a.getLobbyLocation().getBlockX() + "," + a.getLobbyLocation().getBlockY() + "," + a.getLobbyLocation().getBlockZ();
+				CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".lobby", lobbyLoc);
+			}
 			
 			System.out.println("Saved arena " + a.getName());
+		}
+		
+		for(Entry<String, ArrayList<Kit>> sets : KitSet.getSets().entrySet()) {
+			ArrayList<String> kitNames = new ArrayList<String>();
+			for(Kit k : sets.getValue()) {
+				kitNames.add(k.getName());
+			}
+			CustomConfigHandler.getArenas(plugin).set("sets." + sets.getKey(), kitNames);
+			
+			CustomConfigHandler.getArenas(plugin).addDefault("sets." + sets.getKey(), kitNames);
+			
 		}
 	}
 }

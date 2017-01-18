@@ -26,19 +26,16 @@ public class KitCmd implements CommandExecutor {
 				Player p = (Player) sender;
 				
 				if(args.length < 1) {
-					p.openInventory(KitManager.getSelectInventory());
+					p.sendMessage(ChatColor.RED + "Use /kit help");
 				} else if(args.length == 1) {
-					if(args[0].equalsIgnoreCase("menu")) {
-						p.openInventory(KitManager.getSelectInventory());
-					} else if(args[0].equalsIgnoreCase("list")) {
+					if(args[0].equalsIgnoreCase("list")) {
 						p.sendMessage(ChatColor.GOLD + "[" + ChatColor.DARK_GREEN + "Advanced Kits" + ChatColor.GOLD + "] " + ChatColor.BLUE + "Possible kits:");
 						for(Kit kit : KitManager.getAllKits()) {
 							p.sendMessage(ChatColor.GOLD + "- " + ChatColor.GREEN + kit.getName());
 						}
 					} else if(args[0].equalsIgnoreCase("help")) {
 						p.sendMessage(ChatColor.GOLD + "------------" + ChatColor.DARK_GREEN + "< Kit Help Menu >" + ChatColor.GOLD + "------------");
-						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit" + ChatColor.GRAY + " Default command. Opens up the Kit Select Menu.");
-						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit menu" + ChatColor.GRAY + " Opens up the Kit Select Menu.");
+						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit" + ChatColor.GRAY + " Default command. Links you to here.");
 						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit list" + ChatColor.GRAY + " get a list of all the existing kits.");
 						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit help" + ChatColor.GRAY + " opens this.");
 						p.sendMessage(ChatColor.BLACK + "- " + ChatColor.DARK_GRAY + "/kit give <player> <kit>" + ChatColor.GRAY + " gives the selected player the selected kit.");
@@ -49,6 +46,10 @@ public class KitCmd implements CommandExecutor {
 						}
 						p.setHealth(20.0);
 						p.sendMessage(ChatColor.GOLD + "[" + ChatColor.DARK_GREEN + "Advanced Kits" + ChatColor.GOLD + "] " + ChatColor.BLUE + "You have been " + ChatColor.AQUA + "healed" + ChatColor.BLUE + ".");
+					} else if(args[0].equalsIgnoreCase("menu")) {
+						if(p.hasPermission("bluecraft.staff")) {
+							p.openInventory(KitManager.getSelectInventory());
+						}
 					}
 				} else if(args.length == 3) {
 					if(args[0].equalsIgnoreCase("give")) {

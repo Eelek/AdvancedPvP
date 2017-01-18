@@ -2,8 +2,10 @@ package me.eelek.advancedkits.arena;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
@@ -16,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import me.eelek.advancedkits.AKitsMain;
+import me.eelek.advancedkits.arena.GameManager.GameType;
 
 public class ArenaManager implements Listener {
 	
@@ -29,6 +32,12 @@ public class ArenaManager implements Listener {
 
 	public static Inventory getInventory(Arena a) {
 		Inventory inv = plugin.getServer().createInventory(null, 27, "Arena " + a.getName());
+		
+		ItemStack type = new ItemStack(Material.EMPTY_MAP, 1);
+		ItemMeta tMeta = (ItemMeta) type.getItemMeta();
+		tMeta.setDisplayName(ChatColor.DARK_PURPLE + "Game type: " + ChatColor.LIGHT_PURPLE + a.getType().toString() + ChatColor.DARK_PURPLE + ".");
+		type.setItemMeta(tMeta);
+		inv.setItem(9, type);
 
 		ItemStack world = new ItemStack(Material.GRASS, 1);
 		ItemMeta gMeta = (ItemMeta) world.getItemMeta();
@@ -60,21 +69,27 @@ public class ArenaManager implements Listener {
 		
 		ItemStack max = new ItemStack(Material.BARRIER, 1);
 		ItemMeta mMeta = (ItemMeta) max.getItemMeta();
-		mMeta.setDisplayName(ChatColor.DARK_PURPLE + "Maximun players: " + ChatColor.LIGHT_PURPLE + a.getMaxPlayers() + ChatColor.DARK_PURPLE + ".");
+		mMeta.setDisplayName(ChatColor.DARK_PURPLE + "Maximum players: " + ChatColor.LIGHT_PURPLE + a.getMaxPlayers() + ChatColor.DARK_PURPLE + ".");
 		max.setItemMeta(mMeta);
 		inv.setItem(15, max);
 		
 		ItemStack level = new ItemStack(Material.EXP_BOTTLE, 1);
 		ItemMeta lMeta = (ItemMeta) level.getItemMeta();
-		lMeta.setDisplayName(ChatColor.DARK_PURPLE + "Minimun level: " + ChatColor.LIGHT_PURPLE + a.getLevel() + ChatColor.DARK_PURPLE + ".");
+		lMeta.setDisplayName(ChatColor.DARK_PURPLE + "Minimum level: " + ChatColor.LIGHT_PURPLE + a.getMinimumLevel() + ChatColor.DARK_PURPLE + ".");
 		level.setItemMeta(lMeta);
 		inv.setItem(16, level);
+		
+		ItemStack kitSet = new ItemStack(Material.BOOKSHELF, 1);
+		ItemMeta kMeta = (ItemMeta) kitSet.getItemMeta();
+		kMeta.setDisplayName(ChatColor.DARK_PURPLE + "Kit Set: " + ChatColor.LIGHT_PURPLE + a.getKitSetName() + ChatColor.DARK_PURPLE + ".");
+		kitSet.setItemMeta(kMeta);
+		inv.setItem(17, kitSet);
 		
 		return inv;
 	}
 	
 	public static Inventory getWorldInventory(Arena a) {
-		int size = a.getMaxPlayers() / 9;
+		int size = a.getAmountOfSpawns() / 9;
 		if(size % 10 >= 0.5) {
 			size = (int) Math.ceil(size);
 		} else {
@@ -91,10 +106,17 @@ public class ArenaManager implements Listener {
 			ItemStack spawn = new ItemStack(Material.DIRT, 1);
 			ItemMeta sMeta = (ItemMeta) spawn.getItemMeta();
 			sMeta.setDisplayName(ChatColor.GREEN + "Spawn " + (count + 1));
-			sMeta.setLore(Arrays.asList("§r§fX:" + a.getSpawn(count).getBlockX(), "§r§fY: " + a.getSpawn(count).getBlockY(), "§r§fZ: " + a.getSpawn(count).getBlockZ(), "§r§fMax spawns: " + a.getSpawnCount(a.getSpawn(count))));
+			sMeta.setLore(Arrays.asList("§r§fX: " + a.getSpawn(count).getBlockX(), "§r§fY: " + a.getSpawn(count).getBlockY(), "§r§fZ: " + a.getSpawn(count).getBlockZ(), "§r§fMax spawns: " + a.getSpawnCount(a.getSpawn(count)), "§r§fSpawn index: " + a.getSpawnIndex(count), "§r§fTeam: " + a.getSpawnTeam(a.getSpawn(count))));
 			spawn.setItemMeta(sMeta);
 			wInv.setItem(count, spawn);
 		}
+		
+		ItemStack lobby = new ItemStack(Material.GOLD_BLOCK, 1);
+		ItemMeta lMeta = (ItemMeta) lobby.getItemMeta();
+		lMeta.setDisplayName(ChatColor.GOLD + "Lobby");
+		lMeta.setLore(Arrays.asList("§r§fX: " + a.getLobbyLocation().getBlockX(), "§r§fY: " + a.getLobbyLocation().getBlockY(), "§r§fZ: " + a.getLobbyLocation().getBlockZ()));
+		lobby.setItemMeta(lMeta);
+		wInv.setItem(wInv.getSize() - 2, lobby);
 		
 		ItemStack back = new ItemStack(Material.BOOK, 1);
 		ItemMeta bMeta = (ItemMeta) back.getItemMeta();
@@ -121,7 +143,7 @@ public class ArenaManager implements Listener {
 		
 		if(a.getCurrentPlayers() != null) {
 			for(String p : a.getCurrentPlayers()) {
-				ItemStack player = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+				ItemStack player = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
 				SkullMeta pMeta = (SkullMeta) player.getItemMeta();
 				pMeta.setOwner(p);
 				pMeta.setDisplayName(ChatColor.GREEN + p);
@@ -180,27 +202,55 @@ public class ArenaManager implements Listener {
 				if(isArena(e.getLine(2))) {
 					Arena a = getArena(e.getLine(2));
 					if(a.isActive()) {
-						e.setLine(0, "§6§l[§4§lArena§6§l]");
-						e.setLine(1, a.getName());
-						e.setLine(2, "§7§l" + a.getCurrentPlayers().size() + "§0§l/§8§l" + a.getMaxPlayers());
-						e.setLine(3, "§5§lLevel: §a§l" + a.getLevel());
-						e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
-						Sign sign = (Sign) e.getBlock().getState();
-						if(sign != null) {
-							a.setSign(sign);
+						if(a.getType() != GameType.DUEL) {
+							e.setLine(0, "§6§l[§4§l" + a.getType().toString().substring(0, 5) + "§6§l]");
+							e.setLine(1, a.getName());
+							e.setLine(2, "§7§l" + a.getCurrentPlayers().size() + "§0§l/§8§l" + a.getMaxPlayers());
+							e.setLine(3, "§5§lLevel: §a§l" + a.getMinimumLevel());
+							e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
+							Sign sign = (Sign) e.getBlock().getState();
+							if(sign != null) {
+								a.setSign(sign);
+							}
+						} else {
+							e.setLine(0, "§6§l[§4§l" + a.getType().toString().substring(0, 5) + "§6§l]");
+							e.setLine(1, a.getName());
+							e.setLine(2, "§7§l" + a.getCurrentPlayers().size() + "§0§l/§8§l" + a.getMaxPlayers());
+							e.setLine(3, "§5§lLevel: §a§l" + a.getMinimumLevel());
+							e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
+							Sign sign = (Sign) e.getBlock().getState();
+							if(sign != null) {
+								a.setSign(sign);
+							}
 						}
 					} else {
-						e.setLine(0, "§6§l[§4§lArena§6§l]");
-						e.setLine(1, a.getName());
-						e.setLine(2, "§4§lClosed.");
-						e.setLine(3, "§5§lLevel: §a§l" + a.getLevel());
-						e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
-						Sign sign = (Sign) e.getBlock().getState();
-						if(sign != null) {
-							a.setSign(sign);
+						if(a.getType() != GameType.DUEL) {
+							e.setLine(0, "§6§l[§4§l" + a.getType().toString().substring(0, 5) + "§6§l]");
+							e.setLine(1, a.getName());
+							e.setLine(2, "§4§lClosed.");
+							e.setLine(3, "§5§lLevel: §a§l" + a.getMinimumLevel());
+							e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
+							Sign sign = (Sign) e.getBlock().getState();
+							if(sign != null) {
+								a.setSign(sign);
+							}
+						} else {
+							e.setLine(0, "§6§l[§4§l" + a.getType().toString().substring(0, 4) + "§6§l]");
+							e.setLine(1, a.getName());
+							e.setLine(2, "§4§lClosed.");
+							e.setLine(3, "§5§lLevel: §a§l" + a.getMinimumLevel());
+							e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
+							Sign sign = (Sign) e.getBlock().getState();
+							if(sign != null) {
+								a.setSign(sign);
+							}
 						}
 					}
 				}
+			} else if(e.getLine(1).equals("leave")) {
+				e.setLine(0, "§3§l[§2§lArena§3§l]");
+				e.setLine(1, "§2§o§lLeave");
+				e.setLine(3, "§5§oReturn to lobby.");
 			}
 		}
 	}
@@ -243,6 +293,11 @@ public class ArenaManager implements Listener {
 				} else if(e.getCurrentItem().getType() == Material.BOOK) {
 					e.getWhoClicked().closeInventory();
 					e.getWhoClicked().openInventory(getInventory(a));
+				} else if(e.getCurrentItem().getType() == Material.DIRT) {
+					e.getWhoClicked().closeInventory();
+					List<String> lore = e.getCurrentItem().getItemMeta().getLore();
+					Location tpLoc = new Location(e.getWhoClicked().getLocation().getWorld(), Integer.parseInt(lore.get(0).split(" ")[1]), Integer.parseInt(lore.get(1).split(" ")[1]), Integer.parseInt(lore.get(2).split(" ")[1]));
+					e.getWhoClicked().teleport(tpLoc);
 				}
 			}
 		}

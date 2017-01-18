@@ -1,6 +1,7 @@
 package me.eelek.advancedkits.kits;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
@@ -50,6 +51,7 @@ public class Kit {
 	public ItemStack getDisplayItem() {
 		ItemMeta kMeta = (ItemMeta) kitItem.getItemMeta();
 		kMeta.setDisplayName(ChatColor.DARK_PURPLE + name);
+		kMeta.setLore(Arrays.asList("§r§fLeft click to select", "§r§fRight click to see content."));
 		kitItem.setItemMeta(kMeta);
 		return kitItem;
 	}

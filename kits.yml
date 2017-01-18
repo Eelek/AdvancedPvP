@@ -5,3 +5,5 @@
 #The Character '_' (Underscore) can be used as a ' ' (Space) in the kitname.
 
 kits: []
+
+sets: []

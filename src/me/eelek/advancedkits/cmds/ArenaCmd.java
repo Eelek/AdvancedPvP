@@ -34,7 +34,7 @@ public class ArenaCmd implements CommandExecutor {
 							p.sendMessage(ChatColor.GOLD + "Info for arena " + ChatColor.RED + args[1]);
 							p.sendMessage(ChatColor.BLUE + "Name: " + ChatColor.AQUA + a.getName());
 							p.sendMessage(ChatColor.BLUE + "Max Players: " + ChatColor.AQUA + a.getMaxPlayers());
-							p.sendMessage(ChatColor.BLUE + "Level: " + ChatColor.AQUA + a.getLevel());
+							p.sendMessage(ChatColor.BLUE + "Level: " + ChatColor.AQUA + a.getMinimumLevel());
 							if (a.getAmountOfSpawns() != 0) {
 								p.sendMessage(ChatColor.BLUE + "Spawns: " + ChatColor.AQUA + a.getAmountOfSpawns());
 							} else {
@@ -54,6 +54,13 @@ public class ArenaCmd implements CommandExecutor {
 								p.getInventory().addItem(giveSpawnAxe(args[2]));
 								p.sendMessage(ChatColor.BLUE + "Select the " + ChatColor.AQUA + "spawns " + ChatColor.BLUE + "of arena " + ChatColor.AQUA + args[2] + ChatColor.BLUE + ".");
 							}
+						} else if(args[1].equalsIgnoreCase("lobby")) {
+							if(ArenaManager.isArena(args[2])) {
+								if(ArenaManager.getArena(args[2]).hasLobby() == false) {
+									p.getInventory().addItem(giveLobbyAxe(args[2]));
+									p.sendMessage(ChatColor.BLUE + "Select the " + ChatColor.GOLD + "lobby " + ChatColor.BLUE + "of arena " + ChatColor.AQUA + args[2] + ChatColor.BLUE + ".");
+								}
+							}
 						}
 					}
 				} else if (args.length == 4) {
@@ -68,9 +75,9 @@ public class ArenaCmd implements CommandExecutor {
 								}
 							} else if (args[2].equalsIgnoreCase("level")) {
 								try {
-									ArenaManager.getArena(args[0]).setLevel(Integer.parseInt(args[3]));
+									ArenaManager.getArena(args[0]).setMinimumLevel(Integer.parseInt(args[3]));
 									p.sendMessage(ChatColor.BLUE + "Succesfully set " + ChatColor.AQUA + args[0] + ChatColor.BLUE + "'s level to: " + ChatColor.AQUA + args[3]);
-									System.out.println(args[0] + " level " + ArenaManager.getArena(args[0]).getLevel());
+									System.out.println(args[0] + " level " + ArenaManager.getArena(args[0]).getMinimumLevel());
 								} catch (NumberFormatException e) {
 									p.sendMessage(ChatColor.AQUA + args[3] + ChatColor.BLUE + " isn't a valid input.");
 								}
@@ -88,6 +95,14 @@ public class ArenaCmd implements CommandExecutor {
 		ItemStack select = new ItemStack(Material.DIAMOND_HOE, 1);
 		ItemMeta meta = (ItemMeta) select.getItemMeta();
 		meta.setDisplayName(ChatColor.BLUE + "Select spawns " + ChatColor.AQUA + name);
+		select.setItemMeta(meta);
+		return select;
+	}
+	
+	public ItemStack giveLobbyAxe(String name) {
+		ItemStack select = new ItemStack(Material.GOLD_HOE, 1);
+		ItemMeta meta = (ItemMeta) select.getItemMeta();
+		meta.setDisplayName(ChatColor.BLUE + "Select lobby " + ChatColor.AQUA + name);
 		select.setItemMeta(meta);
 		return select;
 	}

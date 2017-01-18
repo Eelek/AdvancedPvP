@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -153,21 +152,23 @@ public class PlayerHandler implements Listener {
 		
 		e.getDrops().clear();
 		
-		if(killed.getLastDamageCause() != null) {
-			if(killed.getLastDamageCause().equals(DamageCause.ENTITY_ATTACK)) {
-				e.setDeathMessage(ChatColor.BLUE + killed.getPlayerListName() + ChatColor.AQUA + " was slain by " + ChatColor.BLUE + killer.getPlayerListName());
-				getPlayer(killer.getPlayerListName()).addKill();
-				
-				Levels.levelUp(getPlayer(killer.getPlayerListName()));
-				
-				Scoresboard.setScoreboard(plugin, killer);
-			}
+		if(killed.getLastDamageCause().getCause().equals(DamageCause.ENTITY_ATTACK)) {
+			e.setDeathMessage(ChatColor.BLUE + killed.getPlayerListName() + ChatColor.AQUA + " was slain by " + ChatColor.BLUE + killer.getPlayerListName());
+			getPlayer(killer.getPlayerListName()).addKill();
+			
+			Levels.levelUp(getPlayer(killer.getPlayerListName()));
+			
+			Scoresboard.setScoreboard(plugin, killer);
+		} else if(killed.getLastDamageCause().getCause().equals(DamageCause.PROJECTILE)) {
+			e.setDeathMessage(ChatColor.BLUE + killed.getPlayerListName() + ChatColor.AQUA + " was shot by " + ChatColor.BLUE + killer.getPlayerListName());
+			getPlayer(killer.getPlayerListName()).addKill();
+			
+			Levels.levelUp(getPlayer(killer.getPlayerListName()));
+			
+			Scoresboard.setScoreboard(plugin, killer);
 		}
 		
 		getPlayer(killed.getPlayerListName()).addDeath();
-		getPlayer(killed.getPlayerListName()).setPlaying(false);
-		
-		ArenaManager.getArena(getPlayer(killed.getPlayerListName()).getCurrentArena()).removePlayer(killed);
 	}
 	
 	@EventHandler
@@ -177,10 +178,13 @@ public class PlayerHandler implements Listener {
 			e.getPlayer().removePotionEffect(pE.getType());
 		}
 		
-		e.getPlayer().getInventory().setItem(4, getKitSelectCompass());
-		e.getPlayer().getInventory().setHeldItemSlot(4);
-		
 		Scoresboard.setScoreboard(plugin, e.getPlayer());
+		
+		if(getPlayer(e.getPlayer().getPlayerListName()).isPlaying()) {
+			e.setRespawnLocation(ArenaManager.getArena(getPlayer(e.getPlayer().getPlayerListName()).getCurrentArena()).getLobbyLocation());
+			e.getPlayer().getInventory().setItem(4, getKitSelectCompass());
+			e.getPlayer().getInventory().setHeldItemSlot(4);
+		}
 	}
 	
 	@EventHandler
@@ -191,7 +195,7 @@ public class PlayerHandler implements Listener {
 			if(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK) {
 				if (p.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
 					if (p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|")) {
-						p.openInventory(KitManager.getSelectInventory());
+						p.openInventory(KitManager.getSelectInventory(ArenaManager.getArena(getPlayer(p.getPlayerListName()).getCurrentArena())));
 					}
 				} else if (p.getInventory().getItemInMainHand().getType() == Material.DIAMOND_HOE) {
 					if (p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().contains(ChatColor.BLUE + "Select spawns ")) {
@@ -199,6 +203,23 @@ public class PlayerHandler implements Listener {
 						Arena a = ArenaManager.getArena(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().split("" + ChatColor.AQUA)[1]);
 						a.addSpawn(e.getClickedBlock().getLocation());
 						p.sendMessage(ChatColor.BLUE + "Added spawn " + ChatColor.AQUA + a.getAmountOfSpawns() + ChatColor.BLUE + " for arena " + ChatColor.AQUA + a.getName() + ChatColor.BLUE + ".");
+					}
+				}
+			}
+			
+			if(e.hasBlock()) {
+				if(e.getClickedBlock().getType() == Material.SIGN_POST || e.getClickedBlock().getType() == Material.WALL_SIGN) {
+					Sign s = (Sign) e.getClickedBlock().getState();
+					if(s.getLine(0).contains("§3§l[§2§l")) {
+						Arena a = ArenaManager.getArena(s.getLine(2));
+						p.teleport(p.getWorld().getSpawnLocation());
+						getPlayer(p.getPlayerListName()).setPlaying(false);
+						getPlayer(p.getPlayerListName()).setCurrentArena(null);
+						a.removePlayer(p);
+						p.getInventory().clear();
+						for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
+							e.getPlayer().removePotionEffect(pE.getType());
+						}
 					}
 				}
 			}
@@ -210,32 +231,45 @@ public class PlayerHandler implements Listener {
 					a.addSpawn(e.getClickedBlock().getLocation());
 					p.sendMessage(ChatColor.BLUE + "Added spawn " + ChatColor.AQUA + a.getAmountOfSpawns() + ChatColor.BLUE + " for arena " + ChatColor.AQUA + a.getName() + ChatColor.BLUE + ".");
 				}
+			} else if(p.getInventory().getItemInMainHand().getType() == Material.GOLD_HOE) {
+				if(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().contains(ChatColor.BLUE + "Select lobby ")) {
+					e.setCancelled(true);
+					Arena a = ArenaManager.getArena(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().split("" + ChatColor.AQUA)[1]);
+					if(a.hasLobby() == false) {
+						a.setLobbyLocation(e.getClickedBlock().getLocation());
+						p.sendMessage(ChatColor.BLUE + "Set " + ChatColor.AQUA + a.getName() + ChatColor.BLUE +  "'s lobby location to: " + ChatColor.AQUA + e.getClickedBlock().getX() + ", " + e.getClickedBlock().getY() + ", " + e.getClickedBlock().getZ() + ChatColor.BLUE + ".");
+					}
+				}
 			}
 			
 			if(e.hasBlock()) {
-				if(e.getClickedBlock().getType() == Material.SIGN || e.getClickedBlock().getType() == Material.WALL_SIGN) {
+				if(e.getClickedBlock().getType() == Material.SIGN_POST || e.getClickedBlock().getType() == Material.WALL_SIGN) {
 					Sign s = (Sign) e.getClickedBlock().getState();
-					if(s.getLine(0).equals("§6§l[§4§lArena§6§l]")) {
+					if(s.getLine(0).contains("§6§l[§4§l")) {
 						Arena a = ArenaManager.getArena(s.getLine(1));
-						if(getPlayer(p.getPlayerListName()).getLevel() >= a.getLevel()) {
+						if(getPlayer(p.getPlayerListName()).getLevel() >= a.getMinimumLevel()) {
 							if(a.isActive() && (a.getCurrentPlayers().size() < a.getMaxPlayers())) {
-								Location spawn = a.getSpawnLocation();
-								if(spawn != null) {
-									p.teleport(spawn);
-								} else {
-									p.sendMessage(ChatColor.RED + "An error occured, please try again.");
-									return;
-								}
+								p.teleport(a.getLobbyLocation());
 								getPlayer(p.getPlayerListName()).setPlaying(true);
 								getPlayer(p.getPlayerListName()).setCurrentArena(a.getName());
 								a.addPlayer(p);
-								e.getPlayer().getInventory().setItem(4, getKitSelectCompass());
-								e.getPlayer().getInventory().setHeldItemSlot(4);
+								p.getInventory().setItem(4, getKitSelectCompass());
+								p.getInventory().setHeldItemSlot(4);
 							} else {
 								p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is disabled.");
 							}
 						} else {
-							p.sendMessage(ChatColor.RED + "You can't join this arena. You need to be atleast level " + ChatColor.DARK_RED + a.getLevel() + ChatColor.RED + ".");
+							p.sendMessage(ChatColor.RED + "You can't join this arena. You need to be atleast level " + ChatColor.DARK_RED + a.getMinimumLevel() + ChatColor.RED + ".");
+						}
+					} else if(s.getLine(0).contains("§3§l[§2§l")) {
+						Arena a = ArenaManager.getArena(s.getLine(2));
+						p.teleport(p.getWorld().getSpawnLocation());
+						getPlayer(p.getPlayerListName()).setPlaying(false);
+						getPlayer(p.getPlayerListName()).setCurrentArena(null);
+						a.removePlayer(p);
+						p.getInventory().clear();
+						for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
+							e.getPlayer().removePotionEffect(pE.getType());
 						}
 					}
 				}

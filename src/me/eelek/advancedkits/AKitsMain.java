@@ -17,14 +17,14 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	
 	public static Logger log;
 	
-	//This is Advanced Kits version: 5.0
+	//This is Advanced Kits version: 6.0
 	
 	@Override
 	public void onEnable() {
 		log = getLogger();
 		
 		//CommandExecutors here
-		getCommand("kit").setExecutor(new KitCmd(this));
+		getCommand("kit").setExecutor(new KitCmd());
 		getCommand("arena").setExecutor(new ArenaCmd());
 		
 		// Setup configs and such.

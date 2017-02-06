@@ -146,7 +146,9 @@ public class ConfigDataManager {
 					effects.add(pE);
 				}
 				
-				KitManager.addKit(new Kit(kitName.replaceAll("_", " "), content, armor, kitItem, effects));
+				int level = CustomConfigHandler.getKits(plugin).getInt("kits." + kitName + ".minimum_level");
+				
+				KitManager.addKit(new Kit(kitName.replaceAll("_", " "), content, armor, kitItem, effects, level));
 			}
 		}
 		
@@ -223,19 +225,12 @@ public class ConfigDataManager {
 				ArrayList<Location> spawns = new ArrayList<Location>();
 				HashMap<Location, Integer> spawnCount = new HashMap<Location, Integer>();
 				HashMap<Location, Integer> spawnIndex = new HashMap<Location, Integer>();
-				HashMap<Location, String> spawnTeam = new HashMap<Location, String>();
 				for(String spawn : CustomConfigHandler.getArenas(plugin).getStringList("arenas." + name + ".spawns")) {
 					String[] s = spawn.split(",");
 					Location spawnloc = new Location(plugin.getServer().getWorld(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]), Integer.parseInt(s[3]), Float.parseFloat(s[4]), Float.parseFloat(s[5]));
 					spawns.add(spawnloc);
 					spawnCount.put(spawnloc, Integer.parseInt(s[6]));
-					spawnIndex.put(spawnloc, null);
-					
-					if(!s[7].equals("null")) {
-						spawnTeam.put(spawnloc, s[7]);
-					} else {
-						spawnTeam.put(spawnloc, null);
-					}
+					spawnIndex.put(spawnloc, 0);
 				}
 				
 				for(String kitSetName : CustomConfigHandler.getArenas(plugin).getConfigurationSection("sets").getKeys(false)) {
@@ -256,9 +251,9 @@ public class ConfigDataManager {
 				if(spawns.isEmpty() && type == null) {
 					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel));
 				} else if(spawns.isEmpty() && type != null) {
-					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, spawnTeam, type, kitSet));
+					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, type, kitSet));
 				} else {
-					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, spawnTeam, type, kitSet, lobby));
+					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, type, kitSet, lobby));
 				}
 				
 				System.out.println("Loaded " + name);
@@ -271,7 +266,7 @@ public class ConfigDataManager {
 	public static void saveArenas(AKitsMain plugin) {
 		for(Arena a : ArenaManager.getArenas()) {
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".max_players", a.getMaxPlayers());
-			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".minimun_level", a.getMinimumLevel());
+			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".minimum_level", a.getMinimumLevel());
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".world", a.getWorld().getName());
 			if(a.getType() == null) {
 				CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".type", "null");
@@ -288,14 +283,14 @@ public class ConfigDataManager {
 
 			ArrayList<String> list = new ArrayList<String>();
 			for(Location l : a.getSpawnLocations()) {
-				String loc = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getPitch() + "," + l.getYaw() + "," + a.getSpawnCount(l) + "," + a.getSpawnTeam(l);
+				String loc = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getPitch() + "," + l.getYaw() + "," + a.getSpawnCount(l);
 				list.add(loc);
 			}
 			
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".spawns", list);
 			
 			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".max_players", a.getMaxPlayers());
-			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".minimun_level", a.getMinimumLevel());
+			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".minimum_level", a.getMinimumLevel());
 			CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".world", a.getWorld().getName());
 			if(a.getType() == null) {
 				CustomConfigHandler.getArenas(plugin).addDefault("arenas." + a.getName() + ".type", "null");

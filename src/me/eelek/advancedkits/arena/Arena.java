@@ -17,7 +17,7 @@ public class Arena {
 	ArrayList<Location> spawns = new ArrayList<Location>();
 	HashMap<Location, Integer> spawnCount = new HashMap<Location, Integer>();
 	HashMap<Location, Integer> spawnIndex = new HashMap<Location, Integer>();
-	HashMap<Location, String> spawnTeam = new HashMap<Location, String>();
+	HashMap<String, Location> spawnPlayer = new HashMap<String, Location>();
 	ArrayList<String> currentPlayers = new ArrayList<String>();
 	int maxPlayers;
 	int minLevel;
@@ -30,7 +30,7 @@ public class Arena {
 	
 	Sign sign;
 	
-	public Arena(String name, World world, int maxPlayers, int minLevel, ArrayList<Location> spawns, HashMap<Location, Integer> spawnCount, HashMap<Location, Integer> spawnIndex, HashMap<Location, String> spawnTeam, GameType type, String kitSet, Location lobby) {
+	public Arena(String name, World world, int maxPlayers, int minLevel, ArrayList<Location> spawns, HashMap<Location, Integer> spawnCount, HashMap<Location, Integer> spawnIndex, GameType type, String kitSet, Location lobby) {
 		this.name = name;
 		this.world = world;
 		this.maxPlayers = maxPlayers;
@@ -38,7 +38,6 @@ public class Arena {
 		this.spawns = spawns;
 		this.spawnCount = spawnCount;
 		this.spawnIndex = spawnIndex;
-		this.spawnTeam = spawnTeam;
 		this.type = type;
 		this.kitSet = kitSet;
 		this.lobby = lobby;
@@ -48,7 +47,7 @@ public class Arena {
 		this.sign = null;
 	}
 	
-	public Arena(String name, World world, int maxPlayers, int minLevel, ArrayList<Location> spawns, HashMap<Location, Integer> spawnCount, HashMap<Location, Integer> spawnIndex, HashMap<Location, String> spawnTeam, GameType type, String kitSet) {
+	public Arena(String name, World world, int maxPlayers, int minLevel, ArrayList<Location> spawns, HashMap<Location, Integer> spawnCount, HashMap<Location, Integer> spawnIndex, GameType type, String kitSet) {
 		this.name = name;
 		this.world = world;
 		this.maxPlayers = maxPlayers;
@@ -56,7 +55,6 @@ public class Arena {
 		this.spawns = spawns;
 		this.spawnCount = spawnCount;
 		this.spawnIndex = spawnIndex;
-		this.spawnTeam = spawnTeam;
 		this.type = type;
 		this.kitSet = kitSet;
 		this.lobby = null;
@@ -81,12 +79,13 @@ public class Arena {
 		return spawns.size();
 	}
 	
-	public Location getSpawnLocation() {
+	public Location getSpawnLocation(String p) {
 		if(type == GameType.DUEL) {
 			for(Location loc : spawns) {
 				if(spawnCount.get(loc) != 0) {
 					if(spawnIndex.get(loc) < spawnCount.get(loc)) {
 						spawnIndex.put(loc, spawnIndex.get(loc) + 1);
+						spawnPlayer.put(p, loc);
 						return loc;
 					}
 				}
@@ -95,12 +94,14 @@ public class Arena {
 			Random r = new Random();
 			int random = r.nextInt(spawns.size());
 			
-			if(spawnIndex.get(getSpawn(random)) == null) {
-				spawnIndex.clear();
+			if(spawnIndex.get(getSpawn(random)) == 0) {
+				for(Location l : spawnIndex.keySet()) {
+					spawnIndex.put(l, 0);
+				}
 				spawnIndex.put(getSpawn(random), 1);
 				return getSpawn(random);
 			} else {
-				return getSpawnLocation();
+				return getSpawnLocation(p);
 			}
 		}
 		return null;
@@ -134,7 +135,7 @@ public class Arena {
 			if(b) {
 				getSign().setLine(0, "§6§l[§4§l" + getType().toString().substring(0, 4) + "§6§l]");
 				getSign().setLine(1, getName());
-				getSign().setLine(2, "§7§l" + getCurrentPlayers().size() + "§0§l/§8§l" + getMaxPlayers());
+				getSign().setLine(2, "§b§lA DUEL?!?");
 				getSign().setLine(3, "§5§lLevel: §a§l" + getMinimumLevel());
 				getSign().update();
 			} else {
@@ -176,13 +177,17 @@ public class Arena {
 			currentPlayers.add(p.getPlayerListName());
 			if(getType() != GameType.DUEL) {
 				getSign().setLine(0, "§6§l[§4§l" + getType().toString().substring(0, 5) + "§6§l]");
+				getSign().setLine(1, getName());
+				getSign().setLine(2, "§7§l" + getCurrentPlayers().size() + "§0§l/§8§l" + getMaxPlayers());
+				getSign().setLine(3, "§5§lLevel: §a§l" + getMinimumLevel());
+				getSign().update();
 			} else {
 				getSign().setLine(0, "§6§l[§4§l" + getType().toString().substring(0, 4) + "§6§l]");
+				getSign().setLine(1, getName());
+				getSign().setLine(2, "§b§lA DUEL?!?");
+				getSign().setLine(3, "§5§lLevel: §a§l" + getMinimumLevel());
+				getSign().update();
 			}
-			getSign().setLine(1, getName());
-			getSign().setLine(2, "§7§l" + getCurrentPlayers().size() + "§0§l/§8§l" + getMaxPlayers());
-			getSign().setLine(3, "§5§lLevel: §a§l" + getMinimumLevel());
-			getSign().update();
 		} else {
 			currentPlayers.add(p.getPlayerListName());
 		}
@@ -191,19 +196,38 @@ public class Arena {
 	public void removePlayer(Player p) {
 		if(isActive()) {
 			currentPlayers.remove(p.getPlayerListName());
+			if(getType() == GameType.DUEL) {
+				spawnIndex.put(spawnPlayer.get(p), 0);
+				spawnPlayer.remove(p);
+			}
 			if(getType() != GameType.DUEL) {
 				getSign().setLine(0, "§6§l[§4§l" + getType().toString().substring(0, 5) + "§6§l]");
+				getSign().setLine(1, getName());
+				getSign().setLine(2, "§7§l" + getCurrentPlayers().size() + "§0§l/§8§l" + getMaxPlayers());
+				getSign().setLine(3, "§5§lLevel: §a§l" + getMinimumLevel());
+				getSign().update();
 			} else {
 				getSign().setLine(0, "§6§l[§4§l" + getType().toString().substring(0, 4) + "§6§l]");
+				getSign().setLine(1, getName());
+				getSign().setLine(2, "§b§lA DUEL?!?");
+				getSign().setLine(3, "§5§lLevel: §a§l" + getMinimumLevel());
+				getSign().update();
 			}
-			getSign().setLine(1, getName());
-			getSign().setLine(2, "§7§l" + getCurrentPlayers().size() + "§0§l/§8§l" + getMaxPlayers());
-			getSign().setLine(3, "§5§lLevel: §a§l" + getMinimumLevel());
-			getSign().update();
 		} else {
 			currentPlayers.remove(p.getPlayerListName());
+			if(getType() == GameType.DUEL) {
+				spawnIndex.put(spawnPlayer.get(p), 0);
+				spawnPlayer.remove(p);
+			}
 		}
 				
+	}
+	
+	public void removeSpawnPlayer(String p) {
+		if(getType() == GameType.DUEL) {
+			spawnIndex.put(spawnPlayer.get(p), 0);
+			spawnPlayer.remove(p);
+		}
 	}
 	
 	public ArrayList<String> getCurrentPlayers() {
@@ -248,10 +272,6 @@ public class Arena {
 	
 	public void setType(GameType t) {
 		type = t;
-	}
-	
-	public String getSpawnTeam(Location l) {
-		return spawnTeam.get(l);
 	}
 	
 	public String getKitSetName() {

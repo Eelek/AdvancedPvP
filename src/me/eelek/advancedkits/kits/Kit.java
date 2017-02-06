@@ -15,21 +15,24 @@ public class Kit {
 	private ArrayList<ItemStack> armor;
 	private ItemStack kitItem;
 	private ArrayList<PotionEffect> potionEffect;
+	private int minimumLevel;
 	
-	public Kit(String name, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem) {
+	public Kit(String name, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, int minimumLevel) {
 		this.name = name;
 		this.content = content;
 		this.armor = armor;
 		this.kitItem = kitItem;
 		this.potionEffect = null;
+		this.minimumLevel = minimumLevel;
 	}
 	
-	public Kit(String name, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, ArrayList<PotionEffect> potionEffect) {
+	public Kit(String name, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, ArrayList<PotionEffect> potionEffect, int minimumLevel) {
 		this.name = name;
 		this.content = content;
 		this.armor = armor;
 		this.kitItem = kitItem;
 		this.potionEffect = potionEffect;
+		this.minimumLevel = minimumLevel;
 	}
 	
 	public String getName() {
@@ -58,6 +61,14 @@ public class Kit {
 	
 	public ArrayList<PotionEffect> getPotionEffects() {
 		return potionEffect;
+	}
+	
+	public int getMinimumLevel() {
+		return minimumLevel;
+	}
+	
+	public void setMinimumLevel(int level) {
+		this.minimumLevel = level;
 	}
 
 }

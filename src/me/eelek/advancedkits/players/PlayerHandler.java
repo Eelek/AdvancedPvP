@@ -169,6 +169,7 @@ public class PlayerHandler implements Listener {
 		}
 		
 		getPlayer(killed.getPlayerListName()).addDeath();
+		ArenaManager.getArena(getPlayer(killed.getPlayerListName()).getCurrentArena()).removeSpawnPlayer(killed.getPlayerListName());
 	}
 	
 	@EventHandler
@@ -195,7 +196,7 @@ public class PlayerHandler implements Listener {
 			if(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK) {
 				if (p.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
 					if (p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|")) {
-						p.openInventory(KitManager.getSelectInventory(ArenaManager.getArena(getPlayer(p.getPlayerListName()).getCurrentArena())));
+						p.openInventory(KitManager.getSelectInventory(p, ArenaManager.getArena(getPlayer(p.getPlayerListName()).getCurrentArena())));
 					}
 				} else if (p.getInventory().getItemInMainHand().getType() == Material.DIAMOND_HOE) {
 					if (p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().contains(ChatColor.BLUE + "Select spawns ")) {
@@ -246,20 +247,38 @@ public class PlayerHandler implements Listener {
 				if(e.getClickedBlock().getType() == Material.SIGN_POST || e.getClickedBlock().getType() == Material.WALL_SIGN) {
 					Sign s = (Sign) e.getClickedBlock().getState();
 					if(s.getLine(0).contains("§6§l[§4§l")) {
-						Arena a = ArenaManager.getArena(s.getLine(1));
-						if(getPlayer(p.getPlayerListName()).getLevel() >= a.getMinimumLevel()) {
-							if(a.isActive() && (a.getCurrentPlayers().size() < a.getMaxPlayers())) {
-								p.teleport(a.getLobbyLocation());
-								getPlayer(p.getPlayerListName()).setPlaying(true);
-								getPlayer(p.getPlayerListName()).setCurrentArena(a.getName());
-								a.addPlayer(p);
-								p.getInventory().setItem(4, getKitSelectCompass());
-								p.getInventory().setHeldItemSlot(4);
+						 if(s.getLine(0).equals("§6§l[§4§lDUEL§6§l]")) {
+							Arena a = ArenaManager.getDuelArena();
+							if(getPlayer(p.getPlayerListName()).getLevel() >= a.getMinimumLevel()) {
+								if(a.isActive() && (a.getCurrentPlayers().size() < a.getMaxPlayers())) {
+									p.teleport(a.getLobbyLocation());
+									getPlayer(p.getPlayerListName()).setPlaying(true);
+									getPlayer(p.getPlayerListName()).setCurrentArena(a.getName());
+									a.addPlayer(p);
+									p.getInventory().setItem(4, getKitSelectCompass());
+									p.getInventory().setHeldItemSlot(4);
+								} else {
+									p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is disabled.");
+								}
 							} else {
-								p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is disabled.");
+								p.sendMessage(ChatColor.RED + "You can't join this arena. You need to be atleast level " + ChatColor.DARK_RED + a.getMinimumLevel() + ChatColor.RED + ".");
 							}
 						} else {
-							p.sendMessage(ChatColor.RED + "You can't join this arena. You need to be atleast level " + ChatColor.DARK_RED + a.getMinimumLevel() + ChatColor.RED + ".");
+							Arena a = ArenaManager.getArena(s.getLine(1));
+							if(getPlayer(p.getPlayerListName()).getLevel() >= a.getMinimumLevel()) {
+								if(a.isActive() && (a.getCurrentPlayers().size() < a.getMaxPlayers())) {
+									p.teleport(a.getLobbyLocation());
+									getPlayer(p.getPlayerListName()).setPlaying(true);
+									getPlayer(p.getPlayerListName()).setCurrentArena(a.getName());
+									a.addPlayer(p);
+									p.getInventory().setItem(4, getKitSelectCompass());
+									p.getInventory().setHeldItemSlot(4);
+								} else {
+									p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is disabled.");
+								}
+							} else {
+								p.sendMessage(ChatColor.RED + "You can't join this arena. You need to be atleast level " + ChatColor.DARK_RED + a.getMinimumLevel() + ChatColor.RED + ".");
+							}
 						}
 					} else if(s.getLine(0).contains("§3§l[§2§l")) {
 						Arena a = ArenaManager.getArena(s.getLine(2));

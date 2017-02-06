@@ -106,7 +106,7 @@ public class ArenaManager implements Listener {
 			ItemStack spawn = new ItemStack(Material.DIRT, 1);
 			ItemMeta sMeta = (ItemMeta) spawn.getItemMeta();
 			sMeta.setDisplayName(ChatColor.GREEN + "Spawn " + (count + 1));
-			sMeta.setLore(Arrays.asList("§r§fX: " + a.getSpawn(count).getBlockX(), "§r§fY: " + a.getSpawn(count).getBlockY(), "§r§fZ: " + a.getSpawn(count).getBlockZ(), "§r§fMax spawns: " + a.getSpawnCount(a.getSpawn(count)), "§r§fSpawn index: " + a.getSpawnIndex(count), "§r§fTeam: " + a.getSpawnTeam(a.getSpawn(count))));
+			sMeta.setLore(Arrays.asList("§r§fX: " + a.getSpawn(count).getBlockX(), "§r§fY: " + a.getSpawn(count).getBlockY(), "§r§fZ: " + a.getSpawn(count).getBlockZ(), "§r§fMax spawns: " + a.getSpawnCount(a.getSpawn(count)), "§r§fSpawn index: " + a.getSpawnIndex(count)));
 			spawn.setItemMeta(sMeta);
 			wInv.setItem(count, spawn);
 		}
@@ -258,48 +258,64 @@ public class ArenaManager implements Listener {
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		if(e.getInventory().getName().contains("Arena") || e.getInventory().getName().contains("arena")) {
-			if(e.getCurrentItem().getType() != Material.AIR) {
-				e.setCancelled(true);
-				Arena a = null;
-				if(e.getInventory().getName().contains("Arena")) {
-					a = getArena(e.getInventory().getName().split(" ")[1]);
-				} else {
-					a = getArena(e.getInventory().getName().split(" ")[3]);
-				}
-				if(e.getCurrentItem().getType() == Material.STAINED_GLASS_PANE) {
-					if(e.getCurrentItem().getDurability() == (short) 5) {
-						ItemStack disabled = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
-						ItemMeta dMeta = (ItemMeta) disabled.getItemMeta();
-						dMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + a.getName() + ChatColor.DARK_PURPLE + " is " + ChatColor.RED + "disabled" + ChatColor.DARK_PURPLE + ".");;
-						disabled.setItemMeta(dMeta);
-						e.setCurrentItem(disabled);
-						
-						a.setActive(false);
+			if(e.getCurrentItem() != null) {
+				if(e.getCurrentItem().getType() != Material.AIR) {
+					e.setCancelled(true);
+					Arena a = null;
+					if(e.getInventory().getName().contains("Arena")) {
+						a = getArena(e.getInventory().getName().split(" ")[1]);
 					} else {
-						ItemStack active = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5);
-						ItemMeta aMeta = (ItemMeta) active.getItemMeta();
-						aMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + a.getName() + ChatColor.DARK_PURPLE + " is " + ChatColor.GREEN + "active" + ChatColor.DARK_PURPLE + ".");;
-						active.setItemMeta(aMeta);
-						e.setCurrentItem(active);
-						
-						a.setActive(true);
+						a = getArena(e.getInventory().getName().split(" ")[3]);
 					}
-				} else if(e.getCurrentItem().getType() == Material.GRASS) {
-					e.getWhoClicked().closeInventory();
-					e.getWhoClicked().openInventory(getWorldInventory(a));
-				} else if(e.getCurrentItem().getType() == Material.SKULL_ITEM) {
-					e.getWhoClicked().closeInventory();
-					e.getWhoClicked().openInventory(getPlayerInventory(a));
-				} else if(e.getCurrentItem().getType() == Material.BOOK) {
-					e.getWhoClicked().closeInventory();
-					e.getWhoClicked().openInventory(getInventory(a));
-				} else if(e.getCurrentItem().getType() == Material.DIRT) {
-					e.getWhoClicked().closeInventory();
-					List<String> lore = e.getCurrentItem().getItemMeta().getLore();
-					Location tpLoc = new Location(e.getWhoClicked().getLocation().getWorld(), Integer.parseInt(lore.get(0).split(" ")[1]), Integer.parseInt(lore.get(1).split(" ")[1]), Integer.parseInt(lore.get(2).split(" ")[1]));
-					e.getWhoClicked().teleport(tpLoc);
+					if(e.getCurrentItem().getType() == Material.STAINED_GLASS_PANE) {
+						if(e.getCurrentItem().getDurability() == (short) 5) {
+							ItemStack disabled = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
+							ItemMeta dMeta = (ItemMeta) disabled.getItemMeta();
+							dMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + a.getName() + ChatColor.DARK_PURPLE + " is " + ChatColor.RED + "disabled" + ChatColor.DARK_PURPLE + ".");;
+							disabled.setItemMeta(dMeta);
+							e.setCurrentItem(disabled);
+							
+							a.setActive(false);
+						} else {
+							ItemStack active = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5);
+							ItemMeta aMeta = (ItemMeta) active.getItemMeta();
+							aMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + a.getName() + ChatColor.DARK_PURPLE + " is " + ChatColor.GREEN + "active" + ChatColor.DARK_PURPLE + ".");;
+							active.setItemMeta(aMeta);
+							e.setCurrentItem(active);
+							
+							a.setActive(true);
+						}
+					} else if(e.getCurrentItem().getType() == Material.GRASS) {
+						e.getWhoClicked().closeInventory();
+						e.getWhoClicked().openInventory(getWorldInventory(a));
+					} else if(e.getCurrentItem().getType() == Material.SKULL_ITEM) {
+						e.getWhoClicked().closeInventory();
+						e.getWhoClicked().openInventory(getPlayerInventory(a));
+					} else if(e.getCurrentItem().getType() == Material.BOOK) {
+						e.getWhoClicked().closeInventory();
+						e.getWhoClicked().openInventory(getInventory(a));
+					} else if(e.getCurrentItem().getType() == Material.DIRT) {
+						e.getWhoClicked().closeInventory();
+						List<String> lore = e.getCurrentItem().getItemMeta().getLore();
+						Location tpLoc = new Location(e.getWhoClicked().getLocation().getWorld(), Integer.parseInt(lore.get(0).split(" ")[1]), Integer.parseInt(lore.get(1).split(" ")[1]), Integer.parseInt(lore.get(2).split(" ")[1]));
+						e.getWhoClicked().teleport(tpLoc);
+					}
 				}
 			}
 		}
+	}
+	
+	public static Arena getDuelArena() {
+		for(Arena a : getArenas()) {
+			if(a.getType() == GameType.DUEL && a.getCurrentPlayers().size() == 1) {
+				return a;
+			}
+			
+			if(a.getType() == GameType.DUEL && a.getCurrentPlayers().size() == 0) {
+				return a;
+			}
+		}
+		
+		return null;
 	}
 }

@@ -113,10 +113,10 @@ public class Scoresboard {
 		Score empty1 = show.getScore("   ");
 		empty1.setScore(9);
 
-		Score yourDeaths = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your deaths: ");
-		yourDeaths.setScore(8);
+		Score yourDeaths = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your deaths:");
+		yourDeaths.setScore(8); 
 
-		Score deaths = show.getScore("" + ChatColor.RED + PlayerHandler.getPlayer(p.getPlayerListName()).getDeaths());
+		Score deaths = show.getScore("" + ChatColor.RED + PlayerHandler.getPlayer(p.getPlayerListName()).getDeaths() + ChatColor.WHITE);
 		deaths.setScore(7);
 
 		Score empty2 = show.getScore("    ");
@@ -137,7 +137,7 @@ public class Scoresboard {
 		Score level = show.getScore("" + ChatColor.AQUA + PlayerHandler.getPlayer(p.getPlayerListName()).getLevel());
 		level.setScore(1);
 		
-		Score empty4 = show.getScore("        ");
+		Score empty4 = show.getScore("            ");
 		empty4.setScore(0);
 
 		p.setScoreboard(board);

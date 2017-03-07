@@ -159,6 +159,7 @@ public class ConfigDataManager {
 	
 	public static void getPlayerDataFromServer(Player p, AKitsMain plugin) {
 		if(CustomConfigHandler.getPlayers(plugin).getConfigurationSection("players") != null) {
+			String channel = plugin.getConfig().getString("default-channel");
 			if(CustomConfigHandler.getPlayers(plugin).getConfigurationSection("players").getKeys(false).contains(p.getPlayerListName())) {
 				String player = p.getPlayerListName();
 				int kills = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".kills");
@@ -166,13 +167,27 @@ public class ConfigDataManager {
 				int points = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".points");
 				int level = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".level");
 				
-				PlayerHandler.inputData(p, kills, deaths, points, level);
+				PlayerHandler.inputData(p, kills, deaths, points, level, channel);
 			} else {
-				PlayerHandler.inputData(p, 0, 0, 0, 0);
+				PlayerHandler.inputData(p, 0, 0, 0, 0, channel);
 			}
 		} else {
 			AKitsMain.log.warning("[AdvancedKits] No player data was found in the on-server storage.");
 		}
+	}
+	
+	
+	public static void savePlayer(GamePlayer p, AKitsMain plugin) {
+		Player player = p.getPlayer();
+		CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".kills", p.getKills());
+		CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".deaths", p.getDeaths());
+		CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".points", p.getPoints());
+		CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".level", p.getLevel());
+		
+		CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".kills", p.getKills());
+		CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".deaths", p.getDeaths());
+		CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".points", p.getPoints());
+		CustomConfigHandler.getPlayers(plugin).addDefault("players." + player.getPlayerListName() + ".level", p.getLevel());
 	}
 	
 	public static void saveDataToServer(AKitsMain plugin) {
@@ -236,8 +251,8 @@ public class ConfigDataManager {
 				for(String kitSetName : CustomConfigHandler.getArenas(plugin).getConfigurationSection("sets").getKeys(false)) {
 					ArrayList<Kit> kits = new ArrayList<Kit>();
 					for(String kit : CustomConfigHandler.getArenas(plugin).getStringList("sets." + kitSetName)) {
-						if(KitManager.isKit(kit)) {
-							kits.add(KitManager.getKit(kit));
+						if(KitManager.isKit(kit.replaceAll("_", " "))) {
+							kits.add(KitManager.getKit(kit.replaceAll("_", " ")));
 						} else if(kit.equalsIgnoreCase("all")) {
 							kits.addAll(KitManager.getAllKits());
 						} else {
@@ -311,7 +326,7 @@ public class ConfigDataManager {
 		for(Entry<String, ArrayList<Kit>> sets : KitSet.getSets().entrySet()) {
 			ArrayList<String> kitNames = new ArrayList<String>();
 			for(Kit k : sets.getValue()) {
-				kitNames.add(k.getName());
+				kitNames.add(k.getName().replaceAll(" ", "_"));
 			}
 			CustomConfigHandler.getArenas(plugin).set("sets." + sets.getKey(), kitNames);
 			

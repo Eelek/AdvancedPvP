@@ -46,13 +46,13 @@ public class KitManager implements Listener {
 		if(a.getType() == GameType.FFA_RANK) {
 			Inventory kitSelect = plugin.getServer().createInventory(null, 45, "Select your kit.");
 			
-			for(Kit k : kits) {
+			for(Kit k : KitSet.getSet(a.getKitSetName())) {
 				ItemStack display = k.getDisplayItem();
 				ItemMeta dMeta = display.getItemMeta();
 				if(PlayerHandler.getPlayer(p.getPlayerListName()).getLevel() >= k.getMinimumLevel()) {
-					dMeta.setLore(Arrays.asList("§r§fYou need atleast level", "§r§a" + k.getMinimumLevel() + "§f."));
+					dMeta.setLore(Arrays.asList("§r§fYou need atleast level", "§r§a" + k.getMinimumLevel() + "§f.", "§r§fUse left click to select.", "§r§fUse right click to preview kit."));
 				} else {
-					dMeta.setLore(Arrays.asList("§r§fYou need atleast level", "§r§4" + k.getMinimumLevel() + "§f."));
+					dMeta.setLore(Arrays.asList("§r§fYou need atleast level", "§r§4" + k.getMinimumLevel() + "§f.", "§r§fUse left click to select.", "§r§fUse right click to preview kit."));
 				}
 				display.setItemMeta(dMeta);
 				kitSelect.addItem(display);
@@ -62,8 +62,16 @@ public class KitManager implements Listener {
 		} else {
 			Inventory kitSelect = plugin.getServer().createInventory(null, 45, "Select your kit.");
 			
-			for(Kit k : kits) {
-				kitSelect.addItem(k.getDisplayItem());
+			for(Kit k : KitSet.getSet(a.getKitSetName())) {
+				ItemStack display = k.getDisplayItem();
+				ItemMeta dMeta = display.getItemMeta();
+				if(PlayerHandler.getPlayer(p.getPlayerListName()).getLevel() >= k.getMinimumLevel()) {
+					dMeta.setLore(Arrays.asList("§r§fUse left click to select.", "§r§fUse right click to preview kit."));
+				} else {
+					dMeta.setLore(Arrays.asList("§r§fUse left click to select.", "§r§fUse right click to preview kit."));
+				}
+				display.setItemMeta(dMeta);
+				kitSelect.addItem(display);
 			}
 			
 			return kitSelect;

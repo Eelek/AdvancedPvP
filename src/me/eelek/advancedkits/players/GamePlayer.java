@@ -15,11 +15,13 @@ public class GamePlayer {
 	
 	private String arena;
 	
+	private String chatChannel;
+	
 	public GamePlayer(Player player) {
 		this.p = player;
 	}
 	
-	public GamePlayer(Player player, int kills, int deaths, int points, int level) {
+	public GamePlayer(Player player, int kills, int deaths, int points, int level, String defaultChannel) {
 		this.p = player;
 		this.kills = kills;
 		this.deaths = deaths;
@@ -29,6 +31,7 @@ public class GamePlayer {
 		this.playing = false;
 		
 		this.arena = "";
+		this.chatChannel = defaultChannel;
 	}
 	
 	public Player getPlayer() {
@@ -61,7 +64,12 @@ public class GamePlayer {
 	}
 	
 	public double calculateKDR() {
-		return kills / deaths;
+		if(deaths == 0 && kills == 0) {
+			return 0;
+		} else {
+			double calc = kills / deaths;
+			return calc;
+		}
 	}
 	
 	public int getLevel() {
@@ -86,6 +94,14 @@ public class GamePlayer {
 	
 	public void setCurrentArena(String a) {
 		this.arena = a;
+	}
+	
+	public String getChatChannel() {
+		return chatChannel;
+	}
+	
+	public void setChatChannel(String c) {
+		this.chatChannel = c;
 	}
 
 }

@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -48,12 +49,12 @@ public class PlayerHandler implements Listener {
 		data.add(gP);
 	}
 	
-	public static void inputData(Player p, int kills, int deaths, int points, int level) {
-		data.add(new GamePlayer(p, kills, deaths, points, level));
+	public static void inputData(Player p, int kills, int deaths, int points, int level, String c) {
+		data.add(new GamePlayer(p, kills, deaths, points, level, c));
 	}
 	
 	public static void removePlayer(Player p) {
-		data.remove(p.getPlayerListName());
+		data.remove(getPlayer(p.getPlayerListName()));
 	}
 	
 	public static ArrayList<GamePlayer> getAllPlayerData() {
@@ -90,9 +91,7 @@ public class PlayerHandler implements Listener {
 				}
 				
 				MySQLConnect.closeConnection();
-			}
-			
-			if(plugin.useConfig()) {
+			} else if(plugin.useConfig()) {
 				ConfigDataManager.getPlayerDataFromServer(e.getPlayer(), plugin);
 			}
 		} else {
@@ -108,21 +107,26 @@ public class PlayerHandler implements Listener {
 				MySQLConnect.closeConnection();
 			} 
 			
-			if(plugin.useConfig()) {
-				inputData(e.getPlayer(), 0, 0, 0, 0);
+			if(plugin.useConfig() && !plugin.useDatabase()) {
+				inputData(e.getPlayer(), 0, 0, 0, 0, plugin.getConfig().getString("default-channel"));
 			}
 		}
 		
 		Scoresboard.setScoreboard(plugin, e.getPlayer());
-		
-		e.getPlayer().setDisplayName(Levels.getLevel(getPlayer(e.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getPlayerListName());
 	}
 	
 	@EventHandler
 	public void playerLeave(PlayerQuitEvent e) {
-		MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
-		SaveData.savePlayerDataToDatabase(getPlayer(e.getPlayer().getPlayerListName()), plugin);
-		MySQLConnect.closeConnection();
+		if(plugin.useDatabase()) {
+			MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
+			SaveData.savePlayerDataToDatabase(getPlayer(e.getPlayer().getPlayerListName()), plugin);
+			MySQLConnect.closeConnection();
+		}
+		
+		if(plugin.useConfig()) {
+			ConfigDataManager.savePlayer(getPlayer(e.getPlayer().getPlayerListName()), plugin);
+		}
+		
 		if(getPlayer(e.getPlayer().getPlayerListName()).isPlaying()) {
 			ArenaManager.getArena(getPlayer(e.getPlayer().getPlayerListName()).getCurrentArena()).removePlayer(e.getPlayer());
 			getPlayer(e.getPlayer().getPlayerListName()).setPlaying(false);
@@ -148,6 +152,8 @@ public class PlayerHandler implements Listener {
 		Player killed = (Player) e.getEntity();
 		Player killer = e.getEntity().getKiller();
 		
+		if(killed.getPlayerListName().equals(killer.getPlayerListName())) return;
+		
 		e.setDeathMessage(null);
 		
 		e.getDrops().clear();
@@ -172,7 +178,7 @@ public class PlayerHandler implements Listener {
 		ArenaManager.getArena(getPlayer(killed.getPlayerListName()).getCurrentArena()).removeSpawnPlayer(killed.getPlayerListName());
 	}
 	
-	@EventHandler
+	@EventHandler (priority = EventPriority.HIGHEST)
 	public void onRespawn(PlayerRespawnEvent e) {
 		e.getPlayer().getInventory().clear();
 		for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
@@ -185,6 +191,29 @@ public class PlayerHandler implements Listener {
 			e.setRespawnLocation(ArenaManager.getArena(getPlayer(e.getPlayer().getPlayerListName()).getCurrentArena()).getLobbyLocation());
 			e.getPlayer().getInventory().setItem(4, getKitSelectCompass());
 			e.getPlayer().getInventory().setHeldItemSlot(4);
+		} else {
+			e.setRespawnLocation(e.getPlayer().getWorld().getSpawnLocation());
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerChat(AsyncPlayerChatEvent e) {
+		String channel = getPlayer(e.getPlayer().getPlayerListName()).getChatChannel();
+		
+		for(Player player : e.getRecipients()) {
+			GamePlayer p = getPlayer(player.getPlayerListName());
+			if(p.getChatChannel().equalsIgnoreCase(channel) || p.getChatChannel().equalsIgnoreCase("staff") || p.getChatChannel().equalsIgnoreCase("staffp")) {
+				if(p.getChatChannel().equalsIgnoreCase("staff") || p.getChatChannel().equalsIgnoreCase("staffp")) {
+					e.setCancelled(true);
+					p.getPlayer().sendMessage(ChatColor.YELLOW + "[" + channel + "] " + Levels.getLevel(getPlayer(e.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
+				} else {
+					e.setCancelled(true);
+					p.getPlayer().sendMessage(Levels.getLevel(getPlayer(e.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
+				}
+			} else if(channel.equalsIgnoreCase("staff")) {
+				e.setCancelled(true);
+				player.sendMessage(Levels.getLevel(getPlayer(e.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
+			}
 		}
 	}
 	
@@ -220,6 +249,10 @@ public class PlayerHandler implements Listener {
 						p.getInventory().clear();
 						for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
 							e.getPlayer().removePotionEffect(pE.getType());
+						}
+						
+						if(!getPlayer(p.getPlayerListName()).getChatChannel().equals("staff")) {
+							getPlayer(p.getPlayerListName()).setChatChannel("lobby");
 						}
 					}
 				}
@@ -257,6 +290,9 @@ public class PlayerHandler implements Listener {
 									a.addPlayer(p);
 									p.getInventory().setItem(4, getKitSelectCompass());
 									p.getInventory().setHeldItemSlot(4);
+									if(!getPlayer(p.getPlayerListName()).getChatChannel().equals("staff")) {
+										getPlayer(p.getPlayerListName()).setChatChannel(a.getName());
+									}									
 								} else {
 									p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is disabled.");
 								}
@@ -273,6 +309,9 @@ public class PlayerHandler implements Listener {
 									a.addPlayer(p);
 									p.getInventory().setItem(4, getKitSelectCompass());
 									p.getInventory().setHeldItemSlot(4);
+									if(!getPlayer(p.getPlayerListName()).getChatChannel().equals("staff")) {
+										getPlayer(p.getPlayerListName()).setChatChannel(a.getName());
+									}
 								} else {
 									p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is disabled.");
 								}
@@ -281,23 +320,10 @@ public class PlayerHandler implements Listener {
 							}
 						}
 					} else if(s.getLine(0).contains("§3§l[§2§l")) {
-						Arena a = ArenaManager.getArena(s.getLine(2));
-						p.teleport(p.getWorld().getSpawnLocation());
-						getPlayer(p.getPlayerListName()).setPlaying(false);
-						getPlayer(p.getPlayerListName()).setCurrentArena(null);
-						a.removePlayer(p);
-						p.getInventory().clear();
-						for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
-							e.getPlayer().removePotionEffect(pE.getType());
-						}
+						p.sendMessage(ChatColor.DARK_RED + "You are not in an arena.");
 					}
 				}
 			}
 		}
-	}
-	
-	@EventHandler
-	public void onChat(AsyncPlayerChatEvent e) {
-		e.setFormat(e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
 	}
 }

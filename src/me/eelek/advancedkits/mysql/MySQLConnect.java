@@ -33,17 +33,19 @@ public class MySQLConnect {
 		}
 	}
 	
-	public static void createTable(String host, String user, String pass, String dbname, String tablename, AKitsMain plugin) {
+	public static boolean createTable(String host, String user, String pass, String dbname, String tablename, AKitsMain plugin) {
 		MySQLConnect.establishMySQLConnection(host, user, pass, dbname);
 		try {
 			PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS `" + plugin.getMySQLData("database") + "`.`" + plugin.getMySQLData("table") + "` ( `player_name` VARCHAR(17) NOT NULL , `player_uuid` VARCHAR(37) NOT NULL , `kills` INT(255) NOT NULL , `deaths` INT(255) NOT NULL , `points` INT(255) NOT NULL );");
 			statement.execute();
-			System.out.println("Made table.");
+			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			closeConnection();
 		}
+		
+		return false;
 	}
 
 }

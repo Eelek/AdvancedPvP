@@ -16,3 +16,6 @@ MySQL-Player-Table:
 #If you're using MySQL, you can still store your files in the AdvancedKits folder, as backup.
 #If you're not using MySQL, no action is required.
 Use-On-Server-Backup: true
+
+#This determines the player´s chat channel when they join.
+default-channel: lobby

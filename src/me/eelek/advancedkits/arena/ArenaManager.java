@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
@@ -19,12 +20,15 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import me.eelek.advancedkits.AKitsMain;
 import me.eelek.advancedkits.arena.GameManager.GameType;
+import me.eelek.advancedkits.utils.AnvilGUI;
 
 public class ArenaManager implements Listener {
 	
 	static ArrayList<Arena> arenas = new ArrayList<Arena>();
 	
 	private static AKitsMain plugin;
+	
+	String arena;
 	
 	public ArenaManager(AKitsMain plugin) {
 		ArenaManager.plugin = plugin;
@@ -89,12 +93,8 @@ public class ArenaManager implements Listener {
 	}
 	
 	public static Inventory getWorldInventory(Arena a) {
-		int size = a.getAmountOfSpawns() / 9;
-		if(size % 10 >= 0.5) {
-			size = (int) Math.ceil(size);
-		} else {
-			size = (int) Math.floor(size);
-		}
+		int size = (int) Math.ceil(a.getAmountOfSpawns() / 9);
+		size = size * 9 + 9;
 		
 		if(size < 9) {
 			size = 18;
@@ -129,7 +129,7 @@ public class ArenaManager implements Listener {
 	
 	public static Inventory getPlayerInventory(Arena a) {
 		int size = a.getMaxPlayers() / 9;
-		if(size % 10 > 0.5) {
+		if(size % 10 >= 0.5) {
 			size = (int) Math.ceil(size);
 		} else {
 			size = (int) Math.floor(size);
@@ -161,12 +161,56 @@ public class ArenaManager implements Listener {
 		return pInv;
 	}
 	
+	public static Inventory getArenasInventory(String searchQuery) {
+		int size = arenas.size() / 9;
+		if(size % 10 >= 0.5) {
+			size = (int) Math.ceil(size);
+		} else {
+			size = (int) Math.floor(size);
+		}
+		
+		if(size < 9) {
+			size = 18;
+		} else if(size >= 54) {
+			size = 45;
+		}
+		
+		Inventory allInv = plugin.getServer().createInventory(null, size, "All the things.");
+		
+		for(Arena a : arenas) {
+			if(a.getName().contains(searchQuery) || searchQuery.equals("all")) {
+				ItemStack arena = new ItemStack(Material.WOOL, 1, a.isActive() ? (short) 5 : (short) 14);
+				ItemMeta aMeta = (ItemMeta) arena.getItemMeta();
+				aMeta.setDisplayName(a.isActive() ? ChatColor.GREEN + a.getName() : ChatColor.RED + a.getName());
+				arena.setItemMeta(aMeta);
+				allInv.addItem(arena);
+			}
+		}
+		
+		ItemStack search = new ItemStack(Material.BOOK_AND_QUILL, 1);
+		ItemMeta sMeta = (ItemMeta) search.getItemMeta();
+		sMeta.setDisplayName(ChatColor.RESET + "Search for an arena.");
+		search.setItemMeta(sMeta);
+		allInv.setItem(allInv.getSize() - 1, search);
+		
+		return allInv;
+	}
+	
 	public static void addArena(Arena arena) {
 		arenas.add(arena);
 	}
 
 	public static ArrayList<Arena> getArenas() {
 		return arenas;
+	}
+	
+	public static ArrayList<String> getArenaNames() {
+		ArrayList<String> r = new ArrayList<String>();
+		for(Arena a : arenas) {
+			r.add(a.getName());
+		}
+		
+		return r;
 	}
 	
 	public static Arena getArena(String name) {
@@ -300,6 +344,29 @@ public class ArenaManager implements Listener {
 						Location tpLoc = new Location(e.getWhoClicked().getLocation().getWorld(), Integer.parseInt(lore.get(0).split(" ")[1]), Integer.parseInt(lore.get(1).split(" ")[1]), Integer.parseInt(lore.get(2).split(" ")[1]));
 						e.getWhoClicked().teleport(tpLoc);
 					}
+				}
+			}
+		} else if(e.getInventory().getName().equals("All the things.")) {
+			if(e.getCurrentItem() != null) {
+				if(e.getCurrentItem().getType() != Material.AIR) {
+					e.setCancelled(true);
+					if(e.getCurrentItem().getType() == Material.BOOK_AND_QUILL) {
+						
+						new AnvilGUI(plugin, (Player) e.getWhoClicked(), new AnvilGUI.AnvilClickHandler() {
+							
+							@Override
+							public boolean onClick(AnvilGUI menu, String text) {
+								arena = text;
+								return true;
+							}
+						}).setInputName("Rename me to search.").open();
+						
+						e.getWhoClicked().openInventory(getArenasInventory(arena));
+					} else {
+						e.getWhoClicked().closeInventory();
+						e.getWhoClicked().openInventory(getInventory(ArenaManager.getArena(e.getCurrentItem().getItemMeta().getDisplayName().substring(2))));
+					}
+					
 				}
 			}
 		}

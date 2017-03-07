@@ -58,8 +58,15 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		//But can be saved in the event of a shutdown when there are still players online.
 		
 		//Create table if not exist
-		MySQLConnect.createTable(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"), getMySQLData("table"), this);
-		log.info("[AdvancedKits] Succesfully connected to database.");
+		if(useDatabase()) {
+			if(getConfig().getString("MySQL-Host") != null && getConfig().getString("MySQL-Port") != null && getConfig().getString("MySQL-DB_Name") != null && getConfig().getString("MySQL-Password") != null && getConfig().getString("MySQL-Player-Table") != null) {
+				if(MySQLConnect.createTable(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"), getMySQLData("table"), this)) {
+					log.info("[AdvancedKits] Successfuly connected to the database.");
+				} else {
+					log.warning("[AdvancedKits] No database info was found in the config.");
+				}
+			}
+		}
 		
 		//Register Events
 		getServer().getPluginManager().registerEvents(new PlayerHandler(this), this);

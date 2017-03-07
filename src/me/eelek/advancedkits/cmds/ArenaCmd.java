@@ -23,9 +23,11 @@ public class ArenaCmd implements CommandExecutor {
 					if (args.length == 0) {
 						p.sendMessage(ChatColor.GOLD + "----------" + ChatColor.DARK_GREEN + "< Arena Help Menu >" + ChatColor.GOLD + "----------");
 						p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena help " + ChatColor.GRAY + "opens this.");
-						p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena info " + ChatColor.GRAY + "see the arena info.");
 						if(p.hasPermission("bluecraft.kits.managearena")) {
+							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena info " + ChatColor.GRAY + "see the arena info.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena inspect " + ChatColor.GRAY + "inspect and open an arena.");
+							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena list " + ChatColor.GRAY + "get a list (and search through) all the arenas.");
+							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena create <arena> " + ChatColor.GRAY + "create an arena.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena select spawns <arena> " + ChatColor.GRAY + "select the arena spawns.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena select lobby <arena>  " + ChatColor.GRAY + "select the arena lobby location.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena <arena> set maxplayers <maxplayers> " + ChatColor.GRAY + "set the arena's maximum players.");
@@ -35,32 +37,42 @@ public class ArenaCmd implements CommandExecutor {
 						if (args[0].equalsIgnoreCase("help")) {
 							p.sendMessage(ChatColor.GOLD + "----------" + ChatColor.DARK_GREEN + "< Arena Help Menu >" + ChatColor.GOLD + "----------");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena help " + ChatColor.GRAY + "opens this.");
-							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena info " + ChatColor.GRAY + "see the arena info.");
 							if(p.hasPermission("bluecraft.kits.managearena")) {
+								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena info " + ChatColor.GRAY + "see the arena info.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena inspect " + ChatColor.GRAY + "inspect and open an arena.");
+								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena list " + ChatColor.GRAY + "get a list (and search through) all the arenas.");
+								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena create <arena> " + ChatColor.GRAY + "create an arena.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena select spawns <arena> " + ChatColor.GRAY + "select the arena spawns.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena select lobby <arena>  " + ChatColor.GRAY + "select the arena lobby location.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena <arena> set maxplayers <maxplayers> " + ChatColor.GRAY + "set the arena's maximum players.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena <arena> set level <level> " + ChatColor.GRAY + "set the arena's minimum level.");
 							}
+						} else if(args[0].equalsIgnoreCase("list")) {
+							if(p.hasPermission("bluecraft.kits.managearena")) {
+								p.openInventory(ArenaManager.getArenasInventory("all"));
+							} else {
+								p.sendMessage(ChatColor.RED + "Use /arena help");
+							}
 						}
 					} else if (args.length == 2) {
 						if (args[0].equalsIgnoreCase("info")) {
 							if (ArenaManager.isArena(args[1])) {
-								Arena a = ArenaManager.getArena(args[1]);
-								p.sendMessage(ChatColor.GOLD + "Info for arena " + ChatColor.RED + args[1]);
-								p.sendMessage(ChatColor.BLUE + "Name: " + ChatColor.AQUA + a.getName());
-								p.sendMessage(ChatColor.BLUE + "Max Players: " + ChatColor.AQUA + a.getMaxPlayers());
-								p.sendMessage(ChatColor.BLUE + "Level: " + ChatColor.AQUA + a.getMinimumLevel());
-								if (a.getAmountOfSpawns() != 0) {
-									p.sendMessage(ChatColor.BLUE + "Spawns: " + ChatColor.AQUA + a.getAmountOfSpawns());
-								} else {
-									p.sendMessage(ChatColor.BLUE + "Spawns: " + ChatColor.AQUA + "0");
+								if(p.hasPermission("bluecraft.staff")) {
+									Arena a = ArenaManager.getArena(args[1]);
+									p.sendMessage(ChatColor.GOLD + "Info for arena " + ChatColor.RED + args[1]);
+									p.sendMessage(ChatColor.BLUE + "Name: " + ChatColor.AQUA + a.getName());
+									p.sendMessage(ChatColor.BLUE + "Max Players: " + ChatColor.AQUA + a.getMaxPlayers());
+									p.sendMessage(ChatColor.BLUE + "Level: " + ChatColor.AQUA + a.getMinimumLevel());
+									if (a.getAmountOfSpawns() != 0) {
+										p.sendMessage(ChatColor.BLUE + "Spawns: " + ChatColor.AQUA + a.getAmountOfSpawns());
+									} else {
+										p.sendMessage(ChatColor.BLUE + "Spawns: " + ChatColor.AQUA + "0");
+									}
+									p.sendMessage(ChatColor.BLUE + "Active: " + ChatColor.AQUA + a.isActive());
+									p.sendMessage(ChatColor.BLUE + "Current Players: " + ChatColor.AQUA + a.getCurrentPlayers().size());
+									p.sendMessage(ChatColor.BLUE + "Kit set: " + ChatColor.AQUA + a.getKitSetName());
+									p.sendMessage(ChatColor.BLUE + "Gametype: " + ChatColor.AQUA + a.getType().toString());
 								}
-								p.sendMessage(ChatColor.BLUE + "Active: " + ChatColor.AQUA + a.isActive());
-								p.sendMessage(ChatColor.BLUE + "Current Players: " + ChatColor.AQUA + a.getCurrentPlayers().size());
-								p.sendMessage(ChatColor.BLUE + "Kit set: " + ChatColor.AQUA + a.getKitSetName());
-								p.sendMessage(ChatColor.BLUE + "Gametype: " + ChatColor.AQUA + a.getType().toString());
 							}
 						} else if (args[0].equalsIgnoreCase("inspect")) {
 							if(p.hasPermission("bluecraft.kits.managearena")) {
@@ -72,7 +84,12 @@ public class ArenaCmd implements CommandExecutor {
 							} else {
 								p.sendMessage(ChatColor.RED + "Use /arena help");
 							}
-						} 
+						} else if(args[0].equalsIgnoreCase("create")) {
+							if(!args[1].isEmpty()) {
+								ArenaManager.addArena(new Arena(args[1], p.getWorld(), 0, 0));
+								p.sendMessage(ChatColor.BLUE + "Arena " + ChatColor.AQUA + args[1] + ChatColor.BLUE + " has been created.\nPlease specify the spawns, the lobby location, the max players and the level.");
+							}
+						}
 					} else if (args.length == 3) {
 						if(p.hasPermission("bluecraft.kits.managearena")) {
 							if (args[0].equalsIgnoreCase("select")) {
@@ -87,7 +104,7 @@ public class ArenaCmd implements CommandExecutor {
 											p.getInventory().addItem(giveLobbyAxe(args[2]));
 											p.sendMessage(ChatColor.BLUE + "Select the " + ChatColor.GOLD + "lobby " + ChatColor.BLUE + "of arena " + ChatColor.AQUA + args[2] + ChatColor.BLUE + ".");
 										} else {
-											p.sendMessage(ChatColor.DARK_RED + args[1] + ChatColor.RED +  " already has a lobby.");
+											p.sendMessage(ChatColor.DARK_RED + args[2] + ChatColor.RED +  " already has a lobby.");
 										}
 									} else {
 										p.sendMessage(ChatColor.DARK_RED + args[1] + ChatColor.RED +  " isn't an arena.");

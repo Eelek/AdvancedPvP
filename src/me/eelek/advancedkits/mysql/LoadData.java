@@ -52,7 +52,7 @@ public class LoadData {
 		try {
 			PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("INSERT INTO `" + plugin.getMySQLData("table") + "` values(?,?,0,0,0,0);");
 			statement.setString(1, p.getPlayerListName());
-			statement.setString(2, PlayerHandler.getUUID(p).toString());
+			statement.setString(2, PlayerHandler.getInstance().getUUID(p).toString());
 			statement.execute();
 			statement.close();
 		} catch (Exception e) {

@@ -18,7 +18,7 @@ public class SaveData {
 			statement.setInt(3, p.getPoints());
 			statement.setInt(4, p.getLevel());
 			statement.setString(5, p.getPlayer().getPlayerListName());
-			statement.setString(6, PlayerHandler.getUUID(p.getPlayer()).toString());
+			statement.setString(6, PlayerHandler.getInstance().getUUID(p.getPlayer()).toString());
 			statement.execute();
 			statement.close();
 		} catch (Exception e) {
@@ -28,7 +28,7 @@ public class SaveData {
 	
 	public static void updateOnDisable(AKitsMain plugin) {
 		for(Player p : plugin.getServer().getOnlinePlayers()) {
-			GamePlayer player = PlayerHandler.getPlayer(p.getPlayerListName());
+			GamePlayer player = PlayerHandler.getInstance().getPlayer(p.getPlayerListName());
 			try {
 				PreparedStatement statement = MySQLConnect.getConnection().prepareStatement("UPDATE `" + plugin.getMySQLData("table") + "`  SET kills = ?, deaths = ?, points = ?, level = ? WHERE player_name = ? AND player_uuid = ?;");
 				statement.setInt(1, player.getKills());
@@ -36,7 +36,7 @@ public class SaveData {
 				statement.setInt(3, player.getPoints());
 				statement.setInt(4, player.getLevel());
 				statement.setString(5, p.getPlayer().getPlayerListName());
-				statement.setString(6, PlayerHandler.getUUID(p.getPlayer()).toString());
+				statement.setString(6, PlayerHandler.getInstance().getUUID(p.getPlayer()).toString());
 				statement.execute();
 				statement.close();
 			} catch (Exception e) {

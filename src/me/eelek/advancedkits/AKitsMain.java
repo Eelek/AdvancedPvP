@@ -17,7 +17,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	
 	public static Logger log;
 	
-	//This is Advanced Kits version: 6.0
+	//This is Advanced Kits version: 7.0
 	
 	@Override
 	public void onEnable() {
@@ -69,9 +69,9 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		}
 		
 		//Register Events
-		getServer().getPluginManager().registerEvents(new PlayerHandler(this), this);
-		getServer().getPluginManager().registerEvents(new KitManager(this), this);
-		getServer().getPluginManager().registerEvents(new ArenaManager(this), this);
+		getServer().getPluginManager().registerEvents(PlayerHandler.getInstance(), this);
+		getServer().getPluginManager().registerEvents(KitManager.getInstance(), this);
+		getServer().getPluginManager().registerEvents(ArenaManager.getInstance(), this);
 	}
 	
 	@Override

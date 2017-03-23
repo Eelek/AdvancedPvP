@@ -6,9 +6,24 @@ import org.bukkit.ChatColor;
 
 public class Levels {
 	
-	static ArrayList<Level> levels = new ArrayList<Level>();
+	ArrayList<Level> levels = new ArrayList<Level>();
 	
-	public static Level getLevel(int level) {
+	private static Levels instance;
+	
+	protected Levels() {
+		
+	}
+	
+	public static Levels getInstance() {
+		if(instance == null) {
+			instance = new Levels();
+		}
+		
+		return instance;
+	}
+	
+	
+	Level getLevel(int level) {
 		for(Level l : levels) {
 			if(l.getLevel() == level) {
 				return l;
@@ -18,19 +33,19 @@ public class Levels {
 		return null;
 	}
 	
-	public static void addLevel(int level, int minimun, String prefix) {
+	public void addLevel(int level, int minimun, String prefix) {
 		levels.add(new Level(level, minimun, prefix));
 	}
 	
-	public static void removeLevel(int level) {
+	void removeLevel(int level) {
 		levels.remove(getLevel(level));
 	}
 	
-	public static void levelUp(GamePlayer p) {
+	void levelUp(GamePlayer p) {
 		if(p.getKills() >= getLevel(p.getLevel() + 1).getMinimunKills()) {
 			p.levelUp();
 			p.getPlayer().sendMessage(ChatColor.BLUE + "You have ranked up!");
-			p.getPlayer().setDisplayName(Levels.getLevel(PlayerHandler.getPlayer(p.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + p.getPlayer().getPlayerListName());
+			p.getPlayer().setDisplayName(getLevel(PlayerHandler.getInstance().getPlayer(p.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + p.getPlayer().getPlayerListName());
 		}
 	}
 

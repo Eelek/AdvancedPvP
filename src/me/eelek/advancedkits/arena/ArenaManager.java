@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,18 +25,27 @@ import me.eelek.advancedkits.utils.AnvilGUI;
 
 public class ArenaManager implements Listener {
 	
-	static ArrayList<Arena> arenas = new ArrayList<Arena>();
+	private static ArenaManager instance = null;
 	
-	private static AKitsMain plugin;
+	private ArrayList<Arena> arenas = new ArrayList<Arena>();
 	
 	String arena;
 	
-	public ArenaManager(AKitsMain plugin) {
-		ArenaManager.plugin = plugin;
+	protected ArenaManager() {
+		
+	}
+	
+	//Singleton
+	public static ArenaManager getInstance() {
+		if(instance == null) {
+			instance = new ArenaManager();
+		}
+		
+		return instance;
 	}
 
-	public static Inventory getInventory(Arena a) {
-		Inventory inv = plugin.getServer().createInventory(null, 27, "Arena " + a.getName());
+	public Inventory getInventory(Arena a) {
+		Inventory inv = Bukkit.getServer().createInventory(null, 27, "Arena " + a.getName());
 		
 		ItemStack type = new ItemStack(Material.EMPTY_MAP, 1);
 		ItemMeta tMeta = (ItemMeta) type.getItemMeta();
@@ -92,7 +102,7 @@ public class ArenaManager implements Listener {
 		return inv;
 	}
 	
-	public static Inventory getWorldInventory(Arena a) {
+	Inventory getWorldInventory(Arena a) {
 		int size = (int) Math.ceil(a.getAmountOfSpawns() / 9);
 		size = size * 9 + 9;
 		
@@ -100,7 +110,7 @@ public class ArenaManager implements Listener {
 			size = 18;
 		}
 		
-		Inventory wInv = plugin.getServer().createInventory(null, size, "Spawns in arena " + a.getName());
+		Inventory wInv = Bukkit.getServer().createInventory(null, size, "Spawns in arena " + a.getName());
 		
 		for(int count = 0; count < a.getAmountOfSpawns(); count++) {
 			ItemStack spawn = new ItemStack(Material.DIRT, 1);
@@ -127,7 +137,7 @@ public class ArenaManager implements Listener {
 		return wInv;
 	}
 	
-	public static Inventory getPlayerInventory(Arena a) {
+	Inventory getPlayerInventory(Arena a) {
 		int size = a.getMaxPlayers() / 9;
 		if(size % 10 >= 0.5) {
 			size = (int) Math.ceil(size);
@@ -139,7 +149,7 @@ public class ArenaManager implements Listener {
 			size = 18;
 		}
 		
-		Inventory pInv = plugin.getServer().createInventory(null, size, "Players in arena " + a.getName());
+		Inventory pInv = Bukkit.getServer().createInventory(null, size, "Players in arena " + a.getName());
 		
 		if(a.getCurrentPlayers() != null) {
 			for(String p : a.getCurrentPlayers()) {
@@ -161,7 +171,7 @@ public class ArenaManager implements Listener {
 		return pInv;
 	}
 	
-	public static Inventory getArenasInventory(String searchQuery) {
+	public Inventory getArenasInventory(String searchQuery) {
 		int size = arenas.size() / 9;
 		if(size % 10 >= 0.5) {
 			size = (int) Math.ceil(size);
@@ -175,7 +185,7 @@ public class ArenaManager implements Listener {
 			size = 45;
 		}
 		
-		Inventory allInv = plugin.getServer().createInventory(null, size, "All the things.");
+		Inventory allInv = Bukkit.getServer().createInventory(null, size, "All the things.");
 		
 		for(Arena a : arenas) {
 			if(a.getName().contains(searchQuery) || searchQuery.equals("all")) {
@@ -196,15 +206,15 @@ public class ArenaManager implements Listener {
 		return allInv;
 	}
 	
-	public static void addArena(Arena arena) {
+	public void addArena(Arena arena) {
 		arenas.add(arena);
 	}
 
-	public static ArrayList<Arena> getArenas() {
+	public ArrayList<Arena> getArenas() {
 		return arenas;
 	}
 	
-	public static ArrayList<String> getArenaNames() {
+	public ArrayList<String> getArenaNames() {
 		ArrayList<String> r = new ArrayList<String>();
 		for(Arena a : arenas) {
 			r.add(a.getName());
@@ -213,7 +223,7 @@ public class ArenaManager implements Listener {
 		return r;
 	}
 	
-	public static Arena getArena(String name) {
+	public Arena getArena(String name) {
 		for(Arena m : arenas) {
 			if(m.getName().equals(name)) {
 				return m;
@@ -223,11 +233,11 @@ public class ArenaManager implements Listener {
 		return null;
 	}
 	
-	public static void removeMap(String name) {
+	void removeMap(String name) {
 		arenas.remove(getArena(name));
 	}
 	
-	public static boolean isArena(String name) {
+	public boolean isArena(String name) {
 		boolean r = false;
 		
 		for(Arena a : arenas) {
@@ -240,7 +250,7 @@ public class ArenaManager implements Listener {
 	}
 	
 	@EventHandler
-	public void onSignChange(SignChangeEvent e) {
+	void onSignChange(SignChangeEvent e) {
 		if(e.getLine(0).equals("[arena]")) {
 			if(e.getLine(1).equals("join")) {
 				if(isArena(e.getLine(2))) {
@@ -300,7 +310,7 @@ public class ArenaManager implements Listener {
 	}
 	
 	@EventHandler
-	public void onInventoryClick(InventoryClickEvent e) {
+	void onInventoryClick(InventoryClickEvent e) {
 		if(e.getInventory().getName().contains("Arena") || e.getInventory().getName().contains("arena")) {
 			if(e.getCurrentItem() != null) {
 				if(e.getCurrentItem().getType() != Material.AIR) {
@@ -352,7 +362,7 @@ public class ArenaManager implements Listener {
 					e.setCancelled(true);
 					if(e.getCurrentItem().getType() == Material.BOOK_AND_QUILL) {
 						
-						new AnvilGUI(plugin, (Player) e.getWhoClicked(), new AnvilGUI.AnvilClickHandler() {
+						new AnvilGUI(AKitsMain.getPlugin(AKitsMain.class), (Player) e.getWhoClicked(), new AnvilGUI.AnvilClickHandler() {
 							
 							@Override
 							public boolean onClick(AnvilGUI menu, String text) {
@@ -364,7 +374,7 @@ public class ArenaManager implements Listener {
 						e.getWhoClicked().openInventory(getArenasInventory(arena));
 					} else {
 						e.getWhoClicked().closeInventory();
-						e.getWhoClicked().openInventory(getInventory(ArenaManager.getArena(e.getCurrentItem().getItemMeta().getDisplayName().substring(2))));
+						e.getWhoClicked().openInventory(getInventory(getArena(e.getCurrentItem().getItemMeta().getDisplayName().substring(2))));
 					}
 					
 				}
@@ -372,7 +382,7 @@ public class ArenaManager implements Listener {
 		}
 	}
 	
-	public static Arena getDuelArena() {
+	public Arena getDuelArena() {
 		for(Arena a : getArenas()) {
 			if(a.getType() == GameType.DUEL && a.getCurrentPlayers().size() == 1) {
 				return a;

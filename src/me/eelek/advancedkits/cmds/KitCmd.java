@@ -24,7 +24,7 @@ public class KitCmd implements CommandExecutor {
 					if(args[0].equalsIgnoreCase("list")) {
 						if(p.hasPermission("bluecraft.staff")) {
 							p.sendMessage(ChatColor.GOLD + "[" + ChatColor.DARK_GREEN + "Advanced Kits" + ChatColor.GOLD + "] " + ChatColor.BLUE + "Possible kits:");
-							for(Kit kit : KitManager.getAllKits()) {
+							for(Kit kit : KitManager.getInstance().getAllKits()) {
 								p.sendMessage(ChatColor.GOLD + "- " + ChatColor.GREEN + kit.getName());
 							}
 						} else {
@@ -49,9 +49,9 @@ public class KitCmd implements CommandExecutor {
 						p.setHealth(20.0);
 						p.sendMessage(ChatColor.GOLD + "[" + ChatColor.DARK_GREEN + "Advanced Kits" + ChatColor.GOLD + "] " + ChatColor.BLUE + "You have been " + ChatColor.AQUA + "healed" + ChatColor.BLUE + ".");
 					} else if(args[0].equalsIgnoreCase("channel")) {
-						p.sendMessage(ChatColor.RED  + PlayerHandler.getPlayer(p.getPlayerListName()).getChatChannel() + ChatColor.GOLD + " is your current channel.");
+						p.sendMessage(ChatColor.RED  + PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).getChatChannel() + ChatColor.GOLD + " is your current channel.");
 					} else if(args[0].equalsIgnoreCase("kd")) {
-						p.sendMessage(ChatColor.DARK_RED + "" + PlayerHandler.getPlayer(p.getPlayerListName()).calculateKDR());
+						p.sendMessage(ChatColor.DARK_RED + "" + PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).calculateKDR());
 					} else {
 						p.sendMessage(ChatColor.RED + "Use /kit help");
 					}
@@ -61,13 +61,13 @@ public class KitCmd implements CommandExecutor {
 							if(args[1].equalsIgnoreCase("list")) {
 								p.sendMessage(ChatColor.GOLD + "Chat Channels: ");
 								p.sendMessage(ChatColor.RED + "- lobby");
-								for(Arena a : ArenaManager.getArenas()) {
+								for(Arena a : ArenaManager.getInstance().getArenas()) {
 									p.sendMessage(ChatColor.RED + "- " + a.getName());
 								}
 								p.sendMessage(ChatColor.RED + "- staff (you will hear everything, everybody hears you).");
 								p.sendMessage(ChatColor.RED + "- staffp (you will hear everything, only staff hears you).");
-							} else if(args[1].equalsIgnoreCase("lobby") || args[1].equalsIgnoreCase("staff") || ArenaManager.getArenaNames().contains(args[1]) || args[1].equalsIgnoreCase("staffp")) {
-								PlayerHandler.getPlayer(p.getPlayerListName()).setChatChannel(args[1]);
+							} else if(args[1].equalsIgnoreCase("lobby") || args[1].equalsIgnoreCase("staff") || ArenaManager.getInstance().getArenaNames().contains(args[1]) || args[1].equalsIgnoreCase("staffp")) {
+								PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).setChatChannel(args[1]);
 								p.sendMessage(ChatColor.GOLD + "You're now in channel " + ChatColor.RED + args[1] + ChatColor.GOLD + ".");
 							} else {
 								p.sendMessage(ChatColor.RED + "Use /kit help (" + ChatColor.GOLD + args[1] + ChatColor.RED + " isn't a channel).");

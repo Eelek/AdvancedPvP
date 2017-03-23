@@ -148,7 +148,7 @@ public class ConfigDataManager {
 				
 				int level = CustomConfigHandler.getKits(plugin).getInt("kits." + kitName + ".minimum_level");
 				
-				KitManager.addKit(new Kit(kitName.replaceAll("_", " "), content, armor, kitItem, effects, level));
+				KitManager.getInstance().addKit(new Kit(kitName.replaceAll("_", " "), content, armor, kitItem, effects, level));
 			}
 		}
 		
@@ -167,9 +167,9 @@ public class ConfigDataManager {
 				int points = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".points");
 				int level = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".level");
 				
-				PlayerHandler.inputData(p, kills, deaths, points, level, channel);
+				PlayerHandler.getInstance().inputData(p, kills, deaths, points, level, channel);
 			} else {
-				PlayerHandler.inputData(p, 0, 0, 0, 0, channel);
+				PlayerHandler.getInstance().inputData(p, 0, 0, 0, 0, channel);
 			}
 		} else {
 			AKitsMain.log.warning("[AdvancedKits] No player data was found in the on-server storage.");
@@ -192,8 +192,8 @@ public class ConfigDataManager {
 	
 	public static void saveDataToServer(AKitsMain plugin) {
 		//Save playerdata
-		if(!PlayerHandler.getAllPlayerData().isEmpty()) {
-			for(GamePlayer p : PlayerHandler.getAllPlayerData()) {
+		if(!PlayerHandler.getInstance().getAllPlayerData().isEmpty()) {
+			for(GamePlayer p : PlayerHandler.getInstance().getAllPlayerData()) {
 				Player player = p.getPlayer();
 				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".kills", p.getKills());
 				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".deaths", p.getDeaths());
@@ -217,7 +217,7 @@ public class ConfigDataManager {
 				Integer minimun = CustomConfigHandler.getLevels(plugin).getInt("levels." + iLevel + ".minimum_kills");
 				String prefix = ChatColor.translateAlternateColorCodes('&', CustomConfigHandler.getLevels(plugin).getString("levels." + iLevel + ".prefix"));
 				
-				Levels.addLevel(level, minimun, prefix);
+				Levels.getInstance().addLevel(level, minimun, prefix);
 				
 				System.out.println("Level " + level + " min kills " + minimun + " prefix " + prefix);
 			}
@@ -251,24 +251,24 @@ public class ConfigDataManager {
 				for(String kitSetName : CustomConfigHandler.getArenas(plugin).getConfigurationSection("sets").getKeys(false)) {
 					ArrayList<Kit> kits = new ArrayList<Kit>();
 					for(String kit : CustomConfigHandler.getArenas(plugin).getStringList("sets." + kitSetName)) {
-						if(KitManager.isKit(kit.replaceAll("_", " "))) {
-							kits.add(KitManager.getKit(kit.replaceAll("_", " ")));
+						if(KitManager.getInstance().isKit(kit.replaceAll("_", " "))) {
+							kits.add(KitManager.getInstance().getKit(kit.replaceAll("_", " ")));
 						} else if(kit.equalsIgnoreCase("all")) {
-							kits.addAll(KitManager.getAllKits());
+							kits.addAll(KitManager.getInstance().getAllKits());
 						} else {
 							AKitsMain.log.warning("[AKitsMain] Couldn't load kit " + kit + " in kit set " + kitSetName + ".");
 						}
 					}
 					
-					KitSet.addSet(kitSetName, kits);
+					KitSet.getInstance().addSet(kitSetName, kits);
 				}
 				
 				if(spawns.isEmpty() && type == null) {
-					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel));
+					ArenaManager.getInstance().addArena(new Arena(name, world, maxPlayers, minLevel));
 				} else if(spawns.isEmpty() && type != null) {
-					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, type, kitSet));
+					ArenaManager.getInstance().addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, type, kitSet));
 				} else {
-					ArenaManager.addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, type, kitSet, lobby));
+					ArenaManager.getInstance().addArena(new Arena(name, world, maxPlayers, minLevel, spawns, spawnCount, spawnIndex, type, kitSet, lobby));
 				}
 				
 				System.out.println("Loaded " + name);
@@ -279,7 +279,7 @@ public class ConfigDataManager {
 	}
 	
 	public static void saveArenas(AKitsMain plugin) {
-		for(Arena a : ArenaManager.getArenas()) {
+		for(Arena a : ArenaManager.getInstance().getArenas()) {
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".max_players", a.getMaxPlayers());
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".minimum_level", a.getMinimumLevel());
 			CustomConfigHandler.getArenas(plugin).set("arenas." + a.getName() + ".world", a.getWorld().getName());
@@ -323,7 +323,7 @@ public class ConfigDataManager {
 			System.out.println("Saved arena " + a.getName());
 		}
 		
-		for(Entry<String, ArrayList<Kit>> sets : KitSet.getSets().entrySet()) {
+		for(Entry<String, ArrayList<Kit>> sets : KitSet.getInstance().getSets().entrySet()) {
 			ArrayList<String> kitNames = new ArrayList<String>();
 			for(Kit k : sets.getValue()) {
 				kitNames.add(k.getName().replaceAll(" ", "_"));

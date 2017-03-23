@@ -49,16 +49,16 @@ public class ArenaCmd implements CommandExecutor {
 							}
 						} else if(args[0].equalsIgnoreCase("list")) {
 							if(p.hasPermission("bluecraft.kits.managearena")) {
-								p.openInventory(ArenaManager.getArenasInventory("all"));
+								p.openInventory(ArenaManager.getInstance().getArenasInventory("all"));
 							} else {
 								p.sendMessage(ChatColor.RED + "Use /arena help");
 							}
 						}
 					} else if (args.length == 2) {
 						if (args[0].equalsIgnoreCase("info")) {
-							if (ArenaManager.isArena(args[1])) {
+							if (ArenaManager.getInstance().isArena(args[1])) {
 								if(p.hasPermission("bluecraft.staff")) {
-									Arena a = ArenaManager.getArena(args[1]);
+									Arena a = ArenaManager.getInstance().getArena(args[1]);
 									p.sendMessage(ChatColor.GOLD + "Info for arena " + ChatColor.RED + args[1]);
 									p.sendMessage(ChatColor.BLUE + "Name: " + ChatColor.AQUA + a.getName());
 									p.sendMessage(ChatColor.BLUE + "Max Players: " + ChatColor.AQUA + a.getMaxPlayers());
@@ -76,8 +76,8 @@ public class ArenaCmd implements CommandExecutor {
 							}
 						} else if (args[0].equalsIgnoreCase("inspect")) {
 							if(p.hasPermission("bluecraft.kits.managearena")) {
-								if (ArenaManager.isArena(args[1])) {
-									p.openInventory(ArenaManager.getInventory(ArenaManager.getArena(args[1])));
+								if (ArenaManager.getInstance().isArena(args[1])) {
+									p.openInventory(ArenaManager.getInstance().getInventory(ArenaManager.getInstance().getArena(args[1])));
 								} else {
 									p.sendMessage(ChatColor.DARK_RED + args[1] + ChatColor.RED +  " isn't an arena.");
 								}
@@ -86,7 +86,7 @@ public class ArenaCmd implements CommandExecutor {
 							}
 						} else if(args[0].equalsIgnoreCase("create")) {
 							if(!args[1].isEmpty()) {
-								ArenaManager.addArena(new Arena(args[1], p.getWorld(), 0, 0));
+								ArenaManager.getInstance().addArena(new Arena(args[1], p.getWorld(), 0, 0));
 								p.sendMessage(ChatColor.BLUE + "Arena " + ChatColor.AQUA + args[1] + ChatColor.BLUE + " has been created.\nPlease specify the spawns, the lobby location, the max players and the level.");
 							}
 						}
@@ -94,13 +94,13 @@ public class ArenaCmd implements CommandExecutor {
 						if(p.hasPermission("bluecraft.kits.managearena")) {
 							if (args[0].equalsIgnoreCase("select")) {
 								if (args[1].equalsIgnoreCase("spawns")) {
-									if (ArenaManager.isArena(args[2])) {
+									if (ArenaManager.getInstance().isArena(args[2])) {
 										p.getInventory().addItem(giveSpawnAxe(args[2]));
 										p.sendMessage(ChatColor.BLUE + "Select the " + ChatColor.AQUA + "spawns " + ChatColor.BLUE + "of arena " + ChatColor.AQUA + args[2] + ChatColor.BLUE + ".");
 									}
 								} else if(args[1].equalsIgnoreCase("lobby")) {
-									if(ArenaManager.isArena(args[2])) {
-										if(ArenaManager.getArena(args[2]).hasLobby() == false) {
+									if(ArenaManager.getInstance().isArena(args[2])) {
+										if(ArenaManager.getInstance().getArena(args[2]).hasLobby() == false) {
 											p.getInventory().addItem(giveLobbyAxe(args[2]));
 											p.sendMessage(ChatColor.BLUE + "Select the " + ChatColor.GOLD + "lobby " + ChatColor.BLUE + "of arena " + ChatColor.AQUA + args[2] + ChatColor.BLUE + ".");
 										} else {
@@ -120,20 +120,20 @@ public class ArenaCmd implements CommandExecutor {
 						}
 					} else if (args.length == 4) {
 						if(p.hasPermission("bluecraft.kits.managearena")) {
-							if (ArenaManager.isArena(args[0])) {
+							if (ArenaManager.getInstance().isArena(args[0])) {
 								if (args[1].equalsIgnoreCase("set")) {
 									if (args[2].equalsIgnoreCase("maxplayers")) {
 										try {
-											ArenaManager.getArena(args[0]).setMaxPlayers(Integer.parseInt(args[3]));
+											ArenaManager.getInstance().getArena(args[0]).setMaxPlayers(Integer.parseInt(args[3]));
 											p.sendMessage(ChatColor.BLUE + "Succesfully set " + ChatColor.AQUA + args[0] + ChatColor.BLUE + "'s max players to: " + ChatColor.AQUA + args[3]);
 										} catch (NumberFormatException e) {
 											p.sendMessage(ChatColor.AQUA + args[3] + ChatColor.BLUE + " isn't a valid input.");
 										}
 									} else if (args[2].equalsIgnoreCase("level")) {
 										try {
-											ArenaManager.getArena(args[0]).setMinimumLevel(Integer.parseInt(args[3]));
+											ArenaManager.getInstance().getArena(args[0]).setMinimumLevel(Integer.parseInt(args[3]));
 											p.sendMessage(ChatColor.BLUE + "Succesfully set " + ChatColor.AQUA + args[0] + ChatColor.BLUE + "'s level to: " + ChatColor.AQUA + args[3]);
-											System.out.println(args[0] + " level " + ArenaManager.getArena(args[0]).getMinimumLevel());
+											System.out.println(args[0] + " level " + ArenaManager.getInstance().getArena(args[0]).getMinimumLevel());
 										} catch (NumberFormatException e) {
 											p.sendMessage(ChatColor.AQUA + args[3] + ChatColor.BLUE + " isn't a valid input.");
 										}

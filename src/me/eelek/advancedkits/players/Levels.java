@@ -10,10 +10,12 @@ public class Levels {
 	
 	private static Levels instance;
 	
+	//Singleton
 	protected Levels() {
 		
 	}
 	
+	//Singleton
 	public static Levels getInstance() {
 		if(instance == null) {
 			instance = new Levels();

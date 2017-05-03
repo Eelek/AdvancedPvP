@@ -9,10 +9,12 @@ public class KitSet {
 	
 	private static KitSet instance;
 	
+	//Singleton
 	protected KitSet() {
 		
 	}
 	
+	//Singleton
 	public static KitSet getInstance() {
 		if(instance == null) {
 			instance = new KitSet();

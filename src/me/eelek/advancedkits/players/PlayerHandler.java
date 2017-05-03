@@ -42,10 +42,12 @@ public class PlayerHandler implements Listener {
 	
 	private static PlayerHandler instance;
 	
+	//Singleton
 	protected PlayerHandler() {
 		
 	}
 	
+	//Singleton
 	public static PlayerHandler getInstance() {
 		if(instance == null) {
 			instance = new PlayerHandler();

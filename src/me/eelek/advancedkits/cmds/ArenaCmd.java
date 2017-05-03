@@ -170,5 +170,4 @@ public class ArenaCmd implements CommandExecutor {
 		select.setItemMeta(meta);
 		return select;
 	}
-
 }

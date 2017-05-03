@@ -151,10 +151,6 @@ public class ConfigDataManager {
 				KitManager.getInstance().addKit(new Kit(kitName.replaceAll("_", " "), content, armor, kitItem, effects, level));
 			}
 		}
-		
-		//Load arenas
-		
-		
 	}
 	
 	public static void getPlayerDataFromServer(Player p, AKitsMain plugin) {

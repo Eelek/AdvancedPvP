@@ -31,6 +31,7 @@ public class ArenaManager implements Listener {
 	
 	String arena;
 	
+	//Singleton
 	protected ArenaManager() {
 		
 	}

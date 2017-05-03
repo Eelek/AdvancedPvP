@@ -26,10 +26,12 @@ public class KitManager implements Listener {
 	
 	private static KitManager instance;
 	
+	//Singleton
 	protected KitManager() {
 		
 	}
 	
+	//Singleton
 	public static KitManager getInstance() {
 		if(instance == null) {
 			instance = new KitManager();

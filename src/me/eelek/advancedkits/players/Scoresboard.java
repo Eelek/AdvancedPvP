@@ -144,5 +144,4 @@ public class Scoresboard {
 
 		runName(plugin, show);
 	}
-
 }

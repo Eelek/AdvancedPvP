@@ -175,14 +175,16 @@ public class PlayerHandler implements Listener {
 			
 			Levels.getInstance().levelUp(getPlayer(killer.getPlayerListName()));
 			
-			Scoresboard.setScoreboard(plugin, killer);
+			getPlayer(killer.getPlayerListName()).getBoard().resetScores("" + ChatColor.GREEN + (getPlayer(killer.getPlayerListName()).getKills() - 1));
+			getPlayer(killer.getPlayerListName()).getBoard().getObjective("scores").getScore("" + ChatColor.GREEN + getPlayer(killer.getPlayerListName()).getKills()).setScore(10);
 		} else if(killed.getLastDamageCause().getCause().equals(DamageCause.PROJECTILE)) {
 			e.setDeathMessage(ChatColor.BLUE + killed.getPlayerListName() + ChatColor.AQUA + " was shot by " + ChatColor.BLUE + killer.getPlayerListName());
 			getPlayer(killer.getPlayerListName()).addKill();
 			
 			Levels.getInstance().levelUp(getPlayer(killer.getPlayerListName()));
 			
-			Scoresboard.setScoreboard(plugin, killer);
+			getPlayer(killer.getPlayerListName()).getBoard().resetScores("" + ChatColor.GREEN + (getPlayer(killer.getPlayerListName()).getKills() - 1));
+			getPlayer(killer.getPlayerListName()).getBoard().getObjective("scores").getScore("" + ChatColor.GREEN + getPlayer(killer.getPlayerListName()).getKills()).setScore(10);
 		}
 		
 		getPlayer(killed.getPlayerListName()).addDeath();
@@ -196,7 +198,8 @@ public class PlayerHandler implements Listener {
 			e.getPlayer().removePotionEffect(pE.getType());
 		}
 		
-		Scoresboard.setScoreboard(plugin, e.getPlayer());
+		getPlayer(e.getPlayer().getPlayerListName()).getBoard().resetScores("" + ChatColor.GREEN + (getPlayer(e.getPlayer().getPlayerListName()).getDeaths() - 1));
+		getPlayer(e.getPlayer().getPlayerListName()).getBoard().getObjective("scores").getScore("" + ChatColor.GREEN + getPlayer(e.getPlayer().getPlayerListName()).getDeaths()).setScore(7);
 		
 		if(getPlayer(e.getPlayer().getPlayerListName()).isPlaying()) {
 			e.setRespawnLocation(ArenaManager.getInstance().getArena(getPlayer(e.getPlayer().getPlayerListName()).getCurrentArena()).getLobbyLocation());

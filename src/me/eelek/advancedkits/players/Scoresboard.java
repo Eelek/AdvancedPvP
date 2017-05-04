@@ -141,6 +141,8 @@ public class Scoresboard {
 		empty4.setScore(0);
 
 		p.setScoreboard(board);
+		
+		PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).setBoard(board);
 
 		runName(plugin, show);
 	}

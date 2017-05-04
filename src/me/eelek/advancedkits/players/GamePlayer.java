@@ -1,6 +1,7 @@
 package me.eelek.advancedkits.players;
 
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
 
 public class GamePlayer {
 	
@@ -16,6 +17,8 @@ public class GamePlayer {
 	private String arena;
 	
 	private String chatChannel;
+	
+	private Scoreboard sB;
 	
 	public GamePlayer(Player player) {
 		this.p = player;
@@ -102,6 +105,14 @@ public class GamePlayer {
 	
 	public void setChatChannel(String c) {
 		this.chatChannel = c;
+	}
+	
+	public Scoreboard getBoard() {
+		return this.sB;
+	}
+	
+	public void setBoard(Scoreboard b) {
+		this.sB = b;
 	}
 
 }

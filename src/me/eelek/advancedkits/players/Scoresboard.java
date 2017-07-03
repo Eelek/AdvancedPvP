@@ -107,7 +107,7 @@ public class Scoresboard {
 		Score yourKills = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your kills: ");
 		yourKills.setScore(11);
 
-		Score kills = show.getScore("" + ChatColor.GREEN + PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).getKills());
+		Score kills = show.getScore("" + ChatColor.GREEN + PlayerHandler.getPlayer(p.getPlayerListName()).getKills());
 		kills.setScore(10);
 
 		Score empty1 = show.getScore("   ");
@@ -116,7 +116,7 @@ public class Scoresboard {
 		Score yourDeaths = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your deaths:");
 		yourDeaths.setScore(8); 
 
-		Score deaths = show.getScore("" + ChatColor.RED + PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).getDeaths() + ChatColor.WHITE);
+		Score deaths = show.getScore("" + ChatColor.RED + PlayerHandler.getPlayer(p.getPlayerListName()).getDeaths() + ChatColor.WHITE);
 		deaths.setScore(7);
 
 		Score empty2 = show.getScore("    ");
@@ -125,7 +125,7 @@ public class Scoresboard {
 		Score yourPoints = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your points: ");
 		yourPoints.setScore(5);
 
-		Score points = show.getScore("" + ChatColor.GOLD + PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).getPoints());
+		Score points = show.getScore("" + ChatColor.GOLD + PlayerHandler.getPlayer(p.getPlayerListName()).getPoints());
 		points.setScore(4);
 
 		Score empty3 = show.getScore("     ");
@@ -134,7 +134,7 @@ public class Scoresboard {
 		Score yourLevel = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your level: ");
 		yourLevel.setScore(2);
 		
-		Score level = show.getScore("" + ChatColor.AQUA + PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).getLevel());
+		Score level = show.getScore("" + ChatColor.AQUA + PlayerHandler.getPlayer(p.getPlayerListName()).getLevel());
 		level.setScore(1);
 		
 		Score empty4 = show.getScore("            ");
@@ -142,7 +142,7 @@ public class Scoresboard {
 
 		p.setScoreboard(board);
 		
-		PlayerHandler.getInstance().getPlayer(p.getPlayerListName()).setBoard(board);
+		PlayerHandler.getPlayer(p.getPlayerListName()).setBoard(board);
 
 		runName(plugin, show);
 	}

@@ -163,9 +163,9 @@ public class ConfigDataManager {
 				int points = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".points");
 				int level = CustomConfigHandler.getPlayers(plugin).getInt("players." + player + ".level");
 				
-				PlayerHandler.getInstance().inputData(p, kills, deaths, points, level, channel);
+				PlayerHandler.inputData(p, kills, deaths, points, level, channel);
 			} else {
-				PlayerHandler.getInstance().inputData(p, 0, 0, 0, 0, channel);
+				PlayerHandler.inputData(p, 0, 0, 0, 0, channel);
 			}
 		} else {
 			AKitsMain.log.warning("[AdvancedKits] No player data was found in the on-server storage.");
@@ -188,8 +188,8 @@ public class ConfigDataManager {
 	
 	public static void saveDataToServer(AKitsMain plugin) {
 		//Save playerdata
-		if(!PlayerHandler.getInstance().getAllPlayerData().isEmpty()) {
-			for(GamePlayer p : PlayerHandler.getInstance().getAllPlayerData()) {
+		if(!PlayerHandler.getAllPlayerData().isEmpty()) {
+			for(GamePlayer p : PlayerHandler.getAllPlayerData()) {
 				Player player = p.getPlayer();
 				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".kills", p.getKills());
 				CustomConfigHandler.getPlayers(plugin).set("players." + player.getPlayerListName() + ".deaths", p.getDeaths());

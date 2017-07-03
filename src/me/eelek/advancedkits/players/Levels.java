@@ -47,7 +47,7 @@ public class Levels {
 		if(p.getKills() >= getLevel(p.getLevel() + 1).getMinimunKills()) {
 			p.levelUp();
 			p.getPlayer().sendMessage(ChatColor.BLUE + "You have ranked up!");
-			p.getPlayer().setDisplayName(getLevel(PlayerHandler.getInstance().getPlayer(p.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + p.getPlayer().getPlayerListName());
+			p.getPlayer().setDisplayName(getLevel(PlayerHandler.getPlayer(p.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + p.getPlayer().getPlayerListName());
 		}
 	}
 

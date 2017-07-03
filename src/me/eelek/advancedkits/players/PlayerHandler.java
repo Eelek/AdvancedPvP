@@ -36,31 +36,20 @@ import me.eelek.advancedkits.mysql.UUIDFetcher;
 
 public class PlayerHandler implements Listener {
 	
-	ArrayList<GamePlayer> data;
+	private static ArrayList<GamePlayer> data;
 	
-	AKitsMain plugin;
+	private AKitsMain plugin;
 	
-	private static PlayerHandler instance;
-	
-	//Singleton
-	protected PlayerHandler() {
-		
-	}
-	
-	//Singleton
-	public static PlayerHandler getInstance() {
-		if(instance == null) {
-			instance = new PlayerHandler();
-		}
-		
-		return instance;
+	public PlayerHandler(AKitsMain plugin) { 
+		this.plugin = plugin;
+		data = new ArrayList<GamePlayer>();
 	}
 	
 	void inputData(GamePlayer gP) {
 		data.add(gP);
 	}
 	
-	public void inputData(Player p, int kills, int deaths, int points, int level, String c) {
+	public static void inputData(Player p, int kills, int deaths, int points, int level, String c) {
 		data.add(new GamePlayer(p, kills, deaths, points, level, c));
 	}
 	
@@ -68,11 +57,11 @@ public class PlayerHandler implements Listener {
 		data.remove(getPlayer(p.getPlayerListName()));
 	}
 	
-	public ArrayList<GamePlayer> getAllPlayerData() {
+	public static ArrayList<GamePlayer> getAllPlayerData() {
 		return data;
 	}
 	
-	public GamePlayer getPlayer(String name) {
+	public static GamePlayer getPlayer(String name) {
 		for(GamePlayer p : data) {
 			if(p.getPlayer().getPlayerListName().equals(name)) {
 				 return p;
@@ -145,7 +134,7 @@ public class PlayerHandler implements Listener {
 		removePlayer(e.getPlayer());
 	}
 	
-	public UUID getUUID(Player p) {
+	public static UUID getUUID(Player p) {
 		UUIDFetcher fetcher = new UUIDFetcher(Arrays.asList(p.getPlayerListName()));
 		Map<String, UUID> response = null;
 		try {

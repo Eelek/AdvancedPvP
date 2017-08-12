@@ -1,10 +1,16 @@
 package me.eelek.advancedkits.utils;
 import java.lang.reflect.Field;
 
-import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.inventory.Inventory;
 
-import net.minecraft.server.v1_10_R1.*;
+import net.minecraft.server.v1_11_R1.BlockPosition;
+import net.minecraft.server.v1_11_R1.Blocks;
+import net.minecraft.server.v1_11_R1.ChatMessage;
+import net.minecraft.server.v1_11_R1.ContainerAnvil;
+import net.minecraft.server.v1_11_R1.EntityHuman;
+import net.minecraft.server.v1_11_R1.EntityPlayer;
+import net.minecraft.server.v1_11_R1.PacketPlayOutOpenWindow;
 
 /**
  * Created by chasechocolate.

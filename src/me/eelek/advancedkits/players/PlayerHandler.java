@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,6 +32,10 @@ import me.eelek.advancedkits.arena.ArenaManager;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.mysql.MySQLConnect;
 import me.eelek.advancedkits.mysql.UUIDFetcher;
+import net.minecraft.server.v1_11_R1.EntityPlayer;
+import net.minecraft.server.v1_11_R1.IChatBaseComponent;
+import net.minecraft.server.v1_11_R1.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_11_R1.PacketPlayOutChat;
 
 public class PlayerHandler implements Listener {
 	
@@ -111,6 +116,8 @@ public class PlayerHandler implements Listener {
 		}
 		
 		Scoresboard.setScoreboard(plugin, e.getPlayer());
+		
+		e.getPlayer().teleport(e.getPlayer().getWorld().getSpawnLocation());
 	}
 	
 	@EventHandler
@@ -199,21 +206,53 @@ public class PlayerHandler implements Listener {
 	
 	@EventHandler
 	void onPlayerChat(AsyncPlayerChatEvent e) {
-		String channel = getPlayer(e.getPlayer().getPlayerListName()).getChatChannel();
+		GamePlayer sender = getPlayer(e.getPlayer().getPlayerListName());
+		String senderChannel = sender.getChatChannel();
 		
 		for(Player player : e.getRecipients()) {
-			GamePlayer p = getPlayer(player.getPlayerListName());
-			if(p.getChatChannel().equalsIgnoreCase(channel) || p.getChatChannel().equalsIgnoreCase("staff") || p.getChatChannel().equalsIgnoreCase("staffp")) {
-				if(p.getChatChannel().equalsIgnoreCase("staff") || p.getChatChannel().equalsIgnoreCase("staffp")) {
+			GamePlayer recipient = getPlayer(player.getPlayerListName());
+			if(recipient.getChatChannel().equalsIgnoreCase(senderChannel)) {
+				if(senderChannel.equalsIgnoreCase("staff")) {
 					e.setCancelled(true);
-					p.getPlayer().sendMessage(ChatColor.YELLOW + "[" + channel + "] " + Levels.getInstance().getLevel(getPlayer(e.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
+					
+					String message = "[\"\",{\"text\":\"[Staff]\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel staff\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to the staff channel\"}]}}},{\"text\":\" " + Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
+					
+					IChatBaseComponent msg = ChatSerializer.a(message);
+					PacketPlayOutChat packet = new PacketPlayOutChat(msg, (byte) 1);
+					
+					EntityPlayer eP = ((CraftPlayer) recipient.getPlayer()).getHandle();
+					eP.playerConnection.sendPacket(packet);
+				} else if (senderChannel.equalsIgnoreCase("broad")) {
+					e.setCancelled(true);
+					
+					String message = "[\"\",{\"text\":\"[Broad]\",\"color\":\"dark_blue\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel broad\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to the broad channel\"}]}}},{\"text\":\" " + Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
+					
+					IChatBaseComponent msg = ChatSerializer.a(message);
+					PacketPlayOutChat packet = new PacketPlayOutChat(msg);
+					
+					EntityPlayer eP = ((CraftPlayer) recipient.getPlayer()).getHandle();
+					eP.playerConnection.sendPacket(packet);
 				} else {
 					e.setCancelled(true);
-					p.getPlayer().sendMessage(Levels.getInstance().getLevel(getPlayer(e.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
+					player.sendMessage(Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());	
 				}
-			} else if(channel.equalsIgnoreCase("staff")) {
-				e.setCancelled(true);
-				player.sendMessage(Levels.getInstance().getLevel(getPlayer(e.getPlayer().getPlayerListName()).getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
+			} else if(senderChannel.equalsIgnoreCase("broad")) {
+				if(!recipient.getChatChannel().equalsIgnoreCase("staff")) {
+					e.setCancelled(true);
+					player.sendMessage(Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());	
+				}
+			} else if(recipient.getChatChannel().equalsIgnoreCase("broad")) {
+				if(!senderChannel.equalsIgnoreCase("staff")) {
+					e.setCancelled(true);
+					
+                    String message = "[\"\",{\"text\":\"[" + senderChannel + "]\",\"color\":\"yellow\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel " + senderChannel + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to channel " + senderChannel + "\"}]}}},{\"text\":\" " + Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
+					
+					IChatBaseComponent msg = ChatSerializer.a(message);
+					PacketPlayOutChat packet = new PacketPlayOutChat(msg);
+					
+					EntityPlayer eP = ((CraftPlayer) recipient.getPlayer()).getHandle();
+					eP.playerConnection.sendPacket(packet);	
+				}
 			}
 		}
 	}
@@ -252,7 +291,7 @@ public class PlayerHandler implements Listener {
 							e.getPlayer().removePotionEffect(pE.getType());
 						}
 						
-						if(!getPlayer(p.getPlayerListName()).getChatChannel().equals("staff")) {
+						if(!getPlayer(p.getPlayerListName()).getChatChannel().equals("staff") && !getPlayer(p.getPlayerListName()).getChatChannel().equals("broad")) {
 							getPlayer(p.getPlayerListName()).setChatChannel("lobby");
 						}
 					}

@@ -16,7 +16,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	
 	public static Logger log;
 	
-	//This is Advanced Kits version: 8.2
+	//This is Advanced Kits version: 8.4
 	
 	@Override
 	public void onEnable() {
@@ -59,7 +59,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		//Create table if not exist
 		if(useDatabase()) {
 			if(getConfig().getString("MySQL-Host") != null && getConfig().getString("MySQL-Port") != null && getConfig().getString("MySQL-DB_Name") != null && getConfig().getString("MySQL-Password") != null && getConfig().getString("MySQL-Player-Table") != null) {
-				if(MySQLConnect.createTable(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"), getMySQLData("table"), this)) {
+				if(MySQLConnect.createTable(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"), getMySQLData("table"))) {
 					log.info("[AdvancedKits] Successfuly connected to the database.");
 				} else {
 					log.warning("[AdvancedKits] No database info was found in the config.");

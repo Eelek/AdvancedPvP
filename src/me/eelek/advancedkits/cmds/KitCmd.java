@@ -64,9 +64,14 @@ public class KitCmd implements CommandExecutor {
 								for(Arena a : ArenaManager.getInstance().getArenas()) {
 									p.sendMessage(ChatColor.RED + "- " + a.getName());
 								}
-								p.sendMessage(ChatColor.RED + "- staff (you will hear everything, everybody hears you).");
-								p.sendMessage(ChatColor.RED + "- staffp (you will hear everything, only staff hears you).");
-							} else if(args[1].equalsIgnoreCase("lobby") || args[1].equalsIgnoreCase("staff") || ArenaManager.getInstance().getArenaNames().contains(args[1]) || args[1].equalsIgnoreCase("staffp")) {
+								
+								p.sendMessage("");
+								p.sendMessage(ChatColor.DARK_PURPLE + "-----------STAFF-----------");
+								p.sendMessage("");
+								
+								p.sendMessage(ChatColor.RED + "- broad " + ChatColor.DARK_RED + "(You hear and receive everything).");
+								p.sendMessage(ChatColor.RED + "- staff " + ChatColor.DARK_RED + "(Staff private channel).");
+							} else if(args[1].equalsIgnoreCase("lobby") || args[1].equalsIgnoreCase("staff") || ArenaManager.getInstance().getArenaNames().contains(args[1]) || args[1].equalsIgnoreCase("broad")) {
 								PlayerHandler.getPlayer(p.getPlayerListName()).setChatChannel(args[1]);
 								p.sendMessage(ChatColor.GOLD + "You're now in channel " + ChatColor.RED + args[1] + ChatColor.GOLD + ".");
 							} else {

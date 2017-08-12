@@ -61,7 +61,7 @@ public class ArenaManager implements Listener {
 		world.setItemMeta(gMeta);
 		inv.setItem(10, world);
 		
-		ItemStack current = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+		ItemStack current = new ItemStack(Material.TOTEM, 1);
 		ItemMeta cMeta = (ItemMeta) current.getItemMeta();
 		cMeta.setDisplayName(ChatColor.DARK_PURPLE + "Current players: " + ChatColor.LIGHT_PURPLE + a.getCurrentPlayers().size() + ChatColor.DARK_PURPLE + ".");
 		gMeta.setLore(Arrays.asList("§r§fClick me to see the current players in the arena!"));
@@ -158,6 +158,7 @@ public class ArenaManager implements Listener {
 				SkullMeta pMeta = (SkullMeta) player.getItemMeta();
 				pMeta.setOwner(p);
 				pMeta.setDisplayName(ChatColor.GREEN + p);
+				pMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + "Click to tp."));
 				player.setItemMeta(pMeta);
 				pInv.addItem(player);
 			}
@@ -310,6 +311,7 @@ public class ArenaManager implements Listener {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	void onInventoryClick(InventoryClickEvent e) {
 		if(e.getInventory().getName().contains("Arena") || e.getInventory().getName().contains("arena")) {
@@ -322,6 +324,7 @@ public class ArenaManager implements Listener {
 					} else {
 						a = getArena(e.getInventory().getName().split(" ")[3]);
 					}
+					
 					if(e.getCurrentItem().getType() == Material.STAINED_GLASS_PANE) {
 						if(e.getCurrentItem().getDurability() == (short) 5) {
 							ItemStack disabled = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
@@ -343,9 +346,15 @@ public class ArenaManager implements Listener {
 					} else if(e.getCurrentItem().getType() == Material.GRASS) {
 						e.getWhoClicked().closeInventory();
 						e.getWhoClicked().openInventory(getWorldInventory(a));
-					} else if(e.getCurrentItem().getType() == Material.SKULL_ITEM) {
+					} else if(e.getCurrentItem().getType() == Material.TOTEM) {
 						e.getWhoClicked().closeInventory();
 						e.getWhoClicked().openInventory(getPlayerInventory(a));
+					} else if(e.getCurrentItem().getType() == Material.SKULL_ITEM) {
+						e.getWhoClicked().closeInventory();
+						SkullMeta meta = (SkullMeta) e.getCurrentItem().getItemMeta();
+						Player p = Bukkit.getServer().getPlayer(meta.getOwner());
+						
+						e.getWhoClicked().teleport(p);
 					} else if(e.getCurrentItem().getType() == Material.BOOK) {
 						e.getWhoClicked().closeInventory();
 						e.getWhoClicked().openInventory(getInventory(a));
@@ -385,11 +394,7 @@ public class ArenaManager implements Listener {
 	
 	public Arena getDuelArena() {
 		for(Arena a : getArenas()) {
-			if(a.getType() == GameType.DUEL && a.getCurrentPlayers().size() == 1) {
-				return a;
-			}
-			
-			if(a.getType() == GameType.DUEL && a.getCurrentPlayers().size() == 0) {
+			if(a.getType() == GameType.DUEL && a.getCurrentPlayers().size() < 2) {
 				return a;
 			}
 		}

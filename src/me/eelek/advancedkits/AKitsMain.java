@@ -10,7 +10,6 @@ import me.eelek.advancedkits.cmds.ArenaCmd;
 import me.eelek.advancedkits.cmds.KitCmd;
 import me.eelek.advancedkits.kits.KitManager;
 import me.eelek.advancedkits.mysql.MySQLConnect;
-import me.eelek.advancedkits.mysql.SaveData;
 import me.eelek.advancedkits.players.PlayerHandler;
 
 public class AKitsMain extends JavaPlugin implements Listener {
@@ -89,7 +88,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 		
 		if(useDatabase()) {
 			MySQLConnect.establishMySQLConnection(getMySQLData("host"), getMySQLData("user"), getMySQLData("pass"), getMySQLData("database"));
-			SaveData.updateOnDisable(this);
+			MySQLConnect.updateOnDisable(this);
 			MySQLConnect.closeConnection();
 		}
 	}

@@ -29,9 +29,7 @@ import me.eelek.advancedkits.ConfigDataManager;
 import me.eelek.advancedkits.arena.Arena;
 import me.eelek.advancedkits.arena.ArenaManager;
 import me.eelek.advancedkits.kits.KitManager;
-import me.eelek.advancedkits.mysql.LoadData;
 import me.eelek.advancedkits.mysql.MySQLConnect;
-import me.eelek.advancedkits.mysql.SaveData;
 import me.eelek.advancedkits.mysql.UUIDFetcher;
 
 public class PlayerHandler implements Listener {
@@ -85,7 +83,7 @@ public class PlayerHandler implements Listener {
 			if(plugin.useDatabase()) {
 				MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
 				try {
-					data.add(LoadData.getPlayerData(e.getPlayer(), plugin));
+					data.add(MySQLConnect.getPlayerData(e.getPlayer(), plugin));
 				} catch(Exception ex) {
 					ex.printStackTrace();
 				}
@@ -98,8 +96,8 @@ public class PlayerHandler implements Listener {
 			if(plugin.useDatabase()) {
 				MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
 				try {
-					LoadData.addNewPlayer(e.getPlayer(), plugin);
-					data.add(LoadData.getPlayerData(e.getPlayer(), plugin));
+					MySQLConnect.addNewPlayer(e.getPlayer(), plugin);
+					data.add(MySQLConnect.getPlayerData(e.getPlayer(), plugin));
 				} catch(Exception ex) {
 					ex.printStackTrace();
 				}
@@ -119,7 +117,7 @@ public class PlayerHandler implements Listener {
 	void playerLeave(PlayerQuitEvent e) {
 		if(plugin.useDatabase()) {
 			MySQLConnect.establishMySQLConnection(plugin.getMySQLData("host"), plugin.getMySQLData("user"), plugin.getMySQLData("pass"), plugin.getMySQLData("database"));
-			SaveData.savePlayerDataToDatabase(getPlayer(e.getPlayer().getPlayerListName()), plugin);
+			MySQLConnect.savePlayerDataToDatabase(getPlayer(e.getPlayer().getPlayerListName()), plugin);
 			MySQLConnect.closeConnection();
 		}
 		

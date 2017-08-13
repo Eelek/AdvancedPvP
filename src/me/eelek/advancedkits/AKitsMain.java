@@ -16,7 +16,7 @@ public class AKitsMain extends JavaPlugin implements Listener {
 	
 	public static Logger log;
 	
-	//This is Advanced Kits version: 8.4
+	//This is Advanced Kits version: 9.1
 	
 	@Override
 	public void onEnable() {

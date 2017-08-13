@@ -19,17 +19,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import me.eelek.advancedkits.AKitsMain;
 import me.eelek.advancedkits.arena.GameManager.GameType;
-import me.eelek.advancedkits.utils.AnvilGUI;
 
 public class ArenaManager implements Listener {
 	
 	private static ArenaManager instance = null;
 	
 	private ArrayList<Arena> arenas = new ArrayList<Arena>();
-	
-	String arena;
 	
 	//Singleton
 	protected ArenaManager() {
@@ -187,7 +183,7 @@ public class ArenaManager implements Listener {
 			size = 45;
 		}
 		
-		Inventory allInv = Bukkit.getServer().createInventory(null, size, "All the things.");
+		Inventory allInv = Bukkit.getServer().createInventory(null, size, searchQuery.isEmpty() ?  "All the things" : "Search results for: " + searchQuery);
 		
 		for(Arena a : arenas) {
 			if(a.getName().contains(searchQuery) || searchQuery.equals("all")) {
@@ -201,7 +197,7 @@ public class ArenaManager implements Listener {
 		
 		ItemStack search = new ItemStack(Material.BOOK_AND_QUILL, 1);
 		ItemMeta sMeta = (ItemMeta) search.getItemMeta();
-		sMeta.setDisplayName(ChatColor.RESET + "Search for an arena.");
+		sMeta.setDisplayName(ChatColor.RESET + "Search with /arena search <query>.");
 		search.setItemMeta(sMeta);
 		allInv.setItem(allInv.getSize() - 1, search);
 		
@@ -370,23 +366,10 @@ public class ArenaManager implements Listener {
 			if(e.getCurrentItem() != null) {
 				if(e.getCurrentItem().getType() != Material.AIR) {
 					e.setCancelled(true);
-					if(e.getCurrentItem().getType() == Material.BOOK_AND_QUILL) {
-						
-						new AnvilGUI(AKitsMain.getPlugin(AKitsMain.class), (Player) e.getWhoClicked(), new AnvilGUI.AnvilClickHandler() {
-							
-							@Override
-							public boolean onClick(AnvilGUI menu, String text) {
-								arena = text;
-								return true;
-							}
-						}).setInputName("Rename me to search.").open();
-						
-						e.getWhoClicked().openInventory(getArenasInventory(arena));
-					} else {
+					if(e.getCurrentItem().getType() != Material.BOOK_AND_QUILL) {
 						e.getWhoClicked().closeInventory();
 						e.getWhoClicked().openInventory(getInventory(getArena(e.getCurrentItem().getItemMeta().getDisplayName().substring(2))));
 					}
-					
 				}
 			}
 		}

@@ -28,6 +28,7 @@ public class ArenaCmd implements CommandExecutor {
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena inspect " + ChatColor.GRAY + "inspect and open an arena.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena list " + ChatColor.GRAY + "get a list (and search through) all the arenas.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena create <arena> " + ChatColor.GRAY + "create an arena.");
+							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena search <query> " + ChatColor.GRAY + "search for an arena.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena select spawns <arena> " + ChatColor.GRAY + "select the arena spawns.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena select lobby <arena>  " + ChatColor.GRAY + "select the arena lobby location.");
 							p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena <arena> set maxplayers <maxplayers> " + ChatColor.GRAY + "set the arena's maximum players.");
@@ -42,6 +43,7 @@ public class ArenaCmd implements CommandExecutor {
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena inspect " + ChatColor.GRAY + "inspect and open an arena.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena list " + ChatColor.GRAY + "get a list (and search through) all the arenas.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena create <arena> " + ChatColor.GRAY + "create an arena.");
+								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena search <query> " + ChatColor.GRAY + "search for an arena.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena select spawns <arena> " + ChatColor.GRAY + "select the arena spawns.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena select lobby <arena>  " + ChatColor.GRAY + "select the arena lobby location.");
 								p.sendMessage(ChatColor.BOLD + "- " + ChatColor.DARK_GRAY + "/arena <arena> set maxplayers <maxplayers> " + ChatColor.GRAY + "set the arena's maximum players.");
@@ -49,7 +51,7 @@ public class ArenaCmd implements CommandExecutor {
 							}
 						} else if(args[0].equalsIgnoreCase("list")) {
 							if(p.hasPermission("bluecraft.kits.managearena")) {
-								p.openInventory(ArenaManager.getInstance().getArenasInventory("all"));
+								p.openInventory(ArenaManager.getInstance().getArenasInventory(""));
 							} else {
 								p.sendMessage(ChatColor.RED + "Use /arena help");
 							}
@@ -88,6 +90,11 @@ public class ArenaCmd implements CommandExecutor {
 							if(!args[1].isEmpty()) {
 								ArenaManager.getInstance().addArena(new Arena(args[1], p.getWorld(), 0, 0));
 								p.sendMessage(ChatColor.BLUE + "Arena " + ChatColor.AQUA + args[1] + ChatColor.BLUE + " has been created.\nPlease specify the spawns, the lobby location, the max players and the level.");
+							}
+						} else if(args[0].equalsIgnoreCase("search")) {
+							if(!args[1].isEmpty()) {
+								p.closeInventory();
+								p.openInventory(ArenaManager.getInstance().getArenasInventory(args[1]));
 							}
 						}
 					} else if (args.length == 3) {

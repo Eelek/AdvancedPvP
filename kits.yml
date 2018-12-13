@@ -1,9 +1,0 @@
-#Do not edit this class. Advanced Kits will save it's data here.
-
-#Place items in order, so that you get them correct in your inventory.
-#The first item mentioned on the list will be in the first slot in your hotbar.
-#The Character '_' (Underscore) can be used as a ' ' (Space) in the kitname.
-
-kits: []
-
-sets: []

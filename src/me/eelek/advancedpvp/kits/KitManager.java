@@ -1,4 +1,4 @@
-package me.eelek.advancedkits.kits;
+package me.eelek.advancedpvp.kits;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +15,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 
-import me.eelek.advancedkits.arena.Arena;
-import me.eelek.advancedkits.arena.ArenaManager;
-import me.eelek.advancedkits.arena.GameManager.GameType;
-import me.eelek.advancedkits.players.PlayerHandler;
+import me.eelek.advancedpvp.arena.Arena;
+import me.eelek.advancedpvp.arena.ArenaManager;
+import me.eelek.advancedpvp.game.GameManager.GameType;
+import me.eelek.advancedpvp.players.GamePlayer;
+import me.eelek.advancedpvp.players.PlayerManager;
 
 public class KitManager implements Listener {
 	
@@ -52,14 +53,14 @@ public class KitManager implements Listener {
 		return kits;
 	}
 	
-	public Inventory getSelectInventory(Player p, Arena a) {
+	public Inventory getSelectInventory(GamePlayer p, Arena a) {
 		if(a.getType() == GameType.FFA_RANK) {
 			Inventory kitSelect = Bukkit.getServer().createInventory(null, 45, "Select your kit.");
 			
-			for(Kit k : KitSet.getInstance().getSet(a.getKitSetName())) {
+			for(Kit k : a.getKitSet()) {
 				ItemStack display = k.getDisplayItem();
 				ItemMeta dMeta = display.getItemMeta();
-				if(PlayerHandler.getPlayer(p.getPlayerListName()).getLevel() >= k.getMinimumLevel()) {
+				if(p.getLevel() >= k.getMinimumLevel()) {
 					dMeta.setLore(Arrays.asList("§r§fYou need atleast level", "§r§a" + k.getMinimumLevel() + "§f.", "§r§fUse left click to select.", "§r§fUse right click to preview kit."));
 				} else {
 					dMeta.setLore(Arrays.asList("§r§fYou need atleast level", "§r§4" + k.getMinimumLevel() + "§f.", "§r§fUse left click to select.", "§r§fUse right click to preview kit."));
@@ -72,10 +73,10 @@ public class KitManager implements Listener {
 		} else {
 			Inventory kitSelect = Bukkit.getServer().createInventory(null, 45, "Select your kit.");
 			
-			for(Kit k : KitSet.getInstance().getSet(a.getKitSetName())) {
+			for(Kit k : a.getKitSet()) {
 				ItemStack display = k.getDisplayItem();
 				ItemMeta dMeta = display.getItemMeta();
-				if(PlayerHandler.getPlayer(p.getPlayerListName()).getLevel() >= k.getMinimumLevel()) {
+				if(p.getLevel() >= k.getMinimumLevel()) {
 					dMeta.setLore(Arrays.asList("§r§fUse left click to select.", "§r§fUse right click to preview kit."));
 				} else {
 					dMeta.setLore(Arrays.asList("§r§fUse left click to select.", "§r§fUse right click to preview kit."));
@@ -126,30 +127,30 @@ public class KitManager implements Listener {
 		return r;
 	}
 	
-	boolean giveKit(Player p, Kit kit) {
-		if(ArenaManager.getInstance().getArena(PlayerHandler.getPlayer(p.getPlayerListName()).getCurrentArena()).getType() == GameType.FFA_RANK) {
-			if(PlayerHandler.getPlayer(p.getPlayerListName()).getLevel() >= kit.getMinimumLevel()) {
-				p.getInventory().clear();
+	public boolean giveKit(GamePlayer p, Kit kit) {
+		if(ArenaManager.getInstance().getArena(p.getCurrentArena()).getType() == GameType.FFA_RANK) {
+			if(p.getLevel() >= kit.getMinimumLevel()) {
+				p.getPlayer().getInventory().clear();
 				
 				for(ItemStack i : kit.getContent()) {
-					p.getInventory().addItem(i);
+					p.getPlayer().getInventory().addItem(i);
 				}
 				
 				for(ItemStack i : kit.getArmor()) {
 					if(i.getType().toString().toLowerCase().contains("helmet")) {
-						p.getInventory().setHelmet(i);
+						p.getPlayer().getInventory().setHelmet(i);
 					} else if(i.getType().toString().toLowerCase().contains("chestplate") || i.getType().toString().toLowerCase().contains("elytra") || i.getType().toString().toLowerCase().contains("shield")) {
-						p.getInventory().setChestplate(i);
+						p.getPlayer().getInventory().setChestplate(i);
 					} else if(i.getType().toString().toLowerCase().contains("leggings")) {
-						p.getInventory().setLeggings(i);
+						p.getPlayer().getInventory().setLeggings(i);
 					} else if(i.getType().toString().toLowerCase().contains("boots")) {
-						p.getInventory().setBoots(i);
+						p.getPlayer().getInventory().setBoots(i);
 					}
 				}
 				
 				if(kit.getPotionEffects() != null) {
 					for(PotionEffect pE : kit.getPotionEffects()) {
-						p.addPotionEffect(pE);
+						p.getPlayer().addPotionEffect(pE);
 					}
 				}
 				
@@ -158,27 +159,27 @@ public class KitManager implements Listener {
 				return false;
 			}
 		} else {
-			p.getInventory().clear();
+			p.getPlayer().getInventory().clear();
 			
 			for(ItemStack i : kit.getContent()) {
-				p.getInventory().addItem(i);
+				p.getPlayer().getInventory().addItem(i);
 			}
 			
 			for(ItemStack i : kit.getArmor()) {
 				if(i.getType().toString().toLowerCase().contains("helmet")) {
-					p.getInventory().setHelmet(i);
+					p.getPlayer().getInventory().setHelmet(i);
 				} else if(i.getType().toString().toLowerCase().contains("chestplate") || i.getType().toString().toLowerCase().contains("elytra") || i.getType().toString().toLowerCase().contains("shield")) {
-					p.getInventory().setChestplate(i);
+					p.getPlayer().getInventory().setChestplate(i);
 				} else if(i.getType().toString().toLowerCase().contains("leggings")) {
-					p.getInventory().setLeggings(i);
+					p.getPlayer().getInventory().setLeggings(i);
 				} else if(i.getType().toString().toLowerCase().contains("boots")) {
-					p.getInventory().setBoots(i);
+					p.getPlayer().getInventory().setBoots(i);
 				}
 			}
 			
 			if(kit.getPotionEffects() != null) {
 				for(PotionEffect pE : kit.getPotionEffects()) {
-					p.addPotionEffect(pE);
+					p.getPlayer().addPotionEffect(pE);
 				}
 			} 
 			
@@ -189,6 +190,8 @@ public class KitManager implements Listener {
 	@EventHandler
 	void onInventoryClick(InventoryClickEvent e) {
 		Player p = (Player) e.getWhoClicked();
+		GamePlayer player = PlayerManager.getInstance().getPlayer(p.getPlayerListName());
+		Arena a = ArenaManager.getInstance().getArena(player.getCurrentArena());
 		
 		if(e.getInventory().getName().equals("Select your kit.")) {
 			e.setCancelled(true);
@@ -198,13 +201,19 @@ public class KitManager implements Listener {
 					for(Kit k : getAllKits()) {
 						if(e.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.DARK_PURPLE + k.getName())) {
 							if(e.getClick().isLeftClick()) {
-								boolean b = giveKit(p, k);
-								if(b) {
-									p.sendMessage(ChatColor.BLUE + "You have recieved the " + ChatColor.AQUA + k.getName() + ChatColor.BLUE + " kit.");
-									p.closeInventory();
-									p.teleport(ArenaManager.getInstance().getArena(PlayerHandler.getPlayer(p.getPlayerListName()).getCurrentArena()).getSpawnLocation(p.getPlayerListName()));
+								if(a.getType() != GameType.TDM_RANK) {
+									if(giveKit(player, k)) {
+										p.closeInventory();
+										
+										p.teleport(a.getSpawnLocation(p.getPlayerListName()));
+										p.sendMessage(ChatColor.BLUE + "You have received the " + ChatColor.AQUA + k.getName() + ChatColor.BLUE + " kit.");
+									} else {
+										p.sendMessage(ChatColor.BLUE + "You don't have the level required for this kit.");
+									}
 								} else {
-									p.sendMessage(ChatColor.BLUE + "You don't have the level required for this kit.");
+									p.sendMessage(ChatColor.BLUE + "You have selected the " + ChatColor.AQUA + k.getName() + ChatColor.BLUE + " kit.");
+									p.sendMessage(ChatColor.BLUE + "You will receive this kit " + ChatColor.AQUA + "when the game starts or after dying" + ChatColor.BLUE + ".");
+									player.setSelectedKit(k);
 								}
 							} else if(e.getClick().isRightClick()) {
 								Inventory check = Bukkit.getServer().createInventory(null, 45, "Preview of kit: " + k.getName());
@@ -240,14 +249,24 @@ public class KitManager implements Listener {
 			if(e.getCurrentItem().getType() == Material.EMERALD_BLOCK) {
 				if(isKit(e.getInventory().getName().split(": ")[1])) {
 					Kit k = getKit(e.getInventory().getName().split(": ")[1]);
-					giveKit(p, k);
-					p.sendMessage(ChatColor.BLUE + "You have recieved the " + ChatColor.AQUA + k.getName() + ChatColor.BLUE + " kit.");
-					p.closeInventory();
-					p.teleport(ArenaManager.getInstance().getArena(PlayerHandler.getPlayer(p.getPlayerListName()).getCurrentArena()).getSpawnLocation(p.getPlayerListName()));
+					if(a.getType() != GameType.TDM_RANK) {
+						if(giveKit(player, k)) {
+							p.closeInventory();
+							
+							p.teleport(a.getSpawnLocation(p.getPlayerListName()));
+							p.sendMessage(ChatColor.BLUE + "You have received the " + ChatColor.AQUA + k.getName() + ChatColor.BLUE + " kit.");
+						} else {
+							p.sendMessage(ChatColor.BLUE + "You don't have the level required for this kit.");
+						}
+					} else {
+						p.sendMessage(ChatColor.BLUE + "You have selected the " + ChatColor.AQUA + k.getName() + ChatColor.BLUE + " kit.");
+						p.sendMessage(ChatColor.BLUE + "You will receive this kit " + ChatColor.AQUA + "when the game starts or after dying" + ChatColor.BLUE + ".");
+						player.setSelectedKit(k);
+					}
 				}
 			} else if(e.getCurrentItem().getType() == Material.REDSTONE_BLOCK) {
 				p.closeInventory();
-				p.openInventory(getSelectInventory(p, ArenaManager.getInstance().getArena(PlayerHandler.getPlayer(p.getPlayerListName()).getCurrentArena())));
+				p.openInventory(getSelectInventory(player, a));
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package me.eelek.advancedkits.arena;
+package me.eelek.advancedpvp.arena;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +20,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import me.eelek.advancedkits.arena.GameManager.GameType;
+import me.eelek.advancedpvp.game.GameManager.GameType;
+import net.minecraft.server.v1_12_R1.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_12_R1.PacketPlayOutChat;
 
 public class ArenaManager implements Listener {
 	
@@ -90,17 +93,14 @@ public class ArenaManager implements Listener {
 		level.setItemMeta(lMeta);
 		inv.setItem(16, level);
 		
-		ItemStack kitSet = new ItemStack(Material.BOOKSHELF, 1);
-		ItemMeta kMeta = (ItemMeta) kitSet.getItemMeta();
-		kMeta.setDisplayName(ChatColor.DARK_PURPLE + "Kit Set: " + ChatColor.LIGHT_PURPLE + a.getKitSetName() + ChatColor.DARK_PURPLE + ".");
-		kitSet.setItemMeta(kMeta);
-		inv.setItem(17, kitSet);
-		
 		return inv;
 	}
 	
 	Inventory getWorldInventory(Arena a) {
-		int size = (int) Math.ceil(a.getAmountOfSpawns() / 9);
+		int size = (int) a.getAmountOfSpawns() / 9;
+		if(size <= 0) {
+			size = 1;
+		}
 		size = size * 9 + 9;
 		
 		if(size < 9) {
@@ -113,7 +113,7 @@ public class ArenaManager implements Listener {
 			ItemStack spawn = new ItemStack(Material.DIRT, 1);
 			ItemMeta sMeta = (ItemMeta) spawn.getItemMeta();
 			sMeta.setDisplayName(ChatColor.GREEN + "Spawn " + (count + 1));
-			sMeta.setLore(Arrays.asList("§r§fX: " + a.getSpawn(count).getBlockX(), "§r§fY: " + a.getSpawn(count).getBlockY(), "§r§fZ: " + a.getSpawn(count).getBlockZ(), "§r§fMax spawns: " + a.getSpawnCount(a.getSpawn(count)), "§r§fSpawn index: " + a.getSpawnIndex(count)));
+			sMeta.setLore(Arrays.asList("§r§fX: " + a.getSpawn(count).getLocation().getBlockX(), "§r§fY: " + a.getSpawn(count).getLocation().getBlockY(), "§r§fZ: " + a.getSpawn(count).getLocation().getBlockZ(), "§r§fMax spawns: " + a.getSpawn(count).getCount(), "§r§fSpawn index: " + a.getSpawn(count).getIndex()));
 			spawn.setItemMeta(sMeta);
 			wInv.setItem(count, spawn);
 		}
@@ -152,7 +152,6 @@ public class ArenaManager implements Listener {
 			for(String p : a.getCurrentPlayers()) {
 				ItemStack player = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
 				SkullMeta pMeta = (SkullMeta) player.getItemMeta();
-				pMeta.setOwner(p);
 				pMeta.setDisplayName(ChatColor.GREEN + p);
 				pMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + "Click to tp."));
 				player.setItemMeta(pMeta);
@@ -204,8 +203,51 @@ public class ArenaManager implements Listener {
 		return allInv;
 	}
 	
+	public Inventory getCreateInventory(Player p, Arena a) {
+        Inventory inv = Bukkit.getServer().createInventory(null, 27, "Arena " + a.getName());
+		
+		ItemStack type = new ItemStack(Material.ACTIVATOR_RAIL, 1);
+		ItemMeta tMeta = (ItemMeta) type.getItemMeta();
+		tMeta.setDisplayName(ChatColor.RED + "Click to set game type.");
+		type.setItemMeta(tMeta);
+		inv.setItem(10, type);
+		
+		ItemStack max = new ItemStack(Material.FENCE_GATE, 1);
+		ItemMeta mMeta = (ItemMeta) max.getItemMeta();
+		mMeta.setDisplayName(ChatColor.RED + "Click to set max. players.");
+		max.setItemMeta(mMeta);
+		inv.setItem(12, max);
+		
+		ItemStack level = new ItemStack(Material.GLASS_BOTTLE, 1);
+		ItemMeta lMeta = (ItemMeta) level.getItemMeta();
+		lMeta.setDisplayName(ChatColor.RED + "Click to set minumum level.");
+		level.setItemMeta(lMeta);
+		inv.setItem(14, level);
+		
+		ItemStack current = new ItemStack(Material.GOLD_HOE, 1);
+		ItemMeta cMeta = (ItemMeta) current.getItemMeta();
+		cMeta.setDisplayName(ChatColor.RED + "Click to set lobby location.");
+		current.setItemMeta(cMeta);
+		inv.setItem(16, current);
+		
+		ItemStack world = new ItemStack(Material.DIAMOND_HOE, 1);
+		ItemMeta gMeta = (ItemMeta) world.getItemMeta();
+		gMeta.setDisplayName(ChatColor.RED + "Click to set spawns.");
+		world.setItemMeta(gMeta);
+		inv.setItem(17, world);
+		
+		return inv;
+	}
+	
 	public void addArena(Arena arena) {
+		if(!arena.hasId()) {
+			arena.setId(arenas.size());
+		}
 		arenas.add(arena);
+	}
+	
+	public int getLastID() {
+		return (arenas.size()-1);
 	}
 
 	public ArrayList<Arena> getArenas() {
@@ -359,10 +401,29 @@ public class ArenaManager implements Listener {
 						List<String> lore = e.getCurrentItem().getItemMeta().getLore();
 						Location tpLoc = new Location(e.getWhoClicked().getLocation().getWorld(), Integer.parseInt(lore.get(0).split(" ")[1]), Integer.parseInt(lore.get(1).split(" ")[1]), Integer.parseInt(lore.get(2).split(" ")[1]));
 						e.getWhoClicked().teleport(tpLoc);
+					} else if(e.getCurrentItem().getType() == Material.ACTIVATOR_RAIL) {
+						PacketPlayOutChat p = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"Click here to set the game type.\",\"color\":\"aqua\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/arena "+a.getName()+" set type <type>\"}}"));
+						((CraftPlayer) e.getWhoClicked()).getHandle().playerConnection.sendPacket(p);
+					} else if(e.getCurrentItem().getType() == Material.FENCE_GATE) {
+						PacketPlayOutChat p = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"Click here to set the max. players.\",\"color\":\"aqua\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/arena "+a.getName()+" set maxplayers <maxplayers>\"}}"));
+						((CraftPlayer) e.getWhoClicked()).getHandle().playerConnection.sendPacket(p);
+					} else if(e.getCurrentItem().getType() == Material.GLASS_BOTTLE) {
+						PacketPlayOutChat p = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"Click here to start the minumum level.\",\"color\":\"aqua\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/arena "+a.getName()+" set level <level>\"}}"));
+						((CraftPlayer) e.getWhoClicked()).getHandle().playerConnection.sendPacket(p);
+					} else if(e.getCurrentItem().getType() == Material.GOLD_HOE) {
+						Player p = (Player) e.getWhoClicked();
+						p.performCommand("/arena select lobby "+a.getName());
+						p.sendMessage(ChatColor.AQUA + "Left click on the block beneath you.");
+						p.sendMessage(ChatColor.BLUE + "To get back to the edit menu, use /arena edit "+a.getName());
+					} else if(e.getCurrentItem().getType() == Material.DIAMOND_HOE) {
+						Player p = (Player) e.getWhoClicked();
+						p.performCommand("/arena select spawns "+a.getName());
+						p.sendMessage(ChatColor.AQUA + "Left click on the block beneath you.");
+						p.sendMessage(ChatColor.BLUE + "To get back to the edit menu, use /arena edit "+a.getName());
 					}
 				}
 			}
-		} else if(e.getInventory().getName().equals("All the things.")) {
+		} else if(e.getInventory().getName().equals("All the things") || e.getInventory().getName().contains("Search results for")) {
 			if(e.getCurrentItem() != null) {
 				if(e.getCurrentItem().getType() != Material.AIR) {
 					e.setCancelled(true);

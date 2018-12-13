@@ -1,4 +1,4 @@
-package me.eelek.advancedkits.kits;
+package me.eelek.advancedpvp.kits;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,14 +11,16 @@ import org.bukkit.potion.PotionEffect;
 public class Kit {
 	
 	private String name;
+	private String author;
 	private ArrayList<ItemStack> content;
 	private ArrayList<ItemStack> armor;
 	private ItemStack kitItem;
 	private ArrayList<PotionEffect> potionEffect;
 	private int minimumLevel;
 	
-	public Kit(String name, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, int minimumLevel) {
+	public Kit(String name, String author, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, int minimumLevel) {
 		this.name = name;
+		this.author = author;
 		this.content = content;
 		this.armor = armor;
 		this.kitItem = kitItem;
@@ -26,8 +28,9 @@ public class Kit {
 		this.minimumLevel = minimumLevel;
 	}
 	
-	public Kit(String name, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, ArrayList<PotionEffect> potionEffect, int minimumLevel) {
+	public Kit(String name, String author, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, ArrayList<PotionEffect> potionEffect, int minimumLevel) {
 		this.name = name;
+		this.author = author;
 		this.content = content;
 		this.armor = armor;
 		this.kitItem = kitItem;
@@ -69,6 +72,10 @@ public class Kit {
 	
 	public void setMinimumLevel(int level) {
 		this.minimumLevel = level;
+	}
+	
+	public String getAuthor() {
+		return author;
 	}
 
 }

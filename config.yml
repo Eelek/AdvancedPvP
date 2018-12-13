@@ -1,9 +1,13 @@
-#This is the config file of AdvancedKits.
+#This is the config file of AdvancedPvP.
 
-#Note: Only player-data will be saved in the MySQL database, not kit data. Kit data is saved in the kit.yml file.
+#Please but your license information here.
+ServerName: putnamehere
+BuyerCode: putcodehere
+Buyer: putbuyerhere
 
-#If MySQL is disabled, AdvancedKits will store all data in the AdvancedKits folder in your plugin folder.
-use-MySQL: false
+#Kit data is stored locally, where as arena, player and level data is stored in a MySQL Database. The plugin will automaticly create the required tables.
+
+#NOTE: Make sure the MySQL account has permissions: SELECT, UPDATE, INSERT and CREATE TABLE.
 
 #MySQL login info.
 MySQL-Host:
@@ -11,11 +15,6 @@ MySQL-Port:
 MySQL-DB_Name:
 MySQL-User:
 MySQL-Password:
-MySQL-Player-Table:
-
-#If you're using MySQL, you can still store your files in the AdvancedKits folder, as backup.
-#If you're not using MySQL, no action is required.
-Use-On-Server-Backup: true
 
 #This determines the player´s chat channel when they join.
 default-channel: lobby

@@ -1,7 +1,9 @@
-package me.eelek.advancedkits.players;
+package me.eelek.advancedpvp.players;
 
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
+
+import me.eelek.advancedpvp.kits.Kit;
 
 public class GamePlayer {
 	
@@ -19,6 +21,8 @@ public class GamePlayer {
 	private String chatChannel;
 	
 	private Scoreboard sB;
+	
+	private Kit selected;
 	
 	public GamePlayer(Player player) {
 		this.p = player;
@@ -113,6 +117,14 @@ public class GamePlayer {
 	
 	public void setBoard(Scoreboard b) {
 		this.sB = b;
+	}
+	
+	public void setSelectedKit(Kit k) {
+		this.selected = k;
+	}
+	
+	public Kit getSelectedKit() {
+		return selected;
 	}
 
 }

@@ -1,13 +1,30 @@
-name: AdvancedKits
-main: me.eelek.advancedkits.AKitsMain
-version: 9.1
+name: AdvancedPvP
+main: me.eelek.advancedpvp.APvPMain
+version: 1.0
 author: Eelek
-description: The Advanced Kits plugin by Eelek.
+website: https://eelekweb.tk/
+description: The Advanced PvP plugin by Eelek.
 
 commands:
   kit:
-    usage: /<command>
+    usage: /<command> help
     description: The main command.
+    permission: advancedkits.kits
   arena:
-    usage: /<command>
+    usage: /<command> help
     description: Arena command.
+    permission: advancedkits.arenas
+    
+permissions:
+  advancedpvp.*:
+    description: Master permission
+    children:
+      - advancedpvp.kits
+      - advancedpvp.arenas
+    default: op
+  advancedpvp.kits:
+    description: Permission for the /kits command.
+    default: op
+  advancedkits.arenas:
+    description: Permission for the /arenas command.
+    default: op

@@ -1,4 +1,4 @@
-package me.eelek.advancedkits.mysql;
+package me.eelek.advancedpvp.players;
 
 import com.google.common.collect.ImmutableList;
 import org.json.simple.JSONArray;

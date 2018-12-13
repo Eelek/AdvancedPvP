@@ -1,4 +1,6 @@
-package me.eelek.advancedkits.players;
+package me.eelek.advancedpvp.players;
+
+import org.bukkit.ChatColor;
 
 public class Level {
 	
@@ -21,7 +23,7 @@ public class Level {
 	}
 	
 	public String getPrefix() {
-		return prefix;
+		return ChatColor.translateAlternateColorCodes('&', prefix);
 	}
 
 }

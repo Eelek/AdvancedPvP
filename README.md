@@ -7,7 +7,7 @@ Versions start at version 1.0 . This can be considered the first version for thi
 <br><hr><br>
 
 ## What is AdvancedPvP?
-AdvancedKits is a Spigot Plugin which adds:
+AdvancedPvP is a Spigot Plugin which adds:
 - Fully customizable kits.
 - Arena's with game types.
 - Levels and leveling-up.

@@ -1,7 +1,5 @@
 package me.eelek.advancedpvp.players;
 
-import java.util.ArrayList;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -11,12 +9,6 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 public class Scoreboards {
-	
-	private static ArrayList<String> tasks = new ArrayList<String>();
-	
-	public static ArrayList<String> getTasks() {
-		return tasks;
-	}
 
 	public static Scoreboard setFFAScoreboard(Player p) {
 		Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();

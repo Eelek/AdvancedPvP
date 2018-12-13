@@ -1,5 +1,6 @@
 package me.eelek.advancedpvp;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -15,7 +16,7 @@ import me.eelek.advancedpvp.players.PlayerManager;
 
 public class APvPMain extends JavaPlugin implements Listener {
 	
-	//This is Advanced PvP version: 1.0
+	//This is Advanced PvP version: 1.2
 
 	@Override
 	public void onEnable() {
@@ -23,13 +24,15 @@ public class APvPMain extends JavaPlugin implements Listener {
 		saveDefaultConfig();
 		getConfig().options().copyDefaults(true);
 		
+		File kitsFile = new File(getDataFolder() + "/kits.json");
+		
+		if(!kitsFile.exists()) {
+			saveResource("kits.json", false);
+		}
+		
 		//Start connection to the database
 		DataManager.getInstance().startConnection(getConfig().getString("MySQL-Host"), getConfig().getString("MySQL-Port"), getConfig().getString("MySQL-DB_Name"), getConfig().getString("MySQL-User"), getConfig().getString("MySQL-Password"));
 		PlayerManager.getInstance().setDefaultChannel(getConfig().getString("default-channel"));
-		
-		//CommandExecutors
-		getCommand("kit").setExecutor(new KitCmd());
-		getCommand("arena").setExecutor(new ArenaCmd());
 		
 		//Create table if not exist
 		try {
@@ -60,6 +63,10 @@ public class APvPMain extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(PlayerManager.getInstance(), this);
 		getServer().getPluginManager().registerEvents(KitManager.getInstance(), this);
 		getServer().getPluginManager().registerEvents(ArenaManager.getInstance(), this);
+		
+		//CommandExecutors
+		getCommand("kit").setExecutor(new KitCmd());
+		getCommand("arena").setExecutor(new ArenaCmd());
 	}
 	
 	@Override

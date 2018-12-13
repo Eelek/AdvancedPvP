@@ -57,7 +57,7 @@ public class DataManager {
 		JSONParser parser = new JSONParser();
 
 		try {
-			Object object = parser.parse(new FileReader(plugin.getDataFolder() + "kits.json"));
+			Object object = parser.parse(new FileReader(plugin.getDataFolder() + "/kits.json"));
 			JSONObject kitsObj = (JSONObject) object;
 
 			JSONArray kits = (JSONArray) kitsObj.get("kits");
@@ -80,12 +80,14 @@ public class DataManager {
 					Material m = Material.getMaterial(contentObj.get("item").toString());
 					int count = Integer.parseInt(contentObj.get("count").toString());
 					int data = 0;
+					ItemStack item;
 
 					if (contentObj.get("data") != null) {
 						data = Integer.parseInt(contentObj.get("data").toString());
+						item = new ItemStack(m, count, (byte) data);
+					} else {
+						item = new ItemStack(m, count);
 					}
-
-					ItemStack item = new ItemStack(m, count, (byte) data);
 
 					if (contentObj.get("ench") != null) {
 						JSONArray enchArray = (JSONArray) contentObj.get("ench");
@@ -110,7 +112,7 @@ public class DataManager {
 					Material m = Material.getMaterial(armorObj.get("item").toString());
 
 					ItemStack item = new ItemStack(m, 1);
-
+					
 					if ((m == Material.LEATHER_HELMET || m == Material.LEATHER_CHESTPLATE || m == Material.LEATHER_LEGGINGS || m == Material.LEATHER_BOOTS) && armorObj.get("data") != null) {
 						JSONArray itemData = (JSONArray) armorObj.get("data");
 
@@ -368,8 +370,7 @@ public class DataManager {
 				s.setInt(2, p.getDeaths());
 				s.setInt(3, p.getPoints());
 				s.setInt(4, p.getLevel());
-				s.setString(5, p.getPlayer().getPlayerListName());
-				s.setString(6, PlayerManager.getInstance().getUUID(p.getPlayer()).toString());
+				s.setString(5, PlayerManager.getInstance().getUUID(p.getPlayer()).toString());
 				s.execute();
 				s.close();
 			} catch (SQLException e) {

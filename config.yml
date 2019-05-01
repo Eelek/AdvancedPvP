@@ -1,11 +1,6 @@
 #This is the config file of AdvancedPvP.
 
-#Please but your license information here.
-ServerName: putnamehere
-BuyerCode: putcodehere
-Buyer: putbuyerhere
-
-#Kit data is stored locally, where as arena, player and level data is stored in a MySQL Database. The plugin will automaticly create the required tables.
+#Kit and arena data are stored locally, whereas player and level data are stored in a MySQL Database. The plugin will automaticly create the required tables.
 
 #NOTE: Make sure the MySQL account has permissions: SELECT, UPDATE, INSERT and CREATE TABLE.
 

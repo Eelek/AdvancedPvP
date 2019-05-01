@@ -1,12 +1,14 @@
 package me.eelek.advancedpvp.players;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
+import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,7 +17,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -23,400 +24,318 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
 
 import me.eelek.advancedpvp.DataManager;
 import me.eelek.advancedpvp.arena.Arena;
 import me.eelek.advancedpvp.arena.ArenaManager;
+import me.eelek.advancedpvp.game.GameManager.GameType;
 import me.eelek.advancedpvp.kits.KitManager;
-import net.minecraft.server.v1_13_R2.EntityPlayer;
-import net.minecraft.server.v1_13_R2.IChatBaseComponent;
-import net.minecraft.server.v1_13_R2.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_13_R2.PacketPlayOutChat;
+import net.minecraft.server.v1_12_R1.EntityPlayer;
+import net.minecraft.server.v1_12_R1.IChatBaseComponent;
+import net.minecraft.server.v1_12_R1.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_12_R1.PacketPlayOutChat;
 
 public class PlayerManager implements Listener {
-
+	
 	private ArrayList<GamePlayer> data;
-
+	
 	private static PlayerManager instance = null;
-
+	
 	private String defaultChannel;
-
-	protected PlayerManager() {
+	
+	protected PlayerManager() { 
 		data = new ArrayList<GamePlayer>();
 	}
-
-	public static PlayerManager getInstance() {
-		if (instance == null) {
+	
+    public static PlayerManager getInstance() {
+		if(instance == null) {
 			instance = new PlayerManager();
 		}
-
+		
 		return instance;
 	}
-
-	/**
-	 * Add a GamePlayer.
-	 * @param gP The GamePlayer to be added.
-	 */
+	
 	void inputData(GamePlayer gP) {
 		data.add(gP);
 	}
-
-	/**
-	 * Add a GamePlayer.
-	 * @param p The player associated with the GamePlayer.
-	 * @param kills The kills of the GamePlayer.
-	 * @param deaths The deaths of the GamePlayer.
-	 * @param points The points of the GamePlayer.
-	 * @param level The level of the GamePlayer.
-	 * @param c The chat channel of the GamePlayer.
-	 */
+	
 	public void inputData(Player p, int kills, int deaths, int points, int level, String c) {
 		data.add(new GamePlayer(p, kills, deaths, points, level, c));
 	}
-
-	/**
-	 * Remove a GamePlayer.
-	 * @param p The player that should be removed.
-	 */
+	
 	void removePlayer(Player p) {
-		data.remove(getPlayer(p.getUniqueId()));
+		data.remove(getPlayer(p.getPlayerListName()));
 	}
-
-	/**
-	 * Set the default chat channel.
-	 * @param channel The new default chat channel.
-	 */
+	
 	public void setDefaultChannel(String channel) {
 		this.defaultChannel = channel;
 	}
-
-	/**
-	 * Get all GamePlayers.
-	 * @return A list containing all GamePlayers.
-	 */
+	
 	public ArrayList<GamePlayer> getAllPlayerData() {
 		return data;
 	}
 	
-	/**
-	 * Get a GamePlayer by uuid.
-	 * @param uuid The uuid of the GamePlayer.
-	 * @return The GamePlayer.
-	 */
-	public GamePlayer getPlayer(UUID uuid) {
+	public GamePlayer getPlayer(String name) {
 		for(GamePlayer p : data) {
-			if(p.getUUID().equals(uuid)) {
-				return p;
+			if(p.getPlayer().getPlayerListName().equals(name)) {
+				 return p;
 			}
 		}
 		
 		return null;
 	}
+	
+	ItemStack getKitSelectCompass() {
+		ItemStack compass = new ItemStack(Material.COMPASS, 1);
+		ItemMeta cM = (ItemMeta) compass.getItemMeta();
+		cM.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|");
+		compass.setItemMeta(cM);
+		return compass;
+	}
 
 	@EventHandler
-	void onPlayerJoin(PlayerJoinEvent e) {
-		if (e.getPlayer().hasPlayedBefore()) {
-			if(!(DataManager.getInstance().getPlayerData(e.getPlayer(), defaultChannel))) {
-				inputData(e.getPlayer(), 0, 0, 0, 0, defaultChannel);
-				DataManager.getInstance().createPlayerData(e.getPlayer());
-			}
+	void playerJoin(PlayerJoinEvent e) {
+		if(e.getPlayer().hasPlayedBefore()) {
+			DataManager.getInstance().getPlayerData(e.getPlayer(), defaultChannel);
 		} else {
 			inputData(e.getPlayer(), 0, 0, 0, 0, defaultChannel);
 			DataManager.getInstance().createPlayerData(e.getPlayer());
 		}
-
-		setFFAScoreboard(e.getPlayer());
-
+		
+		e.getPlayer().setScoreboard(Scoreboards.setFFAScoreboard(e.getPlayer()));
+		getPlayer(e.getPlayer().getPlayerListName()).setBoard(e.getPlayer().getScoreboard());
+		
 		e.getPlayer().teleport(e.getPlayer().getWorld().getSpawnLocation());
+	}
+	
+	@EventHandler
+	void playerLeave(PlayerQuitEvent e) {
+		GamePlayer leave = getPlayer(e.getPlayer().getPlayerListName());
+		
+		DataManager.getInstance().updateOnLeave(leave);
+		
+		if(leave.isPlaying()) {
+			ArenaManager.getInstance().getArena(leave.getCurrentArena()).removePlayer(e.getPlayer());
+			leave.setPlaying(false);
+		}
+		
+		removePlayer(e.getPlayer());
 		
 		e.getPlayer().getInventory().clear();
-		e.getPlayer().getActivePotionEffects().clear();
-		e.getPlayer().getInventory().setItem(4, getArenaCompass());
-        e.getPlayer().getInventory().setHeldItemSlot(4);
-	}
-
-	@EventHandler
-	void onPlayerLeave(PlayerQuitEvent e) {
-		GamePlayer leave = getPlayer(e.getPlayer().getUniqueId());
-
-		DataManager.getInstance().updateOnLeave(leave);
-
-		if (leave.isPlaying()) {
-			ArenaManager.getInstance().getArena(leave.getCurrentArena()).removePlayer(leave);
-		}
-
-		removePlayer(e.getPlayer());
-
-		e.getPlayer().getInventory().clear();
-		for (PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
+		for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
 			e.getPlayer().removePotionEffect(pE.getType());
 		}
 	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	void onKill(PlayerDeathEvent e) {
-		GamePlayer killed = getPlayer(e.getEntity().getUniqueId());
-		GamePlayer killer = null;
+	
+	public UUID getUUID(Player p) {
+		UUIDFetcher fetcher = new UUIDFetcher(Arrays.asList(p.getPlayerListName()));
+		Map<String, UUID> response = null;
 		try {
-			killer = getPlayer(e.getEntity().getKiller().getUniqueId());	
-		} catch (NullPointerException ex) {
-			e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " died.");
-			
-			getPlayer(killed.getPlayer().getUniqueId()).addDeath();
-			
-			ArenaManager.getInstance().getArena(killed.getCurrentArena()).getSpawn(killed.getPlayer().getPlayerListName()).resetSpawn();
-			
-			killed.getBoard().resetScores("" + ChatColor.RED + (killed.getDeaths() - 1));
-			killed.getBoard().getObjective("show").getScore("" + ChatColor.RED + killed.getDeaths()).setScore(7);
+			response = fetcher.call();
+		} catch(Exception e) {
+			System.out.println("[AdvancedKits] Exception while running UUIDFetcher");
+			e.printStackTrace();
 		}
-
+		
+		return response.get(p.getPlayerListName());
+	}
+	
+	@EventHandler (priority = EventPriority.HIGHEST)
+	void onKill(PlayerDeathEvent e) {
+		GamePlayer killed = getPlayer(((Player) e.getEntity()).getPlayerListName());
+		GamePlayer killer = getPlayer(e.getEntity().getKiller().getPlayerListName());
+		
 		e.setDeathMessage(null);
-
+		
 		e.getDrops().clear();
-
-		if (killed.getPlayer().getLastDamageCause().getCause().equals(DamageCause.ENTITY_ATTACK)) {
+		
+		if(killed.getPlayer().getLastDamageCause().getCause().equals(DamageCause.ENTITY_ATTACK)) {
 			e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " was slain by " + ChatColor.BLUE + killer.getPlayer().getPlayerListName());
-		} else if (killed.getPlayer().getLastDamageCause().getCause().equals(DamageCause.PROJECTILE)) {
+			
+		} else if(killed.getPlayer().getLastDamageCause().getCause().equals(DamageCause.PROJECTILE)) {
 			e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " was shot by " + ChatColor.BLUE + killer.getPlayer().getPlayerListName());
 		} else {
 			e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " died.");
 		}
-
+		
 		killer.addKill();
-
-		LevelManager.getInstance().levelUp(killer);
-
+		
+		Levels.getInstance().levelUp(killer);
+		
 		killer.getBoard().resetScores("" + ChatColor.GREEN + (killer.getKills() - 1));
 		killer.getBoard().getObjective("show").getScore("" + ChatColor.GREEN + killer.getKills()).setScore(10);
-
+		
 		killer.getBoard().resetScores("" + ChatColor.GOLD + (killer.getPoints() - 1));
 		killer.getBoard().getObjective("show").getScore("" + ChatColor.GOLD + killer.getPoints()).setScore(4);
-
-		getPlayer(killed.getPlayer().getUniqueId()).addDeath();
-
-		ArenaManager.getInstance().getArena(killed.getCurrentArena()).getSpawn(killed.getPlayer().getPlayerListName()).resetSpawn(); 
-
+		
+		getPlayer(killed.getPlayer().getPlayerListName()).addDeath();
+		
+		ArenaManager.getInstance().getArena(killed.getCurrentArena()).getSpawn(killed.getPlayer().getPlayerListName()).resetPlayer();
+		
 		killed.getBoard().resetScores("" + ChatColor.RED + (killed.getDeaths() - 1));
-		killed.getBoard().getObjective("show").getScore("" + ChatColor.RED + killed.getDeaths()).setScore(7);
+	    killed.getBoard().getObjective("show").getScore("" + ChatColor.RED + killed.getDeaths()).setScore(7);
 	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
+	
+	@EventHandler (priority = EventPriority.HIGHEST)
 	void onRespawn(PlayerRespawnEvent e) {
 		e.getPlayer().getInventory().clear();
-		for (PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
+		for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
 			e.getPlayer().removePotionEffect(pE.getType());
 		}
-
-		if (getPlayer(e.getPlayer().getUniqueId()).isPlaying()) {
-			e.setRespawnLocation(ArenaManager.getInstance().getArena(getPlayer(e.getPlayer().getUniqueId()).getCurrentArena()).getLobbyLocation());
-			e.getPlayer().getInventory().setItem(4, getSelectCompass());
-			e.getPlayer().getInventory().setItem(8, getLeaveItem());
-			e.getPlayer().getInventory().setHeldItemSlot(4);
+				
+		if(getPlayer(e.getPlayer().getPlayerListName()).isPlaying()) {
+			e.setRespawnLocation(ArenaManager.getInstance().getArena(getPlayer(e.getPlayer().getPlayerListName()).getCurrentArena()).getLobbyLocation());
+			if(ArenaManager.getInstance().getArena(getPlayer(e.getPlayer().getPlayerListName()).getCurrentArena()).getType() != GameType.TDM_RANK) {
+				e.getPlayer().getInventory().setItem(4, getKitSelectCompass());
+				e.getPlayer().getInventory().setHeldItemSlot(4);	
+			} else {
+				KitManager.getInstance().giveKit(getPlayer(e.getPlayer().getPlayerListName()), getPlayer(e.getPlayer().getPlayerListName()).getSelectedKit());
+			}
 		} else {
 			e.setRespawnLocation(e.getPlayer().getWorld().getSpawnLocation());
 		}
 	}
-
+	
 	@EventHandler
 	void onPlayerChat(AsyncPlayerChatEvent e) {
-		GamePlayer sender = getPlayer(e.getPlayer().getUniqueId());
+		GamePlayer sender = getPlayer(e.getPlayer().getPlayerListName());
 		String senderChannel = sender.getChatChannel();
-
-		for (Player player : e.getRecipients()) {
-			if (getPlayer(player.getUniqueId()).getChatChannel().equalsIgnoreCase(senderChannel)) {
-				if (senderChannel.equalsIgnoreCase("staff")) {
+		
+		for(Player player : e.getRecipients()) {
+			GamePlayer recipient = getPlayer(player.getPlayerListName());
+			if(recipient.getChatChannel().equalsIgnoreCase(senderChannel)) {
+				if(senderChannel.equalsIgnoreCase("staff")) {
 					e.setCancelled(true);
-
-					String message = "[\"\",{\"text\":\"[Staff]\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel staff\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to the staff channel\"}]}}},{\"text\":\" " + LevelManager.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
-
+					
+					String message = "[\"\",{\"text\":\"[Staff]\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel staff\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to the staff channel\"}]}}},{\"text\":\" " + Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
+					
 					IChatBaseComponent msg = ChatSerializer.a(message);
 					PacketPlayOutChat packet = new PacketPlayOutChat(msg);
-
-					EntityPlayer eP = ((CraftPlayer) player).getHandle();
+					
+					EntityPlayer eP = ((CraftPlayer) recipient.getPlayer()).getHandle();
 					eP.playerConnection.sendPacket(packet);
 				} else if (senderChannel.equalsIgnoreCase("broad")) {
 					e.setCancelled(true);
-
-					String message = "[\"\",{\"text\":\"[Broad]\",\"color\":\"dark_blue\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel broad\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to the broad channel\"}]}}},{\"text\":\" " + LevelManager.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
-
+					
+					String message = "[\"\",{\"text\":\"[Broad]\",\"color\":\"dark_blue\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel broad\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to the broad channel\"}]}}},{\"text\":\" " + Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
+					
 					IChatBaseComponent msg = ChatSerializer.a(message);
 					PacketPlayOutChat packet = new PacketPlayOutChat(msg);
-
-					EntityPlayer eP = ((CraftPlayer) player).getHandle();
+					
+					EntityPlayer eP = ((CraftPlayer) recipient.getPlayer()).getHandle();
 					eP.playerConnection.sendPacket(packet);
 				} else {
 					e.setCancelled(true);
-					player.sendMessage(LevelManager.getInstance().getLevel(sender.getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
+					player.sendMessage(Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());	
 				}
-			} else if (senderChannel.equalsIgnoreCase("broad")) {
-				if (!getPlayer(player.getUniqueId()).getChatChannel().equalsIgnoreCase("staff")) {
+			} else if(senderChannel.equalsIgnoreCase("broad")) {
+				if(!recipient.getChatChannel().equalsIgnoreCase("staff")) {
 					e.setCancelled(true);
-					player.sendMessage("" + ChatColor.DARK_BLUE + ChatColor.BOLD +  "[Broad] " + ChatColor.RESET + LevelManager.getInstance().getLevel(sender.getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());
+					player.sendMessage(Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + " " + ChatColor.RESET + e.getPlayer().getDisplayName() + ChatColor.GRAY + ": " + e.getMessage());	
 				}
-			} else if (getPlayer(player.getUniqueId()).getChatChannel().equalsIgnoreCase("broad")) {
-				if (!senderChannel.equalsIgnoreCase("staff")) {
+			} else if(recipient.getChatChannel().equalsIgnoreCase("broad")) {
+				if(!senderChannel.equalsIgnoreCase("staff")) {
 					e.setCancelled(true);
-
-					String message = "[\"\",{\"text\":\"[" + senderChannel + "]\",\"color\":\"yellow\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel " + senderChannel + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to channel " + senderChannel + "\"}]}}},{\"text\":\" " + LevelManager.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
-
+					
+                    String message = "[\"\",{\"text\":\"[" + senderChannel + "]\",\"color\":\"yellow\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/kit channel " + senderChannel + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Go to channel " + senderChannel + "\"}]}}},{\"text\":\" " + Levels.getInstance().getLevel(sender.getLevel()).getPrefix() + "\",\"color\":\"none\"},{\"text\":\" " + e.getPlayer().getDisplayName() + "\",\"color\":\"none\"},{\"text\":\":\",\"color\":\"gray\"},{\"text\":\" " + e.getMessage() + "\",\"color\":\"gray\"}]";
+					
 					IChatBaseComponent msg = ChatSerializer.a(message);
 					PacketPlayOutChat packet = new PacketPlayOutChat(msg);
-
-					EntityPlayer eP = ((CraftPlayer) player).getHandle();
-					eP.playerConnection.sendPacket(packet);
+					
+					EntityPlayer eP = ((CraftPlayer) recipient.getPlayer()).getHandle();
+					eP.playerConnection.sendPacket(packet);	
 				}
 			}
 		}
 	}
-
+	
 	@EventHandler
 	void onInteract(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
-		GamePlayer player = getPlayer(p.getUniqueId());
-
-		if (player.isPlaying()) {
+		GamePlayer player = getPlayer(p.getPlayerListName());
+		
+		if(player.isPlaying()) {
 			if (p.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
-				if (p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|")) {
-					if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK) {
-						player.openInventory(KitManager.getInstance().generateSelectInventory(ArenaManager.getInstance().getArena(player.getCurrentArena()), 0), 0, ArenaManager.getInstance().getArena(player.getCurrentArena()).getName());
+				if(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK) {
+					if (p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|")) {
+						p.openInventory(KitManager.getInstance().getSelectInventory(player, ArenaManager.getInstance().getArena(player.getCurrentArena())));
 					}
 				}
-			} else if (p.getInventory().getItemInMainHand().getType() == Material.REDSTONE_BLOCK) {
-				Arena a = ArenaManager.getInstance().getArena(player.getCurrentArena());
-				p.teleport(p.getWorld().getSpawnLocation());
-				a.removePlayer(player);
-				p.getInventory().clear();
-				e.getPlayer().getInventory().setItem(4, getArenaCompass());
-		        e.getPlayer().getInventory().setHeldItemSlot(4);
-				for (PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
-					e.getPlayer().removePotionEffect(pE.getType());
-				}
-
-				if (!player.getChatChannel().equals("staff") && !player.getChatChannel().equals("broad")) {
-					player.setChatChannel("lobby");
+			}
+			
+			if(e.hasBlock()) {
+				if(e.getClickedBlock().getType() == Material.SIGN_POST || e.getClickedBlock().getType() == Material.WALL_SIGN) {
+					Sign s = (Sign) e.getClickedBlock().getState();
+					if(s.getLine(0).contains("§3§l[§2§l")) {
+						Arena a = ArenaManager.getInstance().getArena(s.getLine(2));
+						p.teleport(p.getWorld().getSpawnLocation());
+						player.setPlaying(false);
+						player.setCurrentArena(null);
+						a.removePlayer(p);
+						p.getInventory().clear();
+						for(PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
+							e.getPlayer().removePotionEffect(pE.getType());
+						}
+						
+						if(!player.getChatChannel().equals("staff") && !player.getChatChannel().equals("broad")) {
+							player.setChatChannel("lobby");
+						}
+					}
 				}
 			}
 		} else {
-			if(p.getInventory().getItemInMainHand().getType() == Material.CLOCK && p.getInventory().getItemInMainHand().hasItemMeta()) {
-				if(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals(ChatColor.DARK_GREEN + "Select an arena.")) {
-					e.setCancelled(true);
-					if(e.getAction() != Action.PHYSICAL) {
-						p.closeInventory();
-						player.openInventory(ArenaManager.getInstance().generateSelectorInventory(), 0, "");
+			if(e.hasBlock()) {
+				if(e.getClickedBlock().getType() == Material.SIGN_POST || e.getClickedBlock().getType() == Material.WALL_SIGN) {
+					Sign s = (Sign) e.getClickedBlock().getState();
+					if(s.getLine(0).contains("§6§l[§4§l")) {
+						 if(s.getLine(0).equals("§6§l[§4§lDUEL§6§l]")) {
+							Arena a = ArenaManager.getInstance().getDuelArena();
+							if(player.getLevel() >= a.getMinimumLevel()) {
+								if(a.isActive()) {
+									if(a.getCurrentPlayers().size() < a.getMaxPlayers()) {
+										p.teleport(a.getLobbyLocation());
+										player.setPlaying(true);
+										player.setCurrentArena(a.getName());
+										a.addPlayer(p);
+										p.getInventory().setItem(4, getKitSelectCompass());
+										p.getInventory().setHeldItemSlot(4);
+										if(!player.getChatChannel().equals("staff")) {
+											player.setChatChannel(a.getName());
+										}					
+									} else {
+										p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is full.");
+									}
+								} else {
+									p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is disabled.");
+								}
+							} else {
+								p.sendMessage(ChatColor.RED + "You can't join this arena. You need to be atleast level " + ChatColor.DARK_RED + a.getMinimumLevel() + ChatColor.RED + ".");
+							}
+						} else {
+							Arena a = ArenaManager.getInstance().getArena(s.getLine(1));
+							if(player.getLevel() >= a.getMinimumLevel()) {
+								if(a.isActive() && (a.getCurrentPlayers().size() < a.getMaxPlayers())) {
+									p.teleport(a.getLobbyLocation());
+									player.setPlaying(true);
+									player.setCurrentArena(a.getName());
+									a.addPlayer(p);
+									p.getInventory().setItem(4, getKitSelectCompass());
+									p.getInventory().setHeldItemSlot(4);
+									if(player.getChatChannel().equals("staff")) {
+										player.setChatChannel(a.getName());
+									}
+								} else {
+									p.sendMessage(ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is disabled.");
+								}
+							} else {
+								p.sendMessage(ChatColor.RED + "You can't join this arena. You need to be atleast level " + ChatColor.DARK_RED + a.getMinimumLevel() + ChatColor.RED + ".");
+							}
+						}
+					} else if(s.getLine(0).contains("§3§l[§2§l")) {
+						p.sendMessage(ChatColor.DARK_RED + "You are not in an arena.");
 					}
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Prevent the dropping of items.
-	 * @param e The event object.
-	 */
-	@EventHandler
-	public void onDrop(PlayerDropItemEvent e) {
-		e.setCancelled(true);
-	}
-	
-	/**
-	 * Get the Arena selector compass.
-	 * @return The Arena selector compass.
-	 */
-	public ItemStack getArenaCompass() {
-		ItemStack compass = new ItemStack(Material.CLOCK, 1);
-		ItemMeta cMeta = (ItemMeta) compass.getItemMeta();
-		cMeta.setDisplayName(ChatColor.DARK_GREEN + "Select an arena.");
-		compass.setItemMeta(cMeta);
-		return compass;
-	}
-	
-	/**
-	 * Function that generates a scoreboard for a player.
-	 * @param p The player that needs a scoreboard.
-	 */
-	private void setFFAScoreboard(Player p) {
-		Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
-		Objective show = board.registerNewObjective("show", "dummy", "show");
-		show.setDisplaySlot(DisplaySlot.SIDEBAR);
-		show.setDisplayName("§d§l§k|§4§lKit-PvP§d§l§k|");
-
-		Score top = show.getScore(" ");
-		top.setScore(15);
-
-		Score welcome = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Hello there,");
-		welcome.setScore(14);
-
-		Score player = show.getScore("" + ChatColor.GOLD + ChatColor.BOLD + p.getPlayerListName() + ChatColor.BLUE + ChatColor.BOLD + "!");
-		player.setScore(13);
-
-		Score empty = show.getScore("  ");
-		empty.setScore(12);
-
-		Score yourKills = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your kills: ");
-		yourKills.setScore(11);
-
-		Score kills = show.getScore("" + ChatColor.GREEN + PlayerManager.getInstance().getPlayer(p.getUniqueId()).getKills());
-		kills.setScore(10);
-
-		Score empty1 = show.getScore("   ");
-		empty1.setScore(9);
-
-		Score yourDeaths = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your deaths:");
-		yourDeaths.setScore(8); 
-
-		Score deaths = show.getScore("" + ChatColor.RED + PlayerManager.getInstance().getPlayer(p.getUniqueId()).getDeaths());
-		deaths.setScore(7);
-
-		Score empty2 = show.getScore("    ");
-		empty2.setScore(6);
-
-		Score yourPoints = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your points: ");
-		yourPoints.setScore(5);
-
-		Score points = show.getScore("" + ChatColor.GOLD + PlayerManager.getInstance().getPlayer(p.getUniqueId()).getPoints());
-		points.setScore(4);
-
-		Score empty3 = show.getScore("     ");
-		empty3.setScore(3);
-		
-		Score yourLevel = show.getScore("" + ChatColor.WHITE + ChatColor.BOLD + "Your level: ");
-		yourLevel.setScore(2);
-		
-		Score level = show.getScore("" + ChatColor.AQUA + PlayerManager.getInstance().getPlayer(p.getUniqueId()).getLevel());
-		level.setScore(1);
-		
-		Score empty4 = show.getScore("            ");
-		empty4.setScore(0);
-
-		p.setScoreboard(board);
-		getPlayer(p.getUniqueId()).setBoard(board);
-	}
-	
-	/**
-	 * Get the Kit select compass.
-	 * @return The Kit select compass.
-	 */
-	public ItemStack getSelectCompass() {
-		ItemStack compass = new ItemStack(Material.COMPASS, 1);
-		ItemMeta cMeta = (ItemMeta) compass.getItemMeta();
-		cMeta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|");
-		compass.setItemMeta(cMeta);
-		return compass;
-	}
-	
-	/**
-	 * Get the back to lobby item.
-	 * @return The back to lobby item.
-	 */
-	public ItemStack getLeaveItem() {
-		ItemStack leave = new ItemStack(Material.REDSTONE_BLOCK, 1);
-		ItemMeta lMeta = (ItemMeta) leave.getItemMeta();
-		lMeta.setDisplayName(ChatColor.RED + "Go back to the lobby.");
-		leave.setItemMeta(lMeta);
-		return leave;
 	}
 }

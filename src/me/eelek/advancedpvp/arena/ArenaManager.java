@@ -2,421 +2,447 @@ package me.eelek.advancedpvp.arena;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
-import me.eelek.advancedpvp.game.GameManager;
 import me.eelek.advancedpvp.game.GameManager.GameType;
-import me.eelek.advancedpvp.players.GamePlayer;
-import me.eelek.advancedpvp.players.PlayerManager;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_12_R1.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_12_R1.PacketPlayOutChat;
 
 public class ArenaManager implements Listener {
-
+	
 	private static ArenaManager instance = null;
-
+	
 	private ArrayList<Arena> arenas = new ArrayList<Arena>();
-
-	// Singleton
+	
+	//Singleton
 	protected ArenaManager() {
+		
 	}
-
-	// Singleton
+	
+	//Singleton
 	public static ArenaManager getInstance() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new ArenaManager();
 		}
-
+		
 		return instance;
 	}
 
-	/**
-	 * Function that generates an Inventory which contains all Arenas.
-	 * 
-	 * @param page
-	 *            The page which should be displayed
-	 * @return An Inventory which contains all Arenas.
-	 */
-	public Inventory generateArenasInventory(int page, boolean type) {
-		int pageSize = 54; // Amount of slots in the inventory. (Has to be a
-							// multiple of 9).
+	public Inventory getInventory(Arena a) {
+		Inventory inv = Bukkit.getServer().createInventory(null, 27, "Arena " + a.getName());
+		
+		ItemStack type = new ItemStack(Material.EMPTY_MAP, 1);
+		ItemMeta tMeta = (ItemMeta) type.getItemMeta();
+		tMeta.setDisplayName(ChatColor.DARK_PURPLE + "Game type: " + ChatColor.LIGHT_PURPLE + a.getType().toString() + ChatColor.DARK_PURPLE + ".");
+		type.setItemMeta(tMeta);
+		inv.setItem(9, type);
 
-		Inventory inv = Bukkit.getServer().createInventory(null, pageSize, "[Arenas] Page " + (page + 1));
-
-		for (int a = page * (pageSize - 9 * 2); a < (page + 1) * (pageSize - 9 * 2) && a < getArenas().size(); a++) {
-			Arena arena = getArenas().get(a);
-
-			if(type) {
-				if(arena.getType() == GameType.FFA_UNLOCKED) {
-					ItemStack aItem = new ItemStack(Material.GOLDEN_SWORD, 1);
-					ItemMeta aMeta = (ItemMeta) aItem.getItemMeta();
-					aMeta.setDisplayName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName());
-					aItem.setItemMeta(aMeta);
-					inv.addItem(aItem);
-				} else if(arena.getType() == GameType.FFA_RANK) {
-					ItemStack aItem = new ItemStack(Material.GOLDEN_AXE, 1);
-					ItemMeta aMeta = (ItemMeta) aItem.getItemMeta();
-					aMeta.setDisplayName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName());
-					aItem.setItemMeta(aMeta);
-					inv.addItem(aItem);
-				} else if(arena.getType() == GameType.DUEL) {
-					ItemStack aItem = new ItemStack(Material.DIAMOND_SWORD, 1);
-					ItemMeta aMeta = (ItemMeta) aItem.getItemMeta();
-					aMeta.setDisplayName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName());
-					aItem.setItemMeta(aMeta);
-					inv.addItem(aItem);
-				}
-			} else {
-				ItemStack aItem = new ItemStack(arena.isActive() ? Material.LIME_WOOL : Material.RED_WOOL, 1);
-				ItemMeta aMeta = (ItemMeta) aItem.getItemMeta();
-				aMeta.setDisplayName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName());
-				aItem.setItemMeta(aMeta);
-				inv.addItem(aItem);
+		ItemStack world = new ItemStack(Material.GRASS, 1);
+		ItemMeta gMeta = (ItemMeta) world.getItemMeta();
+		gMeta.setDisplayName(ChatColor.DARK_PURPLE + "World: " + ChatColor.LIGHT_PURPLE + a.getWorld().getName() + ChatColor.DARK_PURPLE + ".");
+		gMeta.setLore(Arrays.asList("§r§fClick me for spawn info!"));
+		world.setItemMeta(gMeta);
+		inv.setItem(10, world);
+		
+		ItemStack current = new ItemStack(Material.TOTEM, 1);
+		ItemMeta cMeta = (ItemMeta) current.getItemMeta();
+		cMeta.setDisplayName(ChatColor.DARK_PURPLE + "Current players: " + ChatColor.LIGHT_PURPLE + a.getCurrentPlayers().size() + ChatColor.DARK_PURPLE + ".");
+		gMeta.setLore(Arrays.asList("§r§fClick me to see the current players in the arena!"));
+		current.setItemMeta(cMeta);
+		inv.setItem(11, current);
+		
+		if(a.isActive()) {
+			ItemStack active = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5);
+			ItemMeta aMeta = (ItemMeta) active.getItemMeta();
+			aMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + a.getName() + ChatColor.DARK_PURPLE + " is " + ChatColor.GREEN + "active" + ChatColor.DARK_PURPLE + ".");;
+			active.setItemMeta(aMeta);
+			inv.setItem(13, active);
+		} else { 
+			ItemStack disabled = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
+			ItemMeta dMeta = (ItemMeta) disabled.getItemMeta();
+			dMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + a.getName() + ChatColor.DARK_PURPLE + " is " + ChatColor.RED + "disabled" + ChatColor.DARK_PURPLE + ".");;
+			disabled.setItemMeta(dMeta);
+			inv.setItem(13, disabled);
+		}
+		
+		ItemStack max = new ItemStack(Material.BARRIER, 1);
+		ItemMeta mMeta = (ItemMeta) max.getItemMeta();
+		mMeta.setDisplayName(ChatColor.DARK_PURPLE + "Maximum players: " + ChatColor.LIGHT_PURPLE + a.getMaxPlayers() + ChatColor.DARK_PURPLE + ".");
+		max.setItemMeta(mMeta);
+		inv.setItem(15, max);
+		
+		ItemStack level = new ItemStack(Material.EXP_BOTTLE, 1);
+		ItemMeta lMeta = (ItemMeta) level.getItemMeta();
+		lMeta.setDisplayName(ChatColor.DARK_PURPLE + "Minimum level: " + ChatColor.LIGHT_PURPLE + a.getMinimumLevel() + ChatColor.DARK_PURPLE + ".");
+		level.setItemMeta(lMeta);
+		inv.setItem(16, level);
+		
+		return inv;
+	}
+	
+	Inventory getWorldInventory(Arena a) {
+		int size = (int) a.getAmountOfSpawns() / 9;
+		if(size <= 0) {
+			size = 1;
+		}
+		size = size * 9 + 9;
+		
+		if(size < 9) {
+			size = 18;
+		}
+		
+		Inventory wInv = Bukkit.getServer().createInventory(null, size, "Spawns in arena " + a.getName());
+		
+		for(int count = 0; count < a.getAmountOfSpawns(); count++) {
+			ItemStack spawn = new ItemStack(Material.DIRT, 1);
+			ItemMeta sMeta = (ItemMeta) spawn.getItemMeta();
+			sMeta.setDisplayName(ChatColor.GREEN + "Spawn " + (count + 1));
+			sMeta.setLore(Arrays.asList("§r§fX: " + a.getSpawn(count).getLocation().getBlockX(), "§r§fY: " + a.getSpawn(count).getLocation().getBlockY(), "§r§fZ: " + a.getSpawn(count).getLocation().getBlockZ(), "§r§fMax spawns: " + a.getSpawn(count).getCount(), "§r§fSpawn index: " + a.getSpawn(count).getIndex()));
+			spawn.setItemMeta(sMeta);
+			wInv.setItem(count, spawn);
+		}
+		
+		ItemStack lobby = new ItemStack(Material.GOLD_BLOCK, 1);
+		ItemMeta lMeta = (ItemMeta) lobby.getItemMeta();
+		lMeta.setDisplayName(ChatColor.GOLD + "Lobby");
+		lMeta.setLore(Arrays.asList("§r§fX: " + a.getLobbyLocation().getBlockX(), "§r§fY: " + a.getLobbyLocation().getBlockY(), "§r§fZ: " + a.getLobbyLocation().getBlockZ()));
+		lobby.setItemMeta(lMeta);
+		wInv.setItem(wInv.getSize() - 2, lobby);
+		
+		ItemStack back = new ItemStack(Material.BOOK, 1);
+		ItemMeta bMeta = (ItemMeta) back.getItemMeta();
+		bMeta.setDisplayName(ChatColor.DARK_GREEN + "Go back to the main menu.");
+		back.setItemMeta(bMeta);
+		wInv.setItem(wInv.getSize() - 1, back);
+		
+		return wInv;
+	}
+	
+	Inventory getPlayerInventory(Arena a) {
+		int size = a.getMaxPlayers() / 9;
+		if(size % 10 >= 0.5) {
+			size = (int) Math.ceil(size);
+		} else {
+			size = (int) Math.floor(size);
+		}
+		
+		if(size < 9) {
+			size = 18;
+		}
+		
+		Inventory pInv = Bukkit.getServer().createInventory(null, size, "Players in arena " + a.getName());
+		
+		if(a.getCurrentPlayers() != null) {
+			for(String p : a.getCurrentPlayers()) {
+				ItemStack player = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+				SkullMeta pMeta = (SkullMeta) player.getItemMeta();
+				pMeta.setDisplayName(ChatColor.GREEN + p);
+				pMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + "Click to tp."));
+				player.setItemMeta(pMeta);
+				pInv.addItem(player);
 			}
-		}
-
-		if (page > 0) {
-			ItemStack previous = new ItemStack(Material.REDSTONE_TORCH, 1);
-			ItemMeta pMeta = (ItemMeta) previous.getItemMeta();
-			pMeta.setDisplayName(ChatColor.BLUE + "Previous page.");
-			previous.setItemMeta(pMeta);
-			inv.setItem(inv.getSize() - 9, previous);
-		}
-
-		if ((page + 1) * (pageSize - 9 * 2) < getArenas().size()) {
-			ItemStack next = new ItemStack(Material.FEATHER, 1);
-			ItemMeta nMeta = (ItemMeta) next.getItemMeta();
-			nMeta.setDisplayName(ChatColor.BLUE + "Next page.");
-			next.setItemMeta(nMeta);
-			inv.setItem(inv.getSize() - 1, next);
-		}
-
-		return inv;
-	}
-
-	/**
-	 * Function that generates an Inventory that contains all GameTypes.
-	 * 
-	 * @return An Inventory that contains all GameTypes.
-	 */
-	public Inventory generateSelectorInventory() {
-		int pageSize = 27;
-
-		Inventory inv = Bukkit.getServer().createInventory(null, pageSize, "[Select] Type");
-
-		ItemStack ffaUnlocked = new ItemStack(Material.GOLDEN_SWORD, 1);
-		ItemMeta ffaUMeta = (ItemMeta) ffaUnlocked.getItemMeta();
-		ffaUMeta.setDisplayName(ChatColor.RED + "FFA Unlocked");
-		ffaUnlocked.setItemMeta(ffaUMeta);
-		inv.setItem(11, ffaUnlocked);
-
-		ItemStack ffaRanked = new ItemStack(Material.GOLDEN_AXE, 1);
-		ItemMeta ffaRMeta = (ItemMeta) ffaRanked.getItemMeta();
-		ffaRMeta.setDisplayName(ChatColor.RED + "FFA Ranked");
-		ffaRanked.setItemMeta(ffaRMeta);
-		inv.setItem(15, ffaRanked);
-
-		ItemStack duel = new ItemStack(Material.DIAMOND_SWORD, 1);
-		ItemMeta dMeta = (ItemMeta) duel.getItemMeta();
-		dMeta.setDisplayName(ChatColor.BLUE + "Duel");
-		duel.setItemMeta(dMeta);
-		inv.setItem(13, duel);
-
-		return inv;
-	}
-
-	/**
-	 * Function that generates an Inventory that contains all Arenas with a
-	 * certain GameType.
-	 * 
-	 * @param page
-	 *            The page that should be displayed.
-	 * @param type
-	 *            The GameType for which should be filtered.
-	 * @return An Inventory contains all Arenas with specified GameType.
-	 */
-	public Inventory generateSelectorInventory(int page, GameType type) {
-		int pageSize = 54;
-
-		Inventory inv = Bukkit.getServer().createInventory(null, pageSize, "[Select] Arena, page " + (page + 1));
-
-		for (int a = page * (pageSize - 9 * 2); a < (page + 1) * (pageSize - 9 * 2) && a < getArenas(type, true).size(); a++) {
-			Arena arena = getArenas(type, true).get(a);
-
-			ItemStack display = new ItemStack(arena.getDisplayItem(), 1);
-			ItemMeta dMeta = (ItemMeta) display.getItemMeta();
-			dMeta.setDisplayName("§a" +arena.getName());
-			dMeta.setLore(Arrays.asList("§r§8Players: §r§f" + arena.getCurrentPlayers().size() + "/" + arena.getMaxPlayers(), type == GameType.FFA_RANK ? "§r§8Minimum level: §r§f" + arena.getMinimumLevel() : null));
-			display.setItemMeta(dMeta);
-			inv.addItem(display);
-		}
-
-		if (page > 0) {
-			ItemStack previous = new ItemStack(Material.REDSTONE_TORCH, 1);
-			ItemMeta pMeta = (ItemMeta) previous.getItemMeta();
-			pMeta.setDisplayName(ChatColor.BLUE + "Previous page.");
-			previous.setItemMeta(pMeta);
-			inv.setItem(inv.getSize() - 9, previous);
-		}
-
-		if ((page + 1) * (pageSize - 9 * 2) < getArenas(type, true).size()) {
-			ItemStack next = new ItemStack(Material.FEATHER, 1);
-			ItemMeta nMeta = (ItemMeta) next.getItemMeta();
-			nMeta.setDisplayName(ChatColor.BLUE + "Next page.");
-			next.setItemMeta(nMeta);
-			inv.setItem(inv.getSize() - 1, next);
 		}
 		
 		ItemStack back = new ItemStack(Material.BOOK, 1);
 		ItemMeta bMeta = (ItemMeta) back.getItemMeta();
-		bMeta.setDisplayName(ChatColor.BLUE + "Go back to the type select menu.");
+		bMeta.setDisplayName(ChatColor.DARK_GREEN + "Go back to the main menu.");
 		back.setItemMeta(bMeta);
-		inv.setItem(inv.getSize() - 2 , back);
-
+		pInv.setItem(pInv.getSize() - 1, back);
+		
+		return pInv;
+	}
+	
+	public Inventory getArenasInventory(String searchQuery) {
+		int size = arenas.size() / 9;
+		if(size % 10 >= 0.5) {
+			size = (int) Math.ceil(size);
+		} else {
+			size = (int) Math.floor(size);
+		}
+		
+		if(size < 9) {
+			size = 18;
+		} else if(size >= 54) {
+			size = 45;
+		}
+		
+		Inventory allInv = Bukkit.getServer().createInventory(null, size, searchQuery.isEmpty() ?  "All the things" : "Search results for: " + searchQuery);
+		
+		for(Arena a : arenas) {
+			if(a.getName().contains(searchQuery) || searchQuery.equals("all")) {
+				ItemStack arena = new ItemStack(Material.WOOL, 1, a.isActive() ? (short) 5 : (short) 14);
+				ItemMeta aMeta = (ItemMeta) arena.getItemMeta();
+				aMeta.setDisplayName(a.isActive() ? ChatColor.GREEN + a.getName() : ChatColor.RED + a.getName());
+				arena.setItemMeta(aMeta);
+				allInv.addItem(arena);
+			}
+		}
+		
+		ItemStack search = new ItemStack(Material.BOOK_AND_QUILL, 1);
+		ItemMeta sMeta = (ItemMeta) search.getItemMeta();
+		sMeta.setDisplayName(ChatColor.RESET + "Search with /arena search <query>.");
+		search.setItemMeta(sMeta);
+		allInv.setItem(allInv.getSize() - 1, search);
+		
+		return allInv;
+	}
+	
+	public Inventory getCreateInventory(Player p, Arena a) {
+        Inventory inv = Bukkit.getServer().createInventory(null, 27, "Arena " + a.getName());
+		
+		ItemStack type = new ItemStack(Material.ACTIVATOR_RAIL, 1);
+		ItemMeta tMeta = (ItemMeta) type.getItemMeta();
+		tMeta.setDisplayName(ChatColor.RED + "Click to set game type.");
+		type.setItemMeta(tMeta);
+		inv.setItem(10, type);
+		
+		ItemStack max = new ItemStack(Material.FENCE_GATE, 1);
+		ItemMeta mMeta = (ItemMeta) max.getItemMeta();
+		mMeta.setDisplayName(ChatColor.RED + "Click to set max. players.");
+		max.setItemMeta(mMeta);
+		inv.setItem(12, max);
+		
+		ItemStack level = new ItemStack(Material.GLASS_BOTTLE, 1);
+		ItemMeta lMeta = (ItemMeta) level.getItemMeta();
+		lMeta.setDisplayName(ChatColor.RED + "Click to set minumum level.");
+		level.setItemMeta(lMeta);
+		inv.setItem(14, level);
+		
+		ItemStack current = new ItemStack(Material.GOLD_HOE, 1);
+		ItemMeta cMeta = (ItemMeta) current.getItemMeta();
+		cMeta.setDisplayName(ChatColor.RED + "Click to set lobby location.");
+		current.setItemMeta(cMeta);
+		inv.setItem(16, current);
+		
+		ItemStack world = new ItemStack(Material.DIAMOND_HOE, 1);
+		ItemMeta gMeta = (ItemMeta) world.getItemMeta();
+		gMeta.setDisplayName(ChatColor.RED + "Click to set spawns.");
+		world.setItemMeta(gMeta);
+		inv.setItem(17, world);
+		
 		return inv;
 	}
-
-	/**
-	 * Add an Arena.
-	 * 
-	 * @param arena
-	 *            The arena to be added.
-	 */
+	
 	public void addArena(Arena arena) {
+		if(!arena.hasId()) {
+			arena.setId(arenas.size());
+		}
 		arenas.add(arena);
 	}
+	
+	public int getLastID() {
+		return (arenas.size()-1);
+	}
 
-	/**
-	 * Get a list of all Arenas.
-	 * 
-	 * @return A list containing all Arenas.
-	 */
 	public ArrayList<Arena> getArenas() {
 		return arenas;
 	}
-
-	/**
-	 * Get a list of all Arena names.
-	 * 
-	 * @return A list containing all Arena names.
-	 */
+	
 	public ArrayList<String> getArenaNames() {
 		ArrayList<String> r = new ArrayList<String>();
-		for (Arena a : arenas) {
+		for(Arena a : arenas) {
 			r.add(a.getName());
 		}
-
+		
 		return r;
 	}
-
-	/**
-	 * Get a list of all Arenas with a certain GameType.
-	 * 
-	 * @param type
-	 *            The GameType for which should be filtered.
-	 * @param enabled
-	 * 			  If the Arena has to be enabled.
-	 * @return A list containing all Arenas with a certain GameType.
-	 */
-	public ArrayList<Arena> getArenas(GameType type, boolean enabled) {
-		ArrayList<Arena> list = new ArrayList<Arena>();
-
-		for (Arena a : arenas) {
-			if (a.getType() == type && a.isActive() == enabled)
-				list.add(a);
-		}
-
-		return list;
-	}
-
-	/**
-	 * Get Arena by name.
-	 * 
-	 * @param name
-	 *            The name for which should be filtered.
-	 * @return The Arena with specified name.
-	 */
+	
 	public Arena getArena(String name) {
-		for (Arena m : arenas) {
-			if (m.getName().equalsIgnoreCase(name)) {
+		for(Arena m : arenas) {
+			if(m.getName().equals(name)) {
 				return m;
 			}
 		}
 
 		return null;
 	}
-
-	/**
-	 * Remove an Arena by name.
-	 * 
-	 * @param name
-	 *            The name of the Arena.
-	 */
-	void removeArena(String name) {
+	
+	void removeMap(String name) {
 		arenas.remove(getArena(name));
 	}
-
-	@EventHandler
-	void onInventoryClick(InventoryClickEvent e) {
-		if (e.getCurrentItem() == null || e.getCurrentItem().getType() == Material.AIR) return;
-		if(e.getCurrentItem().getType() == Material.REDSTONE_TORCH || e.getCurrentItem().getType() == Material.FEATHER) return;
-		if (e.getView().getTitle().startsWith("[Arena]")) {
-			e.setCancelled(true);
-
-			GamePlayer player = PlayerManager.getInstance().getPlayer(e.getWhoClicked().getUniqueId());
-			Arena a = getArena(player.getInventoryArgument());
-				
-			if (e.getCurrentItem().getType() == Material.RED_STAINED_GLASS_PANE) { //Change active state of the arena
-				e.getWhoClicked().closeInventory();
-				a.setActive(true);
-				player.openInventory(a.generateInventory(), 0, a.getName());
-            } else if(e.getCurrentItem().getType() == Material.LIME_STAINED_GLASS_PANE) { 
-            	e.getWhoClicked().closeInventory();
-            	a.setActive(false);
-            	player.openInventory(a.generateInventory(), 0, a.getName());
-            } else if (e.getCurrentItem().getType() == Material.GRASS) { //Open Spawns menu
-				e.getWhoClicked().closeInventory();
-				player.openInventory(a.generateSpawnsInventory(0), 0, a.getName());
-			} else if (e.getCurrentItem().getType() == Material.TOTEM_OF_UNDYING) { //Open Players menu
-				e.getWhoClicked().closeInventory();
-				player.openInventory(a.generatePlayersInventory(0), 0, a.getName());
-			} else if (e.getCurrentItem().getType() == Material.MAP) { //Set the game type
-				e.getWhoClicked().closeInventory();
-				
-				TextComponent msg = new TextComponent("§bClick here to set the game type.");
-				msg.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/arena " + a.getName() + " set type <type>"));
-				e.getWhoClicked().spigot().sendMessage(msg);
-			} else if (e.getCurrentItem().getType() == Material.BARRIER) { //Set the max players
-				e.getWhoClicked().closeInventory();
-				
-				TextComponent msg = new TextComponent("§bClick here to set the max. amount of players.");
-				msg.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/arena " + a.getName() + " set maxplayers <maxplayers>"));
-				e.getWhoClicked().spigot().sendMessage(msg);
-			} else if (e.getCurrentItem().getType() == Material.EXPERIENCE_BOTTLE) { //Set the minimum level
-				e.getWhoClicked().closeInventory();
-				
-				TextComponent msg = new TextComponent("§bClick here to set the minimum level.");
-				msg.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/arena " + a.getName() + " set level <level>"));
-				e.getWhoClicked().spigot().sendMessage(msg);
-			}
-		} else if (e.getView().getTitle().startsWith("[Arenas]")) { //List of Arena's
-			e.setCancelled(true);
-			
-			GamePlayer player = PlayerManager.getInstance().getPlayer(e.getWhoClicked().getUniqueId());
-			Arena a = arenas.get(e.getSlot() + player.getOpenPage() * 36); //There are at max 36 arenas on one page.
-			
-			e.getWhoClicked().closeInventory();
-			if(a.isSetup()) {
-				player.openInventory(a.generateInventory(), 0, a.getName());
-			} else {
-				e.getWhoClicked().sendMessage(ChatColor.BLUE + "Arena " + ChatColor.AQUA + a.getName() + ChatColor.BLUE + " hasn't been setup yet. Use " + ChatColor.DARK_AQUA + "/arena help" + ChatColor.BLUE + ".");
-			}
-		} else if(e.getView().getTitle().equals("[Select] Type")) {
-			e.setCancelled(true);
-			
-			GamePlayer player = PlayerManager.getInstance().getPlayer(e.getWhoClicked().getUniqueId());
-			e.getWhoClicked().closeInventory();
-			
-			if(e.getCurrentItem().getType() == Material.GOLDEN_SWORD) {
-				player.openInventory(generateSelectorInventory(0, GameType.FFA_UNLOCKED), 0, GameType.FFA_UNLOCKED.toString());
-			} else if(e.getCurrentItem().getType() == Material.GOLDEN_AXE) {
-				player.openInventory(generateSelectorInventory(0, GameType.FFA_RANK), 0, GameType.FFA_RANK.toString());
-			} else if(e.getCurrentItem().getType() == Material.DIAMOND_SWORD) {
-				player.openInventory(generateSelectorInventory(0, GameType.DUEL), 0, GameType.DUEL.toString());
-			}
-		} else if(e.getView().getTitle().startsWith("[Select] Arena")) {
-			e.setCancelled(true);
-			
-			GamePlayer player = PlayerManager.getInstance().getPlayer(e.getWhoClicked().getUniqueId());
-			
-			if(e.getCurrentItem().getType() == Material.BOOK) {
-				e.getWhoClicked().closeInventory();
-				player.openInventory(generateSelectorInventory(), 0, "");
-			} else {
-				ArrayList<Arena> arenasWithType = getArenas(GameManager.getInstance().getType(player.getInventoryArgument()), true);
-				
-				Arena a = arenasWithType.get(e.getSlot() + player.getOpenPage() * 36);
-				
-				if(a.getCurrentPlayers().size() < a.getMaxPlayers() && player.getLevel() >= a.getMinimumLevel()) {
-					a.addPlayer(player);
-					e.getWhoClicked().getInventory().clear();
-					e.getWhoClicked().getInventory().setItem(4, PlayerManager.getInstance().getSelectCompass());
-					e.getWhoClicked().getInventory().setItem(8, PlayerManager.getInstance().getLeaveItem());
-					e.getWhoClicked().getInventory().setHeldItemSlot(4);	
-				} else {
-					e.getWhoClicked().sendMessage(a.getCurrentPlayers().size() >= a.getMaxPlayers() ? ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is full." : ChatColor.RED + "You do not have the level required (" + ChatColor.DARK_RED + a.getMinimumLevel() + ChatColor.RED + ") to enter this arena.");
-				}
-			}
-		} else if(e.getView().getTitle().startsWith("[Spawns]")) {
-			e.setCancelled(true);
-			
-			GamePlayer player = PlayerManager.getInstance().getPlayer(e.getWhoClicked().getUniqueId());
-			Arena a = getArena(player.getInventoryArgument());
-			
-			if (e.getCurrentItem().getType() == Material.BOOK) { //Go back to Arena menu
-				e.getWhoClicked().closeInventory();
-				player.openInventory(a.generateInventory(), 0, a.getName());
-			} else if (e.getCurrentItem().getType() == Material.DIRT) { //Teleport to Spawn
-				e.getWhoClicked().closeInventory();
-
-				Spawn s = a.getSpawn(e.getSlot() + player.getOpenPage() * 36); //There are at max 36 spawns on a page.
-				e.getWhoClicked().teleport(s.getLocation());
-			} else if(e.getCurrentItem().getType() == Material.GOLD_BLOCK) {
-				e.getWhoClicked().closeInventory();
-				
-				e.getWhoClicked().teleport(a.getLobbyLocation());
-			} else if(e.getCurrentItem().getType() == Material.BRICK) {
-				e.getWhoClicked().closeInventory();
-				
-				TextComponent msg = new TextComponent("§bClick me to add a spawn.");
-				msg.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/arena " + a.getName() + " set spawn"));
-				e.getWhoClicked().spigot().sendMessage(msg);
-			}
-		} else if(e.getView().getTitle().startsWith("[Players]")) {
-			e.setCancelled(true);
-			
-			GamePlayer player = PlayerManager.getInstance().getPlayer(e.getWhoClicked().getUniqueId());
-			Arena a = getArena(player.getInventoryArgument());
-			
-			if (e.getCurrentItem().getType() == Material.BOOK) { //Go back to Arena menu
-				e.getWhoClicked().closeInventory();
-				player.openInventory(a.generateInventory(), 0, a.getName());
-			} else if (e.getCurrentItem().getType() == Material.PLAYER_HEAD) { //Teleport to player
-				e.getWhoClicked().closeInventory();
-				Player p = Bukkit.getServer().getPlayer(a.getCurrentPlayers().get(e.getSlot() + player.getOpenPage() * 36));
-				
-				if(p == null) {
-				    e.getWhoClicked().sendMessage(ChatColor.RED + "Player " + ChatColor.DARK_RED + e.getCurrentItem().getItemMeta().getDisplayName() + ChatColor.RED + " is not online.");
-				    return;
-				}
-					
-				e.getWhoClicked().teleport(p);
+	
+	public boolean isArena(String name) {
+		boolean r = false;
+		
+		for(Arena a : arenas) {
+			if(a.getName().equals(name)) {
+				r = true;
 			}
 		}
-    }
+		
+		return r;
+	}
 	
-	/**
-	 * Get a DUEL Arena which has an open slot.
-	 * 
-	 * @return A DUEL Arena with an open slot.
-	 */
+	@EventHandler
+	void onSignChange(SignChangeEvent e) {
+		if(e.getLine(0).equals("[arena]")) {
+			if(e.getLine(1).equals("join")) {
+				if(isArena(e.getLine(2))) {
+					Arena a = getArena(e.getLine(2));
+					if(a.isActive()) {
+						if(a.getType() != GameType.DUEL) {
+							e.setLine(0, "§6§l[§4§l" + a.getType().toString().substring(0, 5) + "§6§l]");
+							e.setLine(1, a.getName());
+							e.setLine(2, "§7§l" + a.getCurrentPlayers().size() + "§0§l/§8§l" + a.getMaxPlayers());
+							e.setLine(3, "§5§lLevel: §a§l" + a.getMinimumLevel());
+							e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
+							Sign sign = (Sign) e.getBlock().getState();
+							if(sign != null) {
+								a.setSign(sign);
+							}
+						} else {
+							e.setLine(0, "§6§l[§4§l" + a.getType().toString().substring(0, 5) + "§6§l]");
+							e.setLine(1, a.getName());
+							e.setLine(2, "§7§l" + a.getCurrentPlayers().size() + "§0§l/§8§l" + a.getMaxPlayers());
+							e.setLine(3, "§5§lLevel: §a§l" + a.getMinimumLevel());
+							e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
+							Sign sign = (Sign) e.getBlock().getState();
+							if(sign != null) {
+								a.setSign(sign);
+							}
+						}
+					} else {
+						if(a.getType() != GameType.DUEL) {
+							e.setLine(0, "§6§l[§4§l" + a.getType().toString().substring(0, 5) + "§6§l]");
+							e.setLine(1, a.getName());
+							e.setLine(2, "§4§lClosed.");
+							e.setLine(3, "§5§lLevel: §a§l" + a.getMinimumLevel());
+							e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
+							Sign sign = (Sign) e.getBlock().getState();
+							if(sign != null) {
+								a.setSign(sign);
+							}
+						} else {
+							e.setLine(0, "§6§l[§4§l" + a.getType().toString().substring(0, 4) + "§6§l]");
+							e.setLine(1, a.getName());
+							e.setLine(2, "§4§lClosed.");
+							e.setLine(3, "§5§lLevel: §a§l" + a.getMinimumLevel());
+							e.getPlayer().sendMessage(ChatColor.BLUE + "Sign has been created.");
+							Sign sign = (Sign) e.getBlock().getState();
+							if(sign != null) {
+								a.setSign(sign);
+							}
+						}
+					}
+				}
+			} else if(e.getLine(1).equals("leave")) {
+				e.setLine(0, "§3§l[§2§lArena§3§l]");
+				e.setLine(1, "§2§o§lLeave");
+				e.setLine(3, "§5§oReturn to lobby.");
+			}
+		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	@EventHandler
+	void onInventoryClick(InventoryClickEvent e) {
+		if(e.getInventory().getName().contains("Arena") || e.getInventory().getName().contains("arena")) {
+			if(e.getCurrentItem() != null) {
+				if(e.getCurrentItem().getType() != Material.AIR) {
+					e.setCancelled(true);
+					Arena a = null;
+					if(e.getInventory().getName().contains("Arena")) {
+						a = getArena(e.getInventory().getName().split(" ")[1]);
+					} else {
+						a = getArena(e.getInventory().getName().split(" ")[3]);
+					}
+					
+					if(e.getCurrentItem().getType() == Material.STAINED_GLASS_PANE) {
+						if(e.getCurrentItem().getDurability() == (short) 5) {
+							ItemStack disabled = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
+							ItemMeta dMeta = (ItemMeta) disabled.getItemMeta();
+							dMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + a.getName() + ChatColor.DARK_PURPLE + " is " + ChatColor.RED + "disabled" + ChatColor.DARK_PURPLE + ".");;
+							disabled.setItemMeta(dMeta);
+							e.setCurrentItem(disabled);
+							
+							a.setActive(false);
+						} else {
+							ItemStack active = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5);
+							ItemMeta aMeta = (ItemMeta) active.getItemMeta();
+							aMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + a.getName() + ChatColor.DARK_PURPLE + " is " + ChatColor.GREEN + "active" + ChatColor.DARK_PURPLE + ".");;
+							active.setItemMeta(aMeta);
+							e.setCurrentItem(active);
+							
+							a.setActive(true);
+						}
+					} else if(e.getCurrentItem().getType() == Material.GRASS) {
+						e.getWhoClicked().closeInventory();
+						e.getWhoClicked().openInventory(getWorldInventory(a));
+					} else if(e.getCurrentItem().getType() == Material.TOTEM) {
+						e.getWhoClicked().closeInventory();
+						e.getWhoClicked().openInventory(getPlayerInventory(a));
+					} else if(e.getCurrentItem().getType() == Material.SKULL_ITEM) {
+						e.getWhoClicked().closeInventory();
+						SkullMeta meta = (SkullMeta) e.getCurrentItem().getItemMeta();
+						Player p = Bukkit.getServer().getPlayer(meta.getOwner());
+						
+						e.getWhoClicked().teleport(p);
+					} else if(e.getCurrentItem().getType() == Material.BOOK) {
+						e.getWhoClicked().closeInventory();
+						e.getWhoClicked().openInventory(getInventory(a));
+					} else if(e.getCurrentItem().getType() == Material.DIRT) {
+						e.getWhoClicked().closeInventory();
+						List<String> lore = e.getCurrentItem().getItemMeta().getLore();
+						Location tpLoc = new Location(e.getWhoClicked().getLocation().getWorld(), Integer.parseInt(lore.get(0).split(" ")[1]), Integer.parseInt(lore.get(1).split(" ")[1]), Integer.parseInt(lore.get(2).split(" ")[1]));
+						e.getWhoClicked().teleport(tpLoc);
+					} else if(e.getCurrentItem().getType() == Material.ACTIVATOR_RAIL) {
+						PacketPlayOutChat p = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"Click here to set the game type.\",\"color\":\"aqua\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/arena "+a.getName()+" set type <type>\"}}"));
+						((CraftPlayer) e.getWhoClicked()).getHandle().playerConnection.sendPacket(p);
+					} else if(e.getCurrentItem().getType() == Material.FENCE_GATE) {
+						PacketPlayOutChat p = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"Click here to set the max. players.\",\"color\":\"aqua\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/arena "+a.getName()+" set maxplayers <maxplayers>\"}}"));
+						((CraftPlayer) e.getWhoClicked()).getHandle().playerConnection.sendPacket(p);
+					} else if(e.getCurrentItem().getType() == Material.GLASS_BOTTLE) {
+						PacketPlayOutChat p = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"Click here to start the minumum level.\",\"color\":\"aqua\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/arena "+a.getName()+" set level <level>\"}}"));
+						((CraftPlayer) e.getWhoClicked()).getHandle().playerConnection.sendPacket(p);
+					} else if(e.getCurrentItem().getType() == Material.GOLD_HOE) {
+						Player p = (Player) e.getWhoClicked();
+						p.performCommand("/arena select lobby "+a.getName());
+						p.sendMessage(ChatColor.AQUA + "Left click on the block beneath you.");
+						p.sendMessage(ChatColor.BLUE + "To get back to the edit menu, use /arena edit "+a.getName());
+					} else if(e.getCurrentItem().getType() == Material.DIAMOND_HOE) {
+						Player p = (Player) e.getWhoClicked();
+						p.performCommand("/arena select spawns "+a.getName());
+						p.sendMessage(ChatColor.AQUA + "Left click on the block beneath you.");
+						p.sendMessage(ChatColor.BLUE + "To get back to the edit menu, use /arena edit "+a.getName());
+					}
+				}
+			}
+		} else if(e.getInventory().getName().equals("All the things") || e.getInventory().getName().contains("Search results for")) {
+			if(e.getCurrentItem() != null) {
+				if(e.getCurrentItem().getType() != Material.AIR) {
+					e.setCancelled(true);
+					if(e.getCurrentItem().getType() != Material.BOOK_AND_QUILL) {
+						e.getWhoClicked().closeInventory();
+						e.getWhoClicked().openInventory(getInventory(getArena(e.getCurrentItem().getItemMeta().getDisplayName().substring(2))));
+					}
+				}
+			}
+		}
+	}
+	
 	public Arena getDuelArena() {
-		for (Arena a : getArenas()) {
-			if (a.getType() == GameType.DUEL && a.getCurrentPlayers().size() < 2 && a.isActive()) {
+		for(Arena a : getArenas()) {
+			if(a.getType() == GameType.DUEL && a.getCurrentPlayers().size() < 2) {
 				return a;
 			}
 		}
-
+		
 		return null;
 	}
 }

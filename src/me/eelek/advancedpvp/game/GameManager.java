@@ -3,7 +3,7 @@ package me.eelek.advancedpvp.game;
 public class GameManager {
 	
 	public enum GameType {
-		FFA_UNLOCKED, FFA_RANK, DUEL
+		FFA_UNLOCKED, FFA_RANK, DUEL, TDM_RANK
 	}
 	
 	/*
@@ -33,10 +33,14 @@ public class GameManager {
 	//ArrayList<Game> games = new ArrayList<Game>();
 	
 	public GameType getType(String type) {
-		for(GameType t : GameType.values()) {
-			if(t.toString().equalsIgnoreCase(type)) {
-				return t;
-			}
+		if(type.equalsIgnoreCase("duel")) {
+			return GameType.DUEL;
+		} else if(type.equalsIgnoreCase("ffa_unlocked")) {
+			return GameType.FFA_UNLOCKED;
+		} else if(type.equalsIgnoreCase("ffa_rank")) {
+			return GameType.FFA_RANK;
+		} else if(type.equalsIgnoreCase("tdm_rank")) {
+			return GameType.TDM_RANK;
 		}
 		
 		return null;

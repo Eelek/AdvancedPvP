@@ -4,26 +4,31 @@ import java.util.ArrayList;
 
 import org.bukkit.ChatColor;
 
-public class Levels {
+public class LevelManager {
 	
 	ArrayList<Level> levels = new ArrayList<Level>();
 	
-	private static Levels instance;
+	private static LevelManager instance;
 	
 	//Singleton
-	protected Levels() {
+	protected LevelManager() {
 		
 	}
 	
 	//Singleton
-	public static Levels getInstance() {
+	public static LevelManager getInstance() {
 		if(instance == null) {
-			instance = new Levels();
+			instance = new LevelManager();
 		}
 		
 		return instance;
 	}
 
+	/**
+	 * Get a level <i>object</i> by the level <i>integer</i>.
+	 * @param level The level <i>integer</i>.
+	 * @return The level <i>object</i>.
+	 */
 	Level getLevel(int level) {
 		for(Level l : levels) {
 			if(l.getLevel() == level) {
@@ -34,14 +39,28 @@ public class Levels {
 		return null;
 	}
 	
+	/**
+	 * Add a level.
+	 * @param level The level to be added.
+	 * @param minimun The minimum amount of kills required for the level.
+	 * @param prefix The prefix associated with the level.
+	 */
 	public void addLevel(int level, int minimun, String prefix) {
 		levels.add(new Level(level, minimun, prefix));
 	}
 	
+	/**
+	 * Remove a level.
+	 * @param level The level to be removed.
+	 */
 	void removeLevel(int level) {
 		levels.remove(getLevel(level));
 	}
 	
+	/**
+	 * Function that checks if a GamePlayer should level up.
+	 * @param p The GamePlayer that might be leveled up.
+	 */
 	void levelUp(GamePlayer p) {
 		if(p.getKills() >= getLevel(p.getLevel() + 1).getMinimunKills()) {
 			p.levelUp();
@@ -51,5 +70,4 @@ public class Levels {
 			p.getBoard().getObjective("show").getScore("" + ChatColor.AQUA + p.getLevel()).setScore(1);
 		}
 	}
-
 }

@@ -96,7 +96,7 @@ public class PlayerManager implements Listener {
 
 	/**
 	 * Get all GamePlayers.
-	 * @return A list containing all GamePlayers.
+	 * @return A list containing all GamePlayers.e
 	 */
 	public ArrayList<GamePlayer> getAllPlayerData() {
 		return data;
@@ -160,45 +160,36 @@ public class PlayerManager implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	void onKill(PlayerDeathEvent e) {
 		GamePlayer killed = getPlayer(e.getEntity().getUniqueId());
-		GamePlayer killer = null;
-		try {
-			killer = getPlayer(e.getEntity().getKiller().getUniqueId());	
-		} catch (NullPointerException ex) {
-			e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " died.");
+		
+		if(e.getEntity().getKiller() != null) {
+			GamePlayer killer = getPlayer(e.getEntity().getKiller().getUniqueId());
 			
-			getPlayer(killed.getPlayer().getUniqueId()).addDeath();
+			killer.addKill();
 			
-			ArenaManager.getInstance().getArena(killed.getCurrentArena()).getSpawn(killed.getPlayer().getPlayerListName()).resetSpawn();
+			LevelManager.getInstance().levelUp(killer);
 			
-			killed.getBoard().resetScores("" + ChatColor.RED + (killed.getDeaths() - 1));
-			killed.getBoard().getObjective("show").getScore("" + ChatColor.RED + killed.getDeaths()).setScore(7);
+			killer.getBoard().resetScores("" + ChatColor.GREEN + (killer.getKills() - 1));
+			killer.getBoard().getObjective("show").getScore("" + ChatColor.GREEN + killer.getKills()).setScore(10);
+
+			killer.getBoard().resetScores("" + ChatColor.GOLD + (killer.getPoints() - 1));
+			killer.getBoard().getObjective("show").getScore("" + ChatColor.GOLD + killer.getPoints()).setScore(4);
+			
+			if (killed.getPlayer().getLastDamageCause().getCause().equals(DamageCause.ENTITY_ATTACK)) {
+				e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " was slain by " + ChatColor.BLUE + killer.getPlayer().getPlayerListName());
+			} else if (killed.getPlayer().getLastDamageCause().getCause().equals(DamageCause.PROJECTILE)) {
+				e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " was shot by " + ChatColor.BLUE + killer.getPlayer().getPlayerListName());
+			} else {
+				e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " died.");
+			}
 		}
 
 		e.setDeathMessage(null);
 
 		e.getDrops().clear();
 
-		if (killed.getPlayer().getLastDamageCause().getCause().equals(DamageCause.ENTITY_ATTACK)) {
-			e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " was slain by " + ChatColor.BLUE + killer.getPlayer().getPlayerListName());
-		} else if (killed.getPlayer().getLastDamageCause().getCause().equals(DamageCause.PROJECTILE)) {
-			e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " was shot by " + ChatColor.BLUE + killer.getPlayer().getPlayerListName());
-		} else {
-			e.setDeathMessage(ChatColor.BLUE + killed.getPlayer().getPlayerListName() + ChatColor.AQUA + " died.");
-		}
-
-		killer.addKill();
-
-		LevelManager.getInstance().levelUp(killer);
-
-		killer.getBoard().resetScores("" + ChatColor.GREEN + (killer.getKills() - 1));
-		killer.getBoard().getObjective("show").getScore("" + ChatColor.GREEN + killer.getKills()).setScore(10);
-
-		killer.getBoard().resetScores("" + ChatColor.GOLD + (killer.getPoints() - 1));
-		killer.getBoard().getObjective("show").getScore("" + ChatColor.GOLD + killer.getPoints()).setScore(4);
-
 		getPlayer(killed.getPlayer().getUniqueId()).addDeath();
-
-		ArenaManager.getInstance().getArena(killed.getCurrentArena()).getSpawn(killed.getPlayer().getPlayerListName()).resetSpawn(); 
+		
+		ArenaManager.getInstance().getArena(killed.getCurrentArena()).getSpawn(killed.getPlayer().getUniqueId()).resetSpawn(); 
 
 		killed.getBoard().resetScores("" + ChatColor.RED + (killed.getDeaths() - 1));
 		killed.getBoard().getObjective("show").getScore("" + ChatColor.RED + killed.getDeaths()).setScore(7);

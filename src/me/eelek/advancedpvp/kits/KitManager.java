@@ -29,8 +29,7 @@ public class KitManager implements Listener {
 	private static KitManager instance;
 
 	// Singleton
-	protected KitManager() {
-	}
+	protected KitManager() {}
 
 	// Singleton
 	public static KitManager getInstance() {
@@ -161,7 +160,7 @@ public class KitManager implements Listener {
 			}
 		}
 
-		if (kit.getPotionEffects() != null) {
+		if (!kit.getPotionEffects().isEmpty()) {
 			for (PotionEffect pE : kit.getPotionEffects()) {
 				p.getPlayer().addPotionEffect(pE);
 			}
@@ -189,7 +188,7 @@ public class KitManager implements Listener {
 				if (giveKit(player, k)) {
 					p.closeInventory();
 					
-					Location loc = a.getSpawnLocation(p.getPlayerListName());
+					Location loc = a.getSpawnLocation(p);
 					if(loc != null) {
 						p.teleport(loc);
 						p.sendMessage(ChatColor.BLUE + "You have received the " + ChatColor.AQUA + k.getName() + ChatColor.BLUE + " kit.");

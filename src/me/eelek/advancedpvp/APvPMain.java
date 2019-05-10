@@ -33,15 +33,7 @@ public class APvPMain extends JavaPlugin implements Listener {
 			saveResource("arenas.json", false);
 		}
 		
-		//Load Data
-		try {
-			DataManager.getInstance().boot(this);
-		} catch(NullPointerException e) {
-			System.out.println("[AdvancedPvP] [ERROR] Error whilst booting, or first boot.\r\nIf first boot, retry.");
-			this.setEnabled(false);
-			getServer().getPluginManager().disablePlugin(this);
-			return;
-		}
+		DataManager.getInstance().boot(this);
 		
 	    //Setting up PlayerManager
 		PlayerManager.getInstance().setDefaultChannel(getConfig().getString("default-channel"));

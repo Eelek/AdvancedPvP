@@ -189,22 +189,24 @@ public class DataManager {
 				JSONArray effectsArray = (JSONArray) kit.get("effects");
 				ArrayList<PotionEffect> effects = new ArrayList<PotionEffect>();
 
-				for (int eIndex = 0; eIndex < effectsArray.size(); eIndex++) {
-					JSONObject effectObj = (JSONObject) effectsArray.get(eIndex);
-					
-					PotionEffectType eType = PotionEffectType.getByName(effectObj.get("name").toString().toUpperCase());
-					if(eType == null) { throw new ValueConversionException(effectObj.get("name").toString(), name); }
-					int duration = Integer.parseInt(effectObj.get("duration").toString());
-					int amp = Integer.parseInt(effectObj.get("amp").toString());
-					
-					PotionEffect effect = new PotionEffect(eType, duration, amp);
-					
-					effects.add(effect);
+				if(effectsArray != null && !effectsArray.isEmpty()) {
+					for (int eIndex = 0; eIndex < effectsArray.size(); eIndex++) {
+						JSONObject effectObj = (JSONObject) effectsArray.get(eIndex);
+						
+						PotionEffectType eType = PotionEffectType.getByName(effectObj.get("name").toString().toUpperCase());
+						if(eType == null) { throw new ValueConversionException(effectObj.get("name").toString(), name); }
+						int duration = Integer.parseInt(effectObj.get("duration").toString());
+						int amp = Integer.parseInt(effectObj.get("amp").toString());
+						
+						PotionEffect effect = new PotionEffect(eType, duration, amp);
+						
+						effects.add(effect);
+					}
 				}
 				
 				int minimumLevel = Integer.parseInt(kit.get("minimumLevel").toString());
 				
-				KitManager.getInstance().addKit(new Kit(name, author, content, armor, new ItemStack(display, 1), minimumLevel));
+				KitManager.getInstance().addKit(new Kit(name, author, content, armor, new ItemStack(display, 1), effects, minimumLevel));
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("[AdvancedPvP] [ERROR] The kits.json file could not be found.\n------------------\n");

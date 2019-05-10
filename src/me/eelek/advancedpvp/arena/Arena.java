@@ -137,13 +137,13 @@ public class Arena {
 	 * @param p The player who needs a spawn
 	 * @return A spawn location
 	 */
-	public Location getSpawnLocation(String p) {
+	public Location getSpawnLocation(Player p) {
 		if(type == GameType.DUEL) {
 			for(Spawn s : spawns) {
 				if(s.getCount() != 0) {
 					if(s.getIndex() < s.getCount()) {
 						s.addToIndex(1);
-						s.setPlayer(p);
+						s.setPlayer(p.getUniqueId());
 						return s.getLocation();
 					}
 				}
@@ -151,14 +151,12 @@ public class Arena {
 		} else if(type == GameType.FFA_RANK || type == GameType.FFA_UNLOCKED) {
 			Random r = new Random();
 			int random = r.nextInt(spawns.size());
+			Spawn s = getSpawn(random);
 			
-			if(getSpawn(random).getIndex() == 0) {
-				for(Spawn s : spawns) {
-					s.resetIndex();
-				}
-				getSpawn(random).addToIndex(1);
-				getSpawn(random).setPlayer(p);
-				return getSpawn(random).getLocation();
+			if(s.getIndex() == 0) {
+				s.addToIndex(1);
+				s.setPlayer(p.getUniqueId());
+				return s.getLocation();
 			} else {
 				return getSpawnLocation(p);
 			}
@@ -186,7 +184,7 @@ public class Arena {
 	 * @param player The player.
 	 * @return
 	 */
-	public Spawn getSpawn(String player) {
+	public Spawn getSpawn(UUID player) {
 		for(Spawn s : spawns) {
 			if(s.getPlayer().equals(player)) {
 				return s;

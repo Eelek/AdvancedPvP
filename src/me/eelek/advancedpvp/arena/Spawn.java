@@ -1,5 +1,7 @@
 package me.eelek.advancedpvp.arena;
 
+import java.util.UUID;
+
 import org.bukkit.Location;
 
 public class Spawn {
@@ -8,7 +10,7 @@ public class Spawn {
 	private Location loc;
 	private int count;
 	private int index;
-	private String player;
+	private UUID player = null;
 	
 	/**
 	 * Spawn object.
@@ -20,7 +22,6 @@ public class Spawn {
 		this.loc = loc;
 		this.count = 0;
 		this.index = 0;
-		this.player = "";
 	}
 	
 	/**
@@ -34,7 +35,6 @@ public class Spawn {
 		this.loc = loc;
 		this.count = count;
 		this.index = 0;
-		this.player = "";
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class Spawn {
 	 * Get the player that last spawned on this Spawn.
 	 * @return The player that last spawned on this Spawn.
 	 */
-	public String getPlayer() {
+	public UUID getPlayer() {
 		return player;
 	}
 	
@@ -120,7 +120,7 @@ public class Spawn {
 	 * Set the player that last spawned on the Spawn.
 	 * @param player The player that last spawned on the Spawn.
 	 */
-	public void setPlayer(String player) {
+	public void setPlayer(UUID player) {
 		this.player = player;
 	}
 	
@@ -128,7 +128,7 @@ public class Spawn {
 	 * Function that resets the last player that spawned on the Spawn.
 	 */
 	public void resetPlayer() {
-		this.player = "";
+		this.player = null;
 	}
 	
 	/**
@@ -136,6 +136,6 @@ public class Spawn {
 	 */
 	public void resetSpawn() {
 		this.index = 0;
-		this.player = "";
+		this.player = null;
 	}
 }

@@ -1,16 +1,17 @@
 package me.eelek.advancedpvp.cmds;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
+import me.eelek.advancedpvp.ItemStackMaker;
 import me.eelek.advancedpvp.arena.Arena;
 import me.eelek.advancedpvp.arena.ArenaManager;
 import me.eelek.advancedpvp.arena.Spawn;
-import me.eelek.advancedpvp.game.GameManager;
 import me.eelek.advancedpvp.game.GameManager.GameType;
 import me.eelek.advancedpvp.kits.KitManager;
 import me.eelek.advancedpvp.players.GamePlayer;
@@ -62,7 +63,7 @@ public class ArenaCmd implements CommandExecutor {
 					player.setCurrentArena(null);
 					a.removePlayer(player);
 					p.getInventory().clear();
-					p.getInventory().setItem(4, PlayerManager.getInstance().getArenaCompass());
+					p.getInventory().setItem(4, ItemStackMaker.start(Material.CLOCK, 1).setName(ChatColor.DARK_GREEN + "Select an arena.").create());
 					p.getInventory().setHeldItemSlot(4);
 					for (PotionEffect pE : p.getActivePotionEffects()) {
 						p.removePotionEffect(pE.getType());
@@ -157,8 +158,8 @@ public class ArenaCmd implements CommandExecutor {
 							p.sendMessage(ChatColor.AQUA + args[3] + ChatColor.BLUE + " isn't a valid input.");
 						}
 					} else if (args[2].equalsIgnoreCase("type")) {
-						if (GameManager.getInstance().getType(args[3]) != null) {
-							a.setType(GameManager.getInstance().getType(args[3]));
+						if (GameType.valueOf(args[3].toUpperCase()) != null) {
+							a.setType(GameType.valueOf(args[3].toUpperCase()));
 							p.sendMessage(ChatColor.BLUE + "Succesfully set " + ChatColor.AQUA + args[0] + ChatColor.BLUE + "'s game type to: " + ChatColor.AQUA + args[3]);
 						} else {
 							p.sendMessage(ChatColor.AQUA + args[3] + ChatColor.BLUE + " isn't a valid input. Valid inputs are:\n");

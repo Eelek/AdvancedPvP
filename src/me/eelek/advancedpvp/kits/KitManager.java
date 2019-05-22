@@ -13,9 +13,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 
+import me.eelek.advancedpvp.ItemStackMaker;
 import me.eelek.advancedpvp.arena.Arena;
 import me.eelek.advancedpvp.arena.ArenaManager;
 import me.eelek.advancedpvp.game.GameManager.GameType;
@@ -76,27 +76,27 @@ public class KitManager implements Listener {
 		Inventory kitSelect = Bukkit.getServer().createInventory(null, pageSize, "[Kits] " + a.getName() + " Kits, Page " + (page + 1));
 
 		for (int k = page * (pageSize - 9 * 2); k < (page + 1) * (pageSize - 9 * 2) && k < a.getKitSet().size(); k++) {
-			ItemStack display = a.getKitSet().get(k).getDisplayItem();
-			ItemMeta dMeta = (ItemMeta) display.getItemMeta();
-			dMeta.setLore(Arrays.asList(a.getType() == GameType.FFA_RANK ? "§r§fYou need atleast level §r§5" + a.getKitSet().get(k).getMinimumLevel() + "§f." : "§r§aThis kit is available.", "§r§fUse left click to select.", "§r§fUse right click to preview kit."));
-			display.setItemMeta(dMeta);
-			kitSelect.addItem(display);
+			Kit kit = a.getKitSet().get(k);
+			
+			kitSelect.addItem(ItemStackMaker.start(kit.getDisplayItem().getType(), 1)
+											.setName("§5" + kit.getName())
+											.setLore(Arrays.asList(a.getType() == GameType.FFA_RANK ? "§r§fYou need atleast level §r§5" + a.getKitSet().get(k).getMinimumLevel() + "§f." : 
+																									  "§r§aThis kit is available.", 
+																									  "§r§fUse left click to select.", 
+																									  "§r§fUse right click to preview kit."))
+											.create());
 		}
 
 		if(page > 0) {
-			ItemStack previous = new ItemStack(Material.REDSTONE_TORCH, 1);
-			ItemMeta pMeta = (ItemMeta) previous.getItemMeta();
-			pMeta.setDisplayName(ChatColor.BLUE + "Previous page.");
-			previous.setItemMeta(pMeta);
-			kitSelect.setItem(kitSelect.getSize() - 9, previous);
+			kitSelect.setItem(kitSelect.getSize() - 9, ItemStackMaker.start(Material.REDSTONE_TORCH, 1)
+					 .setName(ChatColor.BLUE + "Previous page.")
+					 .create());
 		}
 		
 		if((page + 1) * (pageSize - 9 * 2) < a.getKitSet().size()) {
-			ItemStack next = new ItemStack(Material.FEATHER, 1);
-			ItemMeta nMeta = (ItemMeta) next.getItemMeta();
-			nMeta.setDisplayName(ChatColor.BLUE + "Next page.");
-			next.setItemMeta(nMeta);
-			kitSelect.setItem(kitSelect.getSize() - 1, next);
+			kitSelect.setItem(kitSelect.getSize() - 1, ItemStackMaker.start(Material.FEATHER, 1)
+					 .setName(ChatColor.BLUE + "Next page.")
+					 .create());
 		}
 
 		return kitSelect;

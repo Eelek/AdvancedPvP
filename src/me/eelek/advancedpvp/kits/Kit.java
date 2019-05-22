@@ -8,8 +8,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+
+import me.eelek.advancedpvp.ItemStackMaker;
 
 public class Kit {
 	
@@ -30,12 +31,12 @@ public class Kit {
 	 * @param kitItem The display item of the Kit.
 	 * @param minimumLevel The minimum level required for this Kit.
 	 */
-	public Kit(String name, String author, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, int minimumLevel) {
+	public Kit(String name, String author, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, Material kitItem, int minimumLevel) {
 		this.name = name;
 		this.author = author;
 		this.content = content;
 		this.armor = armor;
-		this.kitItem = kitItem;
+		this.kitItem = ItemStackMaker.start(kitItem, 1).setName("§5" +name).setLore(Arrays.asList("§r§fLeft click to select", "§r§fRight click to see content.")).create();
 		this.potionEffects = null;
 		this.minimumLevel = minimumLevel;
 	}
@@ -50,12 +51,12 @@ public class Kit {
 	 * @param potionEffects A list containing all potion effects associated with the Kit.
 	 * @param minimumLevel The minimum level required for this Kit.
 	 */
-	public Kit(String name, String author, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, ItemStack kitItem, ArrayList<PotionEffect> potionEffects, int minimumLevel) {
+	public Kit(String name, String author, ArrayList<ItemStack> content, ArrayList<ItemStack> armor, Material kitItem, ArrayList<PotionEffect> potionEffects, int minimumLevel) {
 		this.name = name;
 		this.author = author;
 		this.content = content;
 		this.armor = armor;
-		this.kitItem = kitItem;
+		this.kitItem = ItemStackMaker.start(kitItem, 1).setName("§5" +name).setLore(Arrays.asList("§r§fLeft click to select", "§r§fRight click to see content.")).create();
 		this.potionEffects = potionEffects;
 		this.minimumLevel = minimumLevel;
 	}
@@ -98,10 +99,6 @@ public class Kit {
 	 * @return The display item of the Kit.
 	 */
 	public ItemStack getDisplayItem() {
-		ItemMeta kMeta = (ItemMeta) kitItem.getItemMeta();
-		kMeta.setDisplayName(ChatColor.DARK_PURPLE + name);
-		kMeta.setLore(Arrays.asList("§r§fLeft click to select", "§r§fRight click to see content."));
-		kitItem.setItemMeta(kMeta);
 		return kitItem;
 	}
 	
@@ -166,11 +163,9 @@ public class Kit {
 		}
 
 		if(showBack) {
-			ItemStack back = new ItemStack(Material.REDSTONE_BLOCK, 1);
-			ItemMeta bMeta = (ItemMeta) back.getItemMeta();
-			bMeta.setDisplayName(ChatColor.RED + "Go back to the select menu.");;
-			back.setItemMeta(bMeta);
-			inv.setItem(8, back);	
+			inv.setItem(8, ItemStackMaker.start(Material.REDSTONE_BLOCK, 1)
+										  .setName(ChatColor.RED + "Go back to the select menu.")
+										  .create());	
 		} else {
 			inv.setItem(8, this.kitItem);
 		}

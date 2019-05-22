@@ -20,8 +20,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -29,6 +27,7 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 import me.eelek.advancedpvp.DataManager;
+import me.eelek.advancedpvp.ItemStackMaker;
 import me.eelek.advancedpvp.arena.Arena;
 import me.eelek.advancedpvp.arena.ArenaManager;
 import me.eelek.advancedpvp.kits.KitManager;
@@ -135,7 +134,7 @@ public class PlayerManager implements Listener {
 		
 		e.getPlayer().getInventory().clear();
 		e.getPlayer().getActivePotionEffects().clear();
-		e.getPlayer().getInventory().setItem(4, getArenaCompass());
+		e.getPlayer().getInventory().setItem(4, ItemStackMaker.start(Material.CLOCK, 1).setName(ChatColor.DARK_GREEN + "Select an arena.").create());
         e.getPlayer().getInventory().setHeldItemSlot(4);
 	}
 
@@ -204,8 +203,8 @@ public class PlayerManager implements Listener {
 
 		if (getPlayer(e.getPlayer().getUniqueId()).isPlaying()) {
 			e.setRespawnLocation(ArenaManager.getInstance().getArena(getPlayer(e.getPlayer().getUniqueId()).getCurrentArena()).getLobbyLocation());
-			e.getPlayer().getInventory().setItem(4, getSelectCompass());
-			e.getPlayer().getInventory().setItem(8, getLeaveItem());
+			e.getPlayer().getInventory().setItem(4, ItemStackMaker.start(Material.COMPASS, 1).setName("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|").create());
+			e.getPlayer().getInventory().setItem(8, ItemStackMaker.start(Material.COAL_BLOCK, 1).setName(ChatColor.RED + "Go back to the lobby.").create());
 			e.getPlayer().getInventory().setHeldItemSlot(4);
 		} else {
 			e.setRespawnLocation(e.getPlayer().getWorld().getSpawnLocation());
@@ -276,12 +275,12 @@ public class PlayerManager implements Listener {
 						player.openInventory(KitManager.getInstance().generateSelectInventory(ArenaManager.getInstance().getArena(player.getCurrentArena()), 0), 0, ArenaManager.getInstance().getArena(player.getCurrentArena()).getName());
 					}
 				}
-			} else if (p.getInventory().getItemInMainHand().getType() == Material.REDSTONE_BLOCK) {
+			} else if (p.getInventory().getItemInMainHand().getType() == Material.COAL_BLOCK) {
 				Arena a = ArenaManager.getInstance().getArena(player.getCurrentArena());
 				p.teleport(p.getWorld().getSpawnLocation());
 				a.removePlayer(player);
 				p.getInventory().clear();
-				e.getPlayer().getInventory().setItem(4, getArenaCompass());
+				e.getPlayer().getInventory().setItem(4, ItemStackMaker.start(Material.CLOCK, 1).setName(ChatColor.DARK_GREEN + "Select an arena.").create());
 		        e.getPlayer().getInventory().setHeldItemSlot(4);
 				for (PotionEffect pE : e.getPlayer().getActivePotionEffects()) {
 					e.getPlayer().removePotionEffect(pE.getType());
@@ -311,18 +310,6 @@ public class PlayerManager implements Listener {
 	@EventHandler
 	public void onDrop(PlayerDropItemEvent e) {
 		e.setCancelled(true);
-	}
-	
-	/**
-	 * Get the Arena selector compass.
-	 * @return The Arena selector compass.
-	 */
-	public ItemStack getArenaCompass() {
-		ItemStack compass = new ItemStack(Material.CLOCK, 1);
-		ItemMeta cMeta = (ItemMeta) compass.getItemMeta();
-		cMeta.setDisplayName(ChatColor.DARK_GREEN + "Select an arena.");
-		compass.setItemMeta(cMeta);
-		return compass;
 	}
 	
 	/**
@@ -385,29 +372,5 @@ public class PlayerManager implements Listener {
 
 		p.setScoreboard(board);
 		getPlayer(p.getUniqueId()).setBoard(board);
-	}
-	
-	/**
-	 * Get the Kit select compass.
-	 * @return The Kit select compass.
-	 */
-	public ItemStack getSelectCompass() {
-		ItemStack compass = new ItemStack(Material.COMPASS, 1);
-		ItemMeta cMeta = (ItemMeta) compass.getItemMeta();
-		cMeta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|");
-		compass.setItemMeta(cMeta);
-		return compass;
-	}
-	
-	/**
-	 * Get the back to lobby item.
-	 * @return The back to lobby item.
-	 */
-	public ItemStack getLeaveItem() {
-		ItemStack leave = new ItemStack(Material.REDSTONE_BLOCK, 1);
-		ItemMeta lMeta = (ItemMeta) leave.getItemMeta();
-		lMeta.setDisplayName(ChatColor.RED + "Go back to the lobby.");
-		leave.setItemMeta(lMeta);
-		return leave;
 	}
 }

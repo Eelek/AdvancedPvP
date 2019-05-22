@@ -13,9 +13,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import me.eelek.advancedpvp.ItemStackMaker;
 import me.eelek.advancedpvp.game.GameManager.GameType;
 import me.eelek.advancedpvp.kits.Kit;
 import me.eelek.advancedpvp.players.GamePlayer;
@@ -424,49 +424,35 @@ public class Arena {
     public Inventory generateInventory() {
 		Inventory inv = Bukkit.getServer().createInventory(null, 27, "[Arena] " + this.name);
 		
-		ItemStack type = new ItemStack(Material.MAP, 1);
-		ItemMeta tMeta = (ItemMeta) type.getItemMeta();
-		tMeta.setDisplayName(ChatColor.DARK_PURPLE + "Game type: " + ChatColor.LIGHT_PURPLE + this.type.toString() + ChatColor.DARK_PURPLE + ".");
-		type.setItemMeta(tMeta);
-		inv.setItem(9, type);
+		inv.setItem(9, ItemStackMaker.start(Material.MAP, 1)
+									 .setName(ChatColor.DARK_PURPLE + "Game type: " + ChatColor.LIGHT_PURPLE + this.type.toString() + ChatColor.DARK_PURPLE + ".")
+									 .create());
 
-		ItemStack world = new ItemStack(Material.GRASS, 1);
-		ItemMeta wMeta = (ItemMeta) world.getItemMeta();
-		wMeta.setDisplayName(ChatColor.DARK_PURPLE + "World: " + ChatColor.LIGHT_PURPLE + this.world.getName() + ChatColor.DARK_PURPLE + ".");
-		wMeta.setLore(Arrays.asList("§r§fClick me for spawn info!"));
-		world.setItemMeta(wMeta);
-		inv.setItem(10, world);
+		inv.setItem(10, ItemStackMaker.start(Material.GRASS, 1)
+									  .setName(ChatColor.DARK_PURPLE + "World: " + ChatColor.LIGHT_PURPLE + this.world.getName() + ChatColor.DARK_PURPLE + ".")
+									  .setLore(Arrays.asList("§r§fClick me for spawn info!"))
+									  .create());
 
-		ItemStack current = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
-		ItemMeta cMeta = (ItemMeta) current.getItemMeta();
-		cMeta.setDisplayName(ChatColor.DARK_PURPLE + "Current players: " + ChatColor.LIGHT_PURPLE + this.currentPlayers.size() + ChatColor.DARK_PURPLE + ".");
-		cMeta.setLore(Arrays.asList("§r§fClick me to see the current players in the arena!"));
-		current.setItemMeta(cMeta);
-		inv.setItem(11, current);
-		
-		ItemStack active = new ItemStack(this.active ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE, 1);
-		ItemMeta aMeta = (ItemMeta) active.getItemMeta();
-		aMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + this.name + ChatColor.DARK_PURPLE + " is " + (this.active ? ChatColor.GREEN + "active" : ChatColor.RED + "disabled") + ChatColor.DARK_PURPLE + ".");
-		active.setItemMeta(aMeta);
-		inv.setItem(13, active);
+		inv.setItem(11, ItemStackMaker.start(Material.TOTEM_OF_UNDYING, 1)
+									  .setName(ChatColor.DARK_PURPLE + "Current players: " + ChatColor.LIGHT_PURPLE + this.currentPlayers.size() + ChatColor.DARK_PURPLE + ".")
+									  .setLore(Arrays.asList("§r§fClick me to see the current players in the arena!"))
+									  .create());
 
-		ItemStack max = new ItemStack(Material.BARRIER, 1);
-		ItemMeta mMeta = (ItemMeta) max.getItemMeta();
-		mMeta.setDisplayName(ChatColor.DARK_PURPLE + "Maximum players: " + ChatColor.LIGHT_PURPLE + this.maxPlayers + ChatColor.DARK_PURPLE + ".");
-		max.setItemMeta(mMeta);
-		inv.setItem(15, max);
+		inv.setItem(13, ItemStackMaker.start(this.active ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE, 1)
+									  .setName(ChatColor.DARK_PURPLE + "Arena " + ChatColor.LIGHT_PURPLE + this.name + ChatColor.DARK_PURPLE + " is " + (this.active ? ChatColor.GREEN + "active" : ChatColor.RED + "disabled") + ChatColor.DARK_PURPLE + ".")
+									  .create());
 
-		ItemStack level = new ItemStack(Material.EXPERIENCE_BOTTLE, 1);
-		ItemMeta lMeta = (ItemMeta) level.getItemMeta();
-		lMeta.setDisplayName(ChatColor.DARK_PURPLE + "Minimum level: " + ChatColor.LIGHT_PURPLE + this.minLevel + ChatColor.DARK_PURPLE + ".");
-		level.setItemMeta(lMeta);
-		inv.setItem(16, level);
+		inv.setItem(15, ItemStackMaker.start(Material.BARRIER, 1)
+									  .setName(ChatColor.DARK_PURPLE + "Maximum players: " + ChatColor.LIGHT_PURPLE + this.maxPlayers + ChatColor.DARK_PURPLE + ".")
+									  .create());
 
-		ItemStack displayItem = new ItemStack(this.displayItem, 1);
-		ItemMeta dMeta = (ItemMeta) displayItem.getItemMeta();
-		dMeta.setDisplayName(ChatColor.DARK_PURPLE + "This is the display item of this arena.");
-		displayItem.setItemMeta(dMeta);
-		inv.setItem(17, displayItem);
+		inv.setItem(16, ItemStackMaker.start(Material.EXPERIENCE_BOTTLE, 1)
+									  .setName(ChatColor.DARK_PURPLE + "Minimum level: " + ChatColor.LIGHT_PURPLE + this.minLevel + ChatColor.DARK_PURPLE + ".")
+									  .create());
+
+		inv.setItem(17, ItemStackMaker.start(this.displayItem, 1)
+									  .setName(ChatColor.DARK_PURPLE + "This is the display item of this arena.")
+									  .create());
 
 		return inv;
 	}
@@ -483,48 +469,44 @@ public class Arena {
 		
 		for(int s = page * (pageSize - 9 * 2); s < this.spawns.size(); s++) {
 			Spawn spawn = this.spawns.get(s);
-			ItemStack sItem = new ItemStack(Material.DIRT, 1);
-			ItemMeta sMeta = (ItemMeta) sItem.getItemMeta();
-			sMeta.setDisplayName(ChatColor.GREEN + "Spawn " + (s + 1));
-			sMeta.setLore(Arrays.asList("§r§fX: " + spawn.getLocation().getBlockX(), "§r§fY: " + spawn.getLocation().getBlockY(), "§r§fZ: " + spawn.getLocation().getBlockZ(), "§r§fMax spawns: " + spawn.getCount(), "§r§fSpawn index: " + spawn.getIndex(), "§r§fLast spawn:", "§r§8" + spawn.getPlayer()));
-			sItem.setItemMeta(sMeta);
-			inv.addItem(sItem);
+			inv.addItem(ItemStackMaker.start(Material.DIRT, 1)
+									  .setName(ChatColor.GREEN + "Spawn " + (s + 1))
+									  .setLore(Arrays.asList("§r§fX: " + spawn.getLocation().getBlockX(), 
+											   				 "§r§fY: " + spawn.getLocation().getBlockY(), 
+											   				 "§r§fZ: " + spawn.getLocation().getBlockZ(), 
+											   				 "§r§fMax spawns: " + spawn.getCount(), 
+											   				 "§r§fSpawn index: " + spawn.getIndex(), 
+											   				 "§r§fLast spawn:", 
+											   				 "§r§8" + spawn.getPlayer()))
+									  .create());
 		}
 		
 		if(page > 0) {
-			ItemStack previous = new ItemStack(Material.REDSTONE_TORCH, 1);
-			ItemMeta pMeta = (ItemMeta) previous.getItemMeta();
-			pMeta.setDisplayName(ChatColor.BLUE + "Previous page.");
-			previous.setItemMeta(pMeta);
-			inv.setItem(inv.getSize() - 9, previous);
+			inv.setItem(inv.getSize() - 9, ItemStackMaker.start(Material.REDSTONE_TORCH, 1)
+														 .setName(ChatColor.BLUE + "Previous page.")
+														 .create());
 		}
 		
 		if((page + 1) * (pageSize - 9 * 2) < this.spawns.size()) {
-			ItemStack next = new ItemStack(Material.FEATHER, 1);
-			ItemMeta nMeta = (ItemMeta) next.getItemMeta();
-			nMeta.setDisplayName(ChatColor.BLUE + "Next page.");
-			next.setItemMeta(nMeta);
-			inv.setItem(inv.getSize() - 1, next);
+			inv.setItem(inv.getSize() - 1, ItemStackMaker.start(Material.FEATHER, 1)
+														 .setName(ChatColor.BLUE + "Next page.")
+														 .create());
 		}
 		
-		ItemStack add = new ItemStack(Material.BRICK, 1);
-		ItemMeta aMeta = (ItemMeta) add.getItemMeta();
-		aMeta.setDisplayName(ChatColor.BLUE + "Click me to add a spawn.");
-		add.setItemMeta(aMeta);
-		inv.setItem(inv.getSize() - 8, add);
+		inv.setItem(inv.getSize() - 8, ItemStackMaker.start(Material.BRICK, 1)
+													 .setName(ChatColor.BLUE + "Click me to add a spawn.")
+													 .create());
 		
-		ItemStack lobby = new ItemStack(Material.GOLD_BLOCK, 1);
-		ItemMeta lMeta = (ItemMeta) lobby.getItemMeta();
-		lMeta.setDisplayName(ChatColor.GOLD + "Lobby");
-		lMeta.setLore(Arrays.asList("§r§fX: " + this.lobby.getBlockX(), "§r§fY: " + this.lobby.getBlockY(), "§r§fZ: " + this.lobby.getBlockZ()));
-		lobby.setItemMeta(lMeta);
-		inv.setItem(inv.getSize() - 5, lobby);
+		inv.setItem(inv.getSize() - 5, ItemStackMaker.start(Material.GOLD_BLOCK, 1)
+													 .setName(ChatColor.GOLD + "Lobby")
+													 .setLore(Arrays.asList("§r§fX: " + this.lobby.getBlockX(), 
+															 				"§r§fY: " + this.lobby.getBlockY(), 
+															 				"§r§fZ: " + this.lobby.getBlockZ()))
+													 .create());
 		
-		ItemStack back = new ItemStack(Material.BOOK, 1);
-		ItemMeta bMeta = (ItemMeta) back.getItemMeta();
-		bMeta.setDisplayName(ChatColor.BLUE + "Go back to the arena menu.");
-		back.setItemMeta(bMeta);
-		inv.setItem(inv.getSize() - 2 , back);
+		inv.setItem(inv.getSize() - 2 , ItemStackMaker.start(Material.BOOK, 1)
+													  .setName(ChatColor.BLUE + "Go back to the arena menu.")
+													  .create());
 		
 		return inv;
 	}
@@ -541,36 +523,31 @@ public class Arena {
 		
 		for(int p = page * (pageSize - 9 * 2); p < this.currentPlayers.size(); p++) {
 			Player player = Bukkit.getServer().getPlayer(this.currentPlayers.get(p));
+			
 			ItemStack pItem = new ItemStack(Material.PLAYER_HEAD, 1);
 			SkullMeta pMeta = (SkullMeta) pItem.getItemMeta();
 			pMeta.setDisplayName("§b" + player.getPlayerListName());
 			pMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + "Click to tp."));
 			pMeta.setOwningPlayer(player.getPlayer());
+			
 			pItem.setItemMeta(pMeta);
-			inv.addItem(pItem);
 		}
 		
 		if(page > 0) {
-			ItemStack previous = new ItemStack(Material.REDSTONE_TORCH, 1);
-			ItemMeta pMeta = (ItemMeta) previous.getItemMeta();
-			pMeta.setDisplayName(ChatColor.BLUE + "Previous page.");
-			previous.setItemMeta(pMeta);
-			inv.setItem(inv.getSize() - 9, previous);
+			inv.setItem(inv.getSize() - 9, ItemStackMaker.start(Material.REDSTONE_TORCH, 1)
+					 .setName(ChatColor.BLUE + "Previous page.")
+					 .create());
 		}
 		
 		if((page + 1) * (pageSize - 9 * 2) < this.currentPlayers.size()) {
-			ItemStack next = new ItemStack(Material.FEATHER, 1);
-			ItemMeta nMeta = (ItemMeta) next.getItemMeta();
-			nMeta.setDisplayName(ChatColor.BLUE + "Next page.");
-			next.setItemMeta(nMeta);
-			inv.setItem(inv.getSize() - 1, next);
+			inv.setItem(inv.getSize() - 1, ItemStackMaker.start(Material.FEATHER, 1)
+					 .setName(ChatColor.BLUE + "Next page.")
+					 .create());
 		}
 		
-		ItemStack back = new ItemStack(Material.BOOK, 1);
-		ItemMeta bMeta = (ItemMeta) back.getItemMeta();
-		bMeta.setDisplayName(ChatColor.BLUE + "Go back to the arena menu.");
-		back.setItemMeta(bMeta);
-		inv.setItem(inv.getSize() - 2 , back);
+		inv.setItem(inv.getSize() - 2 , ItemStackMaker.start(Material.BOOK, 1)
+				  .setName(ChatColor.BLUE + "Go back to the arena menu.")
+				  .create());
 		
 		return inv;
 	}

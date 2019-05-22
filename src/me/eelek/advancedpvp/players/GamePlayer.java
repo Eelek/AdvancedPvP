@@ -8,7 +8,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.scoreboard.Scoreboard;
 
 import me.eelek.advancedpvp.arena.ArenaManager;
-import me.eelek.advancedpvp.game.GameManager;
+import me.eelek.advancedpvp.game.GameManager.GameType;
 import me.eelek.advancedpvp.kits.Kit;
 import me.eelek.advancedpvp.kits.KitManager;
 
@@ -292,7 +292,7 @@ public class GamePlayer {
 	    } else if(this.openInventory.getTitle().startsWith("[Kits]")) {
 			openInventory(KitManager.getInstance().generateSelectInventory(ArenaManager.getInstance().getArena(this.inventoryArg), page), page, this.inventoryArg);
 		} else if(this.openInventory.getTitle().startsWith("[Select] Arena")) {
-			openInventory(ArenaManager.getInstance().generateSelectorInventory(page, GameManager.getInstance().getType(this.inventoryArg)), page, this.inventoryArg);
+			openInventory(ArenaManager.getInstance().generateSelectorInventory(page, GameType.valueOf(this.inventoryArg.toUpperCase())), page, this.inventoryArg);
 		}
 	}
 }

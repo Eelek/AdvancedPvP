@@ -11,10 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import me.eelek.advancedpvp.game.GameManager;
+import me.eelek.advancedpvp.ItemStackMaker;
 import me.eelek.advancedpvp.game.GameManager.GameType;
 import me.eelek.advancedpvp.players.GamePlayer;
 import me.eelek.advancedpvp.players.PlayerManager;
@@ -58,47 +55,35 @@ public class ArenaManager implements Listener {
 
 			if(type) {
 				if(arena.getType() == GameType.FFA_UNLOCKED) {
-					ItemStack aItem = new ItemStack(Material.GOLDEN_SWORD, 1);
-					ItemMeta aMeta = (ItemMeta) aItem.getItemMeta();
-					aMeta.setDisplayName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName());
-					aItem.setItemMeta(aMeta);
-					inv.addItem(aItem);
+					inv.addItem(ItemStackMaker.start(Material.GOLDEN_SWORD, 1)
+											  .setName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName())
+											  .create());
 				} else if(arena.getType() == GameType.FFA_RANK) {
-					ItemStack aItem = new ItemStack(Material.GOLDEN_AXE, 1);
-					ItemMeta aMeta = (ItemMeta) aItem.getItemMeta();
-					aMeta.setDisplayName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName());
-					aItem.setItemMeta(aMeta);
-					inv.addItem(aItem);
+					inv.addItem(ItemStackMaker.start(Material.GOLDEN_AXE, 1)
+											  .setName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName())
+											  .create());
 				} else if(arena.getType() == GameType.DUEL) {
-					ItemStack aItem = new ItemStack(Material.DIAMOND_SWORD, 1);
-					ItemMeta aMeta = (ItemMeta) aItem.getItemMeta();
-					aMeta.setDisplayName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName());
-					aItem.setItemMeta(aMeta);
-					inv.addItem(aItem);
+					inv.addItem(ItemStackMaker.start(Material.DIAMOND_SWORD, 1)
+							  .setName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName())
+							  .create());
 				}
 			} else {
-				ItemStack aItem = new ItemStack(arena.isActive() ? Material.LIME_WOOL : Material.RED_WOOL, 1);
-				ItemMeta aMeta = (ItemMeta) aItem.getItemMeta();
-				aMeta.setDisplayName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName());
-				aItem.setItemMeta(aMeta);
-				inv.addItem(aItem);
+				inv.addItem(ItemStackMaker.start(arena.isActive() ? Material.LIME_WOOL : Material.RED_WOOL, 1)
+										  .setName(arena.isActive() ? ChatColor.GREEN + arena.getName() : ChatColor.RED + arena.getName())
+										  .create());
 			}
 		}
 
 		if (page > 0) {
-			ItemStack previous = new ItemStack(Material.REDSTONE_TORCH, 1);
-			ItemMeta pMeta = (ItemMeta) previous.getItemMeta();
-			pMeta.setDisplayName(ChatColor.BLUE + "Previous page.");
-			previous.setItemMeta(pMeta);
-			inv.setItem(inv.getSize() - 9, previous);
+			inv.setItem(inv.getSize() - 9, ItemStackMaker.start(Material.REDSTONE_TORCH, 1)
+					 .setName(ChatColor.BLUE + "Previous page.")
+					 .create());
 		}
 
 		if ((page + 1) * (pageSize - 9 * 2) < getArenas().size()) {
-			ItemStack next = new ItemStack(Material.FEATHER, 1);
-			ItemMeta nMeta = (ItemMeta) next.getItemMeta();
-			nMeta.setDisplayName(ChatColor.BLUE + "Next page.");
-			next.setItemMeta(nMeta);
-			inv.setItem(inv.getSize() - 1, next);
+			inv.setItem(inv.getSize() - 1, ItemStackMaker.start(Material.FEATHER, 1)
+					 .setName(ChatColor.BLUE + "Next page.")
+					 .create());
 		}
 
 		return inv;
@@ -114,23 +99,17 @@ public class ArenaManager implements Listener {
 
 		Inventory inv = Bukkit.getServer().createInventory(null, pageSize, "[Select] Type");
 
-		ItemStack ffaUnlocked = new ItemStack(Material.GOLDEN_SWORD, 1);
-		ItemMeta ffaUMeta = (ItemMeta) ffaUnlocked.getItemMeta();
-		ffaUMeta.setDisplayName(ChatColor.RED + "FFA Unlocked");
-		ffaUnlocked.setItemMeta(ffaUMeta);
-		inv.setItem(11, ffaUnlocked);
+		inv.setItem(11, ItemStackMaker.start(Material.GOLDEN_SWORD, 1)
+									  .setName(ChatColor.RED + "FFA Unlocked")
+									  .create());
 
-		ItemStack ffaRanked = new ItemStack(Material.GOLDEN_AXE, 1);
-		ItemMeta ffaRMeta = (ItemMeta) ffaRanked.getItemMeta();
-		ffaRMeta.setDisplayName(ChatColor.RED + "FFA Ranked");
-		ffaRanked.setItemMeta(ffaRMeta);
-		inv.setItem(15, ffaRanked);
-
-		ItemStack duel = new ItemStack(Material.DIAMOND_SWORD, 1);
-		ItemMeta dMeta = (ItemMeta) duel.getItemMeta();
-		dMeta.setDisplayName(ChatColor.BLUE + "Duel");
-		duel.setItemMeta(dMeta);
-		inv.setItem(13, duel);
+		inv.setItem(15, ItemStackMaker.start(Material.GOLDEN_AXE, 1)
+				  .setName(ChatColor.RED + "FFA Ranked")
+				  .create());
+		
+		inv.setItem(13, ItemStackMaker.start(Material.DIAMOND_SWORD, 1)
+				  .setName(ChatColor.RED + "Duel")
+				  .create());
 
 		return inv;
 	}
@@ -152,36 +131,29 @@ public class ArenaManager implements Listener {
 
 		for (int a = page * (pageSize - 9 * 2); a < (page + 1) * (pageSize - 9 * 2) && a < getArenas(type, true).size(); a++) {
 			Arena arena = getArenas(type, true).get(a);
-
-			ItemStack display = new ItemStack(arena.getDisplayItem(), 1);
-			ItemMeta dMeta = (ItemMeta) display.getItemMeta();
-			dMeta.setDisplayName("§a" +arena.getName());
-			dMeta.setLore(Arrays.asList("§r§8Players: §r§f" + arena.getCurrentPlayers().size() + "/" + arena.getMaxPlayers(), type == GameType.FFA_RANK ? "§r§8Minimum level: §r§f" + arena.getMinimumLevel() : null));
-			display.setItemMeta(dMeta);
-			inv.addItem(display);
+			
+			inv.addItem(ItemStackMaker.start(arena.getDisplayItem(), 1)
+									  .setName("§a" +arena.getName())
+									  .setLore(Arrays.asList("§r§8Players: §r§f" + arena.getCurrentPlayers().size() + "/" + arena.getMaxPlayers(), 
+											  				 type == GameType.FFA_RANK ? "§r§8Minimum level: §r§f" + arena.getMinimumLevel() : null))
+									  .create());
 		}
 
 		if (page > 0) {
-			ItemStack previous = new ItemStack(Material.REDSTONE_TORCH, 1);
-			ItemMeta pMeta = (ItemMeta) previous.getItemMeta();
-			pMeta.setDisplayName(ChatColor.BLUE + "Previous page.");
-			previous.setItemMeta(pMeta);
-			inv.setItem(inv.getSize() - 9, previous);
+			inv.setItem(inv.getSize() - 9, ItemStackMaker.start(Material.REDSTONE_TORCH, 1)
+					 .setName(ChatColor.BLUE + "Previous page.")
+					 .create());
 		}
 
 		if ((page + 1) * (pageSize - 9 * 2) < getArenas(type, true).size()) {
-			ItemStack next = new ItemStack(Material.FEATHER, 1);
-			ItemMeta nMeta = (ItemMeta) next.getItemMeta();
-			nMeta.setDisplayName(ChatColor.BLUE + "Next page.");
-			next.setItemMeta(nMeta);
-			inv.setItem(inv.getSize() - 1, next);
+			inv.setItem(inv.getSize() - 1, ItemStackMaker.start(Material.FEATHER, 1)
+					 .setName(ChatColor.BLUE + "Next page.")
+					 .create());
 		}
 		
-		ItemStack back = new ItemStack(Material.BOOK, 1);
-		ItemMeta bMeta = (ItemMeta) back.getItemMeta();
-		bMeta.setDisplayName(ChatColor.BLUE + "Go back to the type select menu.");
-		back.setItemMeta(bMeta);
-		inv.setItem(inv.getSize() - 2 , back);
+		inv.setItem(inv.getSize() - 2 , ItemStackMaker.start(Material.BOOK, 1)
+				  .setName(ChatColor.BLUE + "Go back to the arena menu.")
+				  .create());
 
 		return inv;
 	}
@@ -343,15 +315,15 @@ public class ArenaManager implements Listener {
 				e.getWhoClicked().closeInventory();
 				player.openInventory(generateSelectorInventory(), 0, "");
 			} else {
-				ArrayList<Arena> arenasWithType = getArenas(GameManager.getInstance().getType(player.getInventoryArgument()), true);
+				ArrayList<Arena> arenasWithType = getArenas(GameType.valueOf(player.getInventoryArgument().toUpperCase()), true);
 				
 				Arena a = arenasWithType.get(e.getSlot() + player.getOpenPage() * 36);
 				
 				if(a.getCurrentPlayers().size() < a.getMaxPlayers() && player.getLevel() >= a.getMinimumLevel()) {
 					a.addPlayer(player);
 					e.getWhoClicked().getInventory().clear();
-					e.getWhoClicked().getInventory().setItem(4, PlayerManager.getInstance().getSelectCompass());
-					e.getWhoClicked().getInventory().setItem(8, PlayerManager.getInstance().getLeaveItem());
+					e.getWhoClicked().getInventory().setItem(4, ItemStackMaker.start(Material.COMPASS, 1).setName("" + ChatColor.GOLD + ChatColor.BOLD + "|" + ChatColor.DARK_RED + ChatColor.BOLD + " Select your kit! " + ChatColor.GOLD + ChatColor.BOLD + "|").create());
+					e.getWhoClicked().getInventory().setItem(8, ItemStackMaker.start(Material.COAL_BLOCK, 1).setName(ChatColor.RED + "Go back to the lobby.").create());
 					e.getWhoClicked().getInventory().setHeldItemSlot(4);	
 				} else {
 					e.getWhoClicked().sendMessage(a.getCurrentPlayers().size() >= a.getMaxPlayers() ? ChatColor.RED + "Arena " + ChatColor.DARK_RED + a.getName() + ChatColor.RED + " is full." : ChatColor.RED + "You do not have the level required (" + ChatColor.DARK_RED + a.getMinimumLevel() + ChatColor.RED + ") to enter this arena.");

@@ -31,7 +31,6 @@ import org.json.simple.parser.ParseException;
 import me.eelek.advancedpvp.arena.Arena;
 import me.eelek.advancedpvp.arena.ArenaManager;
 import me.eelek.advancedpvp.arena.Spawn;
-import me.eelek.advancedpvp.game.GameManager;
 import me.eelek.advancedpvp.game.GameManager.GameType;
 import me.eelek.advancedpvp.kits.Kit;
 import me.eelek.advancedpvp.kits.KitManager;
@@ -206,7 +205,7 @@ public class DataManager {
 				
 				int minimumLevel = Integer.parseInt(kit.get("minimumLevel").toString());
 				
-				KitManager.getInstance().addKit(new Kit(name, author, content, armor, new ItemStack(display, 1), effects, minimumLevel));
+				KitManager.getInstance().addKit(new Kit(name, author, content, armor, display, effects, minimumLevel));
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("[AdvancedPvP] [ERROR] The kits.json file could not be found.\n------------------\n");
@@ -284,7 +283,7 @@ public class DataManager {
 				
 				GameType type = null;
 				if(arena.get("type") != null) {
-					type = GameManager.getInstance().getType(arena.get("type").toString());
+					type = GameType.valueOf(arena.get("type").toString().toUpperCase());
 					if(type == null) { throw new ValueConversionException(arena.get("type").toString(), name); }
 				}
 				
